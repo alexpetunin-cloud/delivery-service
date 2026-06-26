@@ -1,12 +1,14 @@
 package com.petunincloud.delivery.service.orders;
 
 import com.petunincloud.delivery.service.common.BaseService;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@Transactional
 public class OrderService extends BaseService<OrderEntity, OrderDto, OrderSearchFilter> {
 
     private final OrderRepository repository;
