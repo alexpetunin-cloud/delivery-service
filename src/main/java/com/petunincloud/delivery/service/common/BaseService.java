@@ -17,7 +17,7 @@ public abstract class BaseService<E, D, F extends BaseFilter> {
 
         List<E> entities = findWithFilter(filter, pageable);
         return entities.stream()
-                .map(getMapper()::toDto)
+                .map(getMapper()::toResponse)
                 .collect(Collectors.toList());
     }
 }

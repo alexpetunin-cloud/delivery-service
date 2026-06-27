@@ -1,8 +1,12 @@
-package com.petunincloud.delivery.service.orders;
+package com.petunincloud.delivery.service.orders.entity;
 
+import com.petunincloud.delivery.service.orders.OrderStatus;
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Table(name = "orders")
 @Entity
@@ -12,33 +16,37 @@ public class OrderEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "order_id", nullable = false)
-    private Long orderId;
-
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
     @Column(name = "date_time", nullable = false)
     private LocalDateTime dateTime;
 
-    // Список заказа
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderItemEntity> items = new ArrayList<>();
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private OrderStatus status;
+
+    @Column(name = "total_price", nullable = false)
+    private BigDecimal totalPrice;
 
     public OrderEntity() {
     }
 
     public OrderEntity(
-            Long orderId,
             Long userId,
             LocalDateTime dateTime,
-            OrderStatus status
+            List<OrderItemEntity> items,
+            OrderStatus status,
+            BigDecimal totalPrice
     ) {
-        this.orderId = orderId;
         this.userId = userId;
         this.dateTime = dateTime;
+        this.items = items;
         this.status = status;
+        this.totalPrice = totalPrice;
     }
 
     public Long getId() {
@@ -47,14 +55,6 @@ public class OrderEntity {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Long getOrderId() {
-        return orderId;
-    }
-
-    public void setOrderId(Long orderId) {
-        this.orderId = orderId;
     }
 
     public Long getUserId() {
@@ -79,5 +79,21 @@ public class OrderEntity {
 
     public void setStatus(OrderStatus status) {
         this.status = status;
+    }
+
+    public List<OrderItemEntity> getItems() {
+        return items;
+    }
+
+    public void setItems(List<OrderItemEntity> items) {
+        this.items = items;
+    }
+
+    public BigDecimal getTotalPrice() {
+        return totalPrice;
+    }
+
+    public void setTotalPrice(BigDecimal totalPrice) {
+        this.totalPrice = totalPrice;
     }
 }
