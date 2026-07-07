@@ -6,7 +6,6 @@ import com.petunincloud.delivery.service.orders.entity.OrderEntity;
 import com.petunincloud.delivery.service.orders.entity.OrderItemEntity;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,14 +21,12 @@ public class OrderMapper implements BaseMapper<OrderEntity, OrderResponse> {
                 .map(this::toItemResponse)
                 .collect(Collectors.toList());
 
-        BigDecimal total = calculateTotal(entity.getItems());
-
         return new OrderResponse(
                 entity.getId(),
                 entity.getUserId(),
                 entity.getDateTime(),
                 entity.getStatus(),
-                total,
+                entity.getTotalPrice(),
                 itemResponses
         );
     }
@@ -45,23 +42,14 @@ public class OrderMapper implements BaseMapper<OrderEntity, OrderResponse> {
 
     @Override
     public OrderEntity toEntity(OrderResponse dto) {
-        throw new UnsupportedOperationException("Not needed");
+        throw new UnsupportedOperationException("Not implemented");
     }
 
-    public OrderEntity toEntity(CreateOrderRequest request) {
+    public OrderEntity toEntity(OrderRequest request) {
         OrderEntity order = new OrderEntity();
         order.setUserId(request.userId());
         order.setDateTime(LocalDateTime.now());
         order.setStatus(OrderStatus.PENDING);
         return order;
-    }
-
-    private BigDecimal calculateTotal(List<OrderItemEntity> items) {
-        return items.stream()
-                .map(
-                        item -> item.getPrice()
-                                .multiply(
-                                        BigDecimal.valueOf(item.getQuantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

@@ -1,7 +1,7 @@
 package com.petunincloud.delivery.service.orders;
 
 import com.petunincloud.delivery.service.common.BaseController;
-import com.petunincloud.delivery.service.orders.dto.CreateOrderRequest;
+import com.petunincloud.delivery.service.orders.dto.OrderRequest;
 import com.petunincloud.delivery.service.orders.dto.OrderResponse;
 import com.petunincloud.delivery.service.orders.entity.OrderEntity;
 import org.slf4j.Logger;
@@ -24,7 +24,7 @@ public class OrderController extends BaseController<OrderService, OrderEntity, O
 
     @PostMapping
     public ResponseEntity<OrderResponse> createOrder (
-            @RequestBody CreateOrderRequest request
+            @RequestBody OrderRequest request
     ) {
         log.info("Called createOrder with parameters = {}", request);
 
