@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,12 +24,11 @@ public class OrderController extends BaseController<OrderService, OrderEntity, O
 
     @PostMapping
     public ResponseEntity<OrderResponse> createOrder (
-            CreateOrderRequest request
+            @RequestBody CreateOrderRequest request
     ) {
-        log.info("Called createOrder with parametres = {}", request);
+        log.info("Called createOrder with parameters = {}", request);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(service.create(request));
     }
-
 }

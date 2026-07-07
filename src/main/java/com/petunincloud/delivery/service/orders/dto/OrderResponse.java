@@ -10,10 +10,7 @@ import java.util.List;
 public record OrderResponse(
         Long id,
         Long userId,
-
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         LocalDateTime dateTime,
-
         OrderStatus status,
         BigDecimal totalPrice,
         List<OrderItemResponse> items

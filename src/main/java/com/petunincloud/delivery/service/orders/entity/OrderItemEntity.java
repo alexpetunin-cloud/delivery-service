@@ -41,6 +41,9 @@ public class OrderItemEntity {
         this.price = price;
     }
 
+    public OrderItemEntity() {
+    }
+
     public Long getId() {
         return id;
     }
