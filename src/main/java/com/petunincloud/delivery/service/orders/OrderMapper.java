@@ -48,8 +48,6 @@ public class OrderMapper implements BaseMapper<OrderEntity, OrderResponse> {
     public OrderEntity toEntity(OrderRequest request) {
         OrderEntity order = new OrderEntity();
         order.setUserId(request.userId());
-        order.setDateTime(LocalDateTime.now());
-        order.setStatus(OrderStatus.PENDING);
         return order;
     }
 }

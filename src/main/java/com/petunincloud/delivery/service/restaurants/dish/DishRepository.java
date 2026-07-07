@@ -11,10 +11,11 @@ public interface DishRepository extends JpaRepository<DishEntity, Long> {
     @Query("""
             SELECT d FROM DishEntity d
             WHERE (:name IS NULL OR d.name = :name)
+              AND (:restaurantId IS NULL OR d.restaurant.id = :restaurantId)
             """)
     List<DishEntity> searchAllByFilter(
             @Param("name") String name,
-            Long restaurantId,
+            @Param("restaurantId") Long restaurantId,
             Pageable pageable
     );
 }

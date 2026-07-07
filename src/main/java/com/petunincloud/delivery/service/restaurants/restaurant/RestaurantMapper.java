@@ -3,6 +3,7 @@ package com.petunincloud.delivery.service.restaurants.restaurant;
 import com.petunincloud.delivery.service.common.BaseMapper;
 import com.petunincloud.delivery.service.restaurants.dish.DishEntity;
 import com.petunincloud.delivery.service.restaurants.dish.dto.DishResponse;
+import com.petunincloud.delivery.service.restaurants.restaurant.dto.RestaurantRequest;
 import com.petunincloud.delivery.service.restaurants.restaurant.dto.RestaurantResponse;
 import org.springframework.stereotype.Component;
 
@@ -35,5 +36,13 @@ public class RestaurantMapper implements BaseMapper<RestaurantEntity, Restaurant
                 item.getName(),
                 item.getPrice()
         );
+    }
+
+    public RestaurantEntity toEntity(RestaurantRequest request) {
+        RestaurantEntity restaurant = new RestaurantEntity();
+        restaurant.setName(request.name());
+        restaurant.setAddress(request.address());
+
+        return restaurant;
     }
 }
