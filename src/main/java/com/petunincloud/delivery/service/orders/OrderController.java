@@ -8,10 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -30,5 +27,59 @@ public class OrderController extends BaseController<OrderService, OrderEntity, O
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(service.create(request));
+    }
+
+    @PatchMapping("/{orderId}/confirm")
+    public ResponseEntity<OrderResponse> confirmOrder (
+            @PathVariable("orderId") Long orderId
+    ) {
+        return ResponseEntity.ok(
+                service.confirmOrder(orderId)
+        );
+    }
+
+    @PatchMapping("/{orderId}/cook")
+    public ResponseEntity<OrderResponse> startCooking (
+            @PathVariable("orderId") Long orderId
+    ) {
+        return ResponseEntity.ok(
+                service.startCooking(orderId)
+        );
+    }
+
+    @PatchMapping("/{orderId}/ready")
+    public ResponseEntity<OrderResponse> markAsReady (
+            @PathVariable("orderId") Long orderId
+    ) {
+        return ResponseEntity.ok(
+                service.markAsReady(orderId)
+        );
+    }
+
+    @PatchMapping("/{orderId}/deliver")
+    public ResponseEntity<OrderResponse> startDelivery (
+            @PathVariable("orderId") Long orderId
+    ) {
+        return ResponseEntity.ok(
+                service.startDelivery(orderId)
+        );
+    }
+
+    @PatchMapping("/{orderId}/complete")
+    public ResponseEntity<OrderResponse> completeDelivery (
+            @PathVariable("orderId") Long orderId
+    ) {
+        return ResponseEntity.ok(
+                service.completeDelivery(orderId)
+        );
+    }
+
+    @PatchMapping("/{orderId}/cancel")
+    public ResponseEntity<OrderResponse> cancelOrder (
+            @PathVariable("orderId") Long orderId
+    ) {
+        return ResponseEntity.ok(
+                service.cancelOrder(orderId)
+        );
     }
 }

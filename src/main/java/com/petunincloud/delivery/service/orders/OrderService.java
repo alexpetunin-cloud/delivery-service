@@ -26,7 +26,9 @@ public class OrderService extends BaseService<OrderEntity, OrderResponse, OrderS
     private final DishService dishService;
 
     public OrderService(
-            OrderRepository repository, OrderMapper mapper, DishService dishService
+            OrderRepository repository,
+            OrderMapper mapper,
+            DishService dishService
     ) {
         this.repository = repository;
         this.mapper = mapper;
@@ -78,5 +80,76 @@ public class OrderService extends BaseService<OrderEntity, OrderResponse, OrderS
         OrderEntity saved = repository.save(entity);
 
         return mapper.toResponse(saved);
+    }
+
+    public OrderResponse confirmOrder(Long orderId) {
+        OrderEntity order = getOrderById(orderId);
+
+        if (order.getStatus() != OrderStatus.PENDING) {
+            throw new IllegalStateException("Only PENDING orders can be confirmed");
+        }
+
+        order.setStatus(OrderStatus.CONFIRMED);
+        return mapper.toResponse(repository.save(order));
+    }
+
+    public OrderResponse startCooking(Long orderId) {
+        OrderEntity order = getOrderById(orderId);
+
+        if (order.getStatus() != OrderStatus.CONFIRMED) {
+            throw new IllegalStateException("Only CONFIRMED orders can be start cooking");
+        }
+
+        order.setStatus(OrderStatus.COOKING);
+        return mapper.toResponse(repository.save(order));
+    }
+
+    public OrderResponse markAsReady(Long orderId) {
+        OrderEntity order = getOrderById(orderId);
+
+        if (order.getStatus() != OrderStatus.COOKING) {
+            throw new IllegalStateException("Only COOKING orders can be marked as ready");
+        }
+
+        order.setStatus(OrderStatus.READY);
+        return mapper.toResponse(repository.save(order));
+    }
+
+    public OrderResponse startDelivery(Long orderId) {
+        OrderEntity order = getOrderById(orderId);
+
+        if (order.getStatus() != OrderStatus.READY) {
+            throw new IllegalStateException("Only READY orders can be taken for delivery");
+        }
+
+        order.setStatus(OrderStatus.DELIVERING);
+        return mapper.toResponse(repository.save(order));
+    }
+
+    public OrderResponse completeDelivery(Long orderId) {
+        OrderEntity order = getOrderById(orderId);
+
+        if (order.getStatus() != OrderStatus.DELIVERING) {
+            throw new IllegalStateException("Only DELIVERING orders can be completed");
+        }
+
+        order.setStatus(OrderStatus.DELIVERED);
+        return mapper.toResponse(repository.save(order));
+    }
+
+    public OrderResponse cancelOrder(Long orderId) {
+        OrderEntity order = getOrderById(orderId);
+
+        if (order.getStatus() == OrderStatus.DELIVERED || order.getStatus() == OrderStatus.CANCELED) {
+            throw new IllegalStateException("Cannot cancel DELIVERED or already CANCELED order");
+        }
+
+        order.setStatus(OrderStatus.CANCELED);
+        return mapper.toResponse(repository.save(order));
+    }
+
+    private OrderEntity getOrderById(Long orderId) {
+        return repository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found: " + orderId));
     }
 }
