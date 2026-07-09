@@ -9,16 +9,16 @@ import java.util.List;
 
 @Service
 public class DishService extends BaseService<DishEntity, DishResponse, DishSearchFilter> {
-    private final DishRepository repository;
+    private final DishRepository dishRepository;
     private final DishMapper mapper;
 
-    public DishService(DishRepository repository, DishMapper mapper) {
-        this.repository = repository;
+    public DishService(DishRepository dishRepository, DishMapper mapper) {
+        this.dishRepository = dishRepository;
         this.mapper = mapper;
     }
 
     public DishResponse getDishById(Long dishId) {
-        DishEntity entity = repository.findById(dishId)
+        DishEntity entity = dishRepository.findById(dishId)
                 .orElseThrow(() -> new IllegalArgumentException("Dish not found: " + dishId));
 
         return mapper.toResponse(entity);
@@ -26,7 +26,7 @@ public class DishService extends BaseService<DishEntity, DishResponse, DishSearc
 
     @Override
     protected List<DishEntity> findWithFilter(DishSearchFilter filter, Pageable pageable) {
-        return repository.searchAllByFilter(
+        return dishRepository.searchAllByFilter(
                 filter.name(),
                 filter.restaurantId(),
                 pageable

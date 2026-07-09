@@ -18,26 +18,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@Transactional
 public class OrderService extends BaseService<OrderEntity, OrderResponse, OrderSearchFilter> {
 
-    private final OrderRepository repository;
+    private final OrderRepository orderRepository;
     private final OrderMapper mapper;
     private final DishService dishService;
 
     public OrderService(
-            OrderRepository repository,
+            OrderRepository orderRepository,
             OrderMapper mapper,
             DishService dishService
     ) {
-        this.repository = repository;
+        this.orderRepository = orderRepository;
         this.mapper = mapper;
         this.dishService = dishService;
     }
 
     @Override
     protected List<OrderEntity> findWithFilter(OrderSearchFilter filter, Pageable pageable) {
-        return repository.searchAllByFilter(
+        return orderRepository.searchAllByFilter(
                 filter.userId(),
                 pageable
         );
@@ -48,6 +47,7 @@ public class OrderService extends BaseService<OrderEntity, OrderResponse, OrderS
         return mapper;
     }
 
+    @Transactional
     public OrderResponse create(OrderRequest request) {
         OrderEntity entity = mapper.toEntity(request);
         entity.setDateTime(LocalDateTime.now().withNano(0));
@@ -77,11 +77,12 @@ public class OrderService extends BaseService<OrderEntity, OrderResponse, OrderS
         entity.setItems(items);
         entity.setTotalPrice(totalPrice);
 
-        OrderEntity saved = repository.save(entity);
+        OrderEntity saved = orderRepository.save(entity);
 
         return mapper.toResponse(saved);
     }
 
+    @Transactional
     public OrderResponse confirmOrder(Long orderId) {
         OrderEntity order = getOrderById(orderId);
 
@@ -90,9 +91,20 @@ public class OrderService extends BaseService<OrderEntity, OrderResponse, OrderS
         }
 
         order.setStatus(OrderStatus.CONFIRMED);
-        return mapper.toResponse(repository.save(order));
+        return mapper.toResponse(orderRepository.save(order));
     }
 
+    @Transactional
+    public OrderResponse confirmOrder(OrderEntity order) {
+        if (order.getStatus() != OrderStatus.PENDING) {
+            throw new IllegalStateException("Only PENDING orders can be confirmed");
+        }
+
+        order.setStatus(OrderStatus.CONFIRMED);
+        return mapper.toResponse(orderRepository.save(order));
+    }
+
+    @Transactional
     public OrderResponse startCooking(Long orderId) {
         OrderEntity order = getOrderById(orderId);
 
@@ -101,9 +113,10 @@ public class OrderService extends BaseService<OrderEntity, OrderResponse, OrderS
         }
 
         order.setStatus(OrderStatus.COOKING);
-        return mapper.toResponse(repository.save(order));
+        return mapper.toResponse(orderRepository.save(order));
     }
 
+    @Transactional
     public OrderResponse markAsReady(Long orderId) {
         OrderEntity order = getOrderById(orderId);
 
@@ -112,9 +125,10 @@ public class OrderService extends BaseService<OrderEntity, OrderResponse, OrderS
         }
 
         order.setStatus(OrderStatus.READY);
-        return mapper.toResponse(repository.save(order));
+        return mapper.toResponse(orderRepository.save(order));
     }
 
+    @Transactional
     public OrderResponse startDelivery(Long orderId) {
         OrderEntity order = getOrderById(orderId);
 
@@ -123,9 +137,10 @@ public class OrderService extends BaseService<OrderEntity, OrderResponse, OrderS
         }
 
         order.setStatus(OrderStatus.DELIVERING);
-        return mapper.toResponse(repository.save(order));
+        return mapper.toResponse(orderRepository.save(order));
     }
 
+    @Transactional
     public OrderResponse completeDelivery(Long orderId) {
         OrderEntity order = getOrderById(orderId);
 
@@ -134,9 +149,10 @@ public class OrderService extends BaseService<OrderEntity, OrderResponse, OrderS
         }
 
         order.setStatus(OrderStatus.DELIVERED);
-        return mapper.toResponse(repository.save(order));
+        return mapper.toResponse(orderRepository.save(order));
     }
 
+    @Transactional
     public OrderResponse cancelOrder(Long orderId) {
         OrderEntity order = getOrderById(orderId);
 
@@ -145,11 +161,11 @@ public class OrderService extends BaseService<OrderEntity, OrderResponse, OrderS
         }
 
         order.setStatus(OrderStatus.CANCELED);
-        return mapper.toResponse(repository.save(order));
+        return mapper.toResponse(orderRepository.save(order));
     }
 
     private OrderEntity getOrderById(Long orderId) {
-        return repository.findById(orderId)
+        return orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("Order not found: " + orderId));
     }
 }

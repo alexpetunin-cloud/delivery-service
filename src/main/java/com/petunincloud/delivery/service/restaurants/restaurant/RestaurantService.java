@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-@Transactional
 public class RestaurantService extends BaseService<RestaurantEntity, RestaurantResponse, RestaurantSearchFilter> {
     private final RestaurantRepository restaurantRepository;
     private final RestaurantMapper restaurantMapper;
@@ -48,12 +47,14 @@ public class RestaurantService extends BaseService<RestaurantEntity, RestaurantR
         return restaurantMapper;
     }
 
+    @Transactional
     public RestaurantResponse createRestaurant(RestaurantRequest request) {
         RestaurantEntity entity = restaurantMapper.toEntity(request);
         RestaurantEntity saved = restaurantRepository.save(entity);
         return restaurantMapper.toResponse(saved);
     }
 
+    @Transactional
     public DishResponse addDishToRestaurant(Long restaurantId, DishRequest request) {
         RestaurantEntity restaurant = restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new IllegalArgumentException("Restaurant not found: " + restaurantId));
