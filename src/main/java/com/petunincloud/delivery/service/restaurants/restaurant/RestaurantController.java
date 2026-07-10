@@ -1,5 +1,7 @@
 package com.petunincloud.delivery.service.restaurants.restaurant;
 import com.petunincloud.delivery.service.common.BaseController;
+import com.petunincloud.delivery.service.orders.OrderService;
+import com.petunincloud.delivery.service.orders.dto.OrderResponse;
 import com.petunincloud.delivery.service.restaurants.dish.dto.DishRequest;
 import com.petunincloud.delivery.service.restaurants.dish.dto.DishResponse;
 import com.petunincloud.delivery.service.restaurants.restaurant.dto.RestaurantRequest;
@@ -16,7 +18,9 @@ import org.springframework.web.bind.annotation.*;
 public class RestaurantController extends BaseController<RestaurantService, RestaurantEntity, RestaurantResponse, RestaurantSearchFilter> {
     private final static Logger log = LoggerFactory.getLogger(RestaurantController.class);
 
-    public RestaurantController(RestaurantService service) {
+    public RestaurantController(
+            RestaurantService service
+    ) {
         super(service);
     }
 
@@ -33,11 +37,32 @@ public class RestaurantController extends BaseController<RestaurantService, Rest
     @PostMapping("/{restaurantId}/dishes")
     public ResponseEntity<DishResponse> addDishToRestaurant(
             @PathVariable Long restaurantId,
-            @RequestBody @Valid DishRequest request) {
+            @RequestBody @Valid DishRequest request
+    ) {
         log.info("Called addDishToRestaurant for id = {} with parameters = {}", restaurantId, request);
 
         DishResponse response = service.addDishToRestaurant(restaurantId, request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(response);
+    }
+
+    @PatchMapping("/{orderId}/cook")
+    public ResponseEntity<OrderResponse> startCooking(
+            @PathVariable Long orderId
+    ) {
+        log.info("Called startCooking for id = {}", orderId);
+
+        return ResponseEntity.ok()
+                .body(service.startCooking(orderId));
+    }
+
+    @PatchMapping("/{orderId}/ready")
+    public ResponseEntity<OrderResponse> markAsReady(
+            @PathVariable Long orderId
+    ) {
+        log.info("Called markAsReady for id = {}", orderId);
+
+        return ResponseEntity.ok()
+                .body(service.markAsReady(orderId));
     }
 }

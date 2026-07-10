@@ -1,6 +1,8 @@
 package com.petunincloud.delivery.service.orders.entity;
 
 import com.petunincloud.delivery.service.orders.OrderStatus;
+import com.petunincloud.delivery.service.restaurants.restaurant.RestaurantEntity;
+import com.petunincloud.delivery.service.users.UserEntity;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -16,8 +18,13 @@ public class OrderEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private UserEntity user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "restaurant_id", nullable = false)
+    private RestaurantEntity restaurant;
 
     @Column(name = "date_time", nullable = false)
     private LocalDateTime dateTime;
@@ -36,13 +43,17 @@ public class OrderEntity {
     }
 
     public OrderEntity(
-            Long userId,
+            Long id,
+            UserEntity user,
+            RestaurantEntity restaurant,
             LocalDateTime dateTime,
             List<OrderItemEntity> items,
             OrderStatus status,
             BigDecimal totalPrice
     ) {
-        this.userId = userId;
+        this.id = id;
+        this.user = user;
+        this.restaurant = restaurant;
         this.dateTime = dateTime;
         this.items = items;
         this.status = status;
@@ -53,44 +64,52 @@ public class OrderEntity {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public UserEntity getUser() {
+        return user;
     }
 
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public RestaurantEntity getRestaurant() {
+        return restaurant;
     }
 
     public LocalDateTime getDateTime() {
         return dateTime;
     }
 
-    public void setDateTime(LocalDateTime dateTime) {
-        this.dateTime = dateTime;
+    public List<OrderItemEntity> getItems() {
+        return items;
     }
 
     public OrderStatus getStatus() {
         return status;
     }
 
-    public void setStatus(OrderStatus status) {
-        this.status = status;
+    public BigDecimal getTotalPrice() {
+        return totalPrice;
     }
 
-    public List<OrderItemEntity> getItems() {
-        return items;
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setUser(UserEntity user) {
+        this.user = user;
+    }
+
+    public void setRestaurant(RestaurantEntity restaurant) {
+        this.restaurant = restaurant;
+    }
+
+    public void setDateTime(LocalDateTime dateTime) {
+        this.dateTime = dateTime;
     }
 
     public void setItems(List<OrderItemEntity> items) {
         this.items = items;
     }
 
-    public BigDecimal getTotalPrice() {
-        return totalPrice;
+    public void setStatus(OrderStatus status) {
+        this.status = status;
     }
 
     public void setTotalPrice(BigDecimal totalPrice) {

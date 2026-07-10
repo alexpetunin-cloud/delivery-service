@@ -1,14 +1,13 @@
-package com.petunincloud.delivery.service.payments;
+package com.petunincloud.delivery.service.deliveries.delivery;
 
 import com.petunincloud.delivery.service.common.BaseFilter;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-public record PaymentSearchFilter(
-        Long userId,
+public record DeliverySearchFilter(
         Long orderId,
-        PaymentStatus status,
+        Long courierId,
+        DeliveryStatus status,
         LocalDateTime fromDate,
         LocalDateTime toDate,
         Integer pageSize,

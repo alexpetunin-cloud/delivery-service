@@ -4,6 +4,7 @@ import com.petunincloud.delivery.service.common.BaseMapper;
 import com.petunincloud.delivery.service.orders.dto.*;
 import com.petunincloud.delivery.service.orders.entity.OrderEntity;
 import com.petunincloud.delivery.service.orders.entity.OrderItemEntity;
+import com.petunincloud.delivery.service.users.UserEntity;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -23,7 +24,9 @@ public class OrderMapper implements BaseMapper<OrderEntity, OrderResponse> {
 
         return new OrderResponse(
                 entity.getId(),
-                entity.getUserId(),
+                entity.getUser().getId(),
+                entity.getRestaurant().getId(),
+                entity.getRestaurant().getName(),
                 entity.getDateTime(),
                 entity.getStatus(),
                 entity.getTotalPrice(),
@@ -45,9 +48,9 @@ public class OrderMapper implements BaseMapper<OrderEntity, OrderResponse> {
         throw new UnsupportedOperationException("Not implemented");
     }
 
-    public OrderEntity toEntity(OrderRequest request) {
+    public OrderEntity toEntity(OrderRequest request, UserEntity user) {
         OrderEntity order = new OrderEntity();
-        order.setUserId(request.userId());
+        order.setUser(user);
         return order;
     }
 }

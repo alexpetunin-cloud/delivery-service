@@ -1,6 +1,7 @@
 package com.petunincloud.delivery.service.payments;
 
 import com.petunincloud.delivery.service.orders.entity.OrderEntity;
+import com.petunincloud.delivery.service.users.UserEntity;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -17,8 +18,9 @@ public class PaymentEntity {
     @JoinColumn(name = "order_id", nullable = false)
     private OrderEntity order;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private UserEntity user;
 
     @Column(nullable = false)
     private BigDecimal amount;
@@ -45,7 +47,7 @@ public class PaymentEntity {
     public PaymentEntity(
             Long id,
             OrderEntity order,
-            Long userId,
+            UserEntity user,
             BigDecimal amount,
             String paymentMethod,
             String transactionId,
@@ -55,7 +57,7 @@ public class PaymentEntity {
     ) {
         this.id = id;
         this.order = order;
-        this.userId = userId;
+        this.user = user;
         this.amount = amount;
         this.paymentMethod = paymentMethod;
         this.transactionId = transactionId;
@@ -72,8 +74,8 @@ public class PaymentEntity {
         return order;
     }
 
-    public Long getUserId() {
-        return userId;
+    public UserEntity getUser() {
+        return user;
     }
 
     public BigDecimal getAmount() {
@@ -108,8 +110,8 @@ public class PaymentEntity {
         this.order = order;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setUser(UserEntity user) {
+        this.user = user;
     }
 
     public void setAmount(BigDecimal amount) {

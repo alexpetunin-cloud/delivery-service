@@ -10,6 +10,9 @@ public record OrderRequest(
         @NotNull(message = "userId is required")
         Long userId,
 
+        @NotNull(message = "restaurantId is required")
+        Long restaurantId,
+
         @NotEmpty(message = "Order must have at least one item")
         @Valid List<OrderItemRequest> items
 ) {}

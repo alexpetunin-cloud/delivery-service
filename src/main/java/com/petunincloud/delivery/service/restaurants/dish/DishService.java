@@ -10,18 +10,21 @@ import java.util.List;
 @Service
 public class DishService extends BaseService<DishEntity, DishResponse, DishSearchFilter> {
     private final DishRepository dishRepository;
-    private final DishMapper mapper;
+    private final DishMapper dishMapper;
 
-    public DishService(DishRepository dishRepository, DishMapper mapper) {
+    public DishService(
+            DishRepository dishRepository,
+            DishMapper dishMapper
+    ) {
         this.dishRepository = dishRepository;
-        this.mapper = mapper;
+        this.dishMapper = dishMapper;
     }
 
     public DishResponse getDishById(Long dishId) {
         DishEntity entity = dishRepository.findById(dishId)
                 .orElseThrow(() -> new IllegalArgumentException("Dish not found: " + dishId));
 
-        return mapper.toResponse(entity);
+        return dishMapper.toResponse(entity);
     }
 
     @Override
@@ -35,6 +38,6 @@ public class DishService extends BaseService<DishEntity, DishResponse, DishSearc
 
     @Override
     protected DishMapper getMapper() {
-        return mapper;
+        return dishMapper;
     }
 }

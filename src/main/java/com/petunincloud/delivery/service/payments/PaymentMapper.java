@@ -3,15 +3,16 @@ package com.petunincloud.delivery.service.payments;
 import com.petunincloud.delivery.service.common.BaseMapper;
 import com.petunincloud.delivery.service.orders.entity.OrderEntity;
 import com.petunincloud.delivery.service.payments.dto.PaymentResponse;
+import com.petunincloud.delivery.service.users.UserEntity;
 import org.springframework.stereotype.Component;
 
 @Component
 public class PaymentMapper implements BaseMapper<PaymentEntity, PaymentResponse> {
 
-    public PaymentEntity toEntity(Long userId, OrderEntity order) {
+    public PaymentEntity toEntity(UserEntity user, OrderEntity order) {
         PaymentEntity payment = new PaymentEntity();
         payment.setOrder(order);
-        payment.setUserId(userId);
+        payment.setUser(user);
         return payment;
     }
 
@@ -20,7 +21,7 @@ public class PaymentMapper implements BaseMapper<PaymentEntity, PaymentResponse>
         return new PaymentResponse(
                 entity.getId(),
                 entity.getOrder().getId(),
-                entity.getUserId(),
+                entity.getUser().getId(),
                 entity.getAmount(),
                 entity.getPaymentMethod(),
                 entity.getStatus(),

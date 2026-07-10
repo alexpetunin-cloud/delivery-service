@@ -8,6 +8,10 @@ import com.petunincloud.delivery.service.orders.entity.OrderEntity;
 import com.petunincloud.delivery.service.orders.entity.OrderItemEntity;
 import com.petunincloud.delivery.service.restaurants.dish.DishService;
 import com.petunincloud.delivery.service.restaurants.dish.dto.DishResponse;
+import com.petunincloud.delivery.service.restaurants.restaurant.RestaurantEntity;
+import com.petunincloud.delivery.service.restaurants.restaurant.RestaurantRepository;
+import com.petunincloud.delivery.service.users.UserEntity;
+import com.petunincloud.delivery.service.users.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -21,35 +25,49 @@ import java.util.List;
 public class OrderService extends BaseService<OrderEntity, OrderResponse, OrderSearchFilter> {
 
     private final OrderRepository orderRepository;
-    private final OrderMapper mapper;
+    private final OrderMapper orderMapper;
     private final DishService dishService;
+    private final UserRepository userRepository;
+    private final RestaurantRepository restaurantRepository;
 
     public OrderService(
             OrderRepository orderRepository,
-            OrderMapper mapper,
-            DishService dishService
+            OrderMapper orderMapper,
+            DishService dishService,
+            UserRepository userRepository,
+            RestaurantRepository restaurantRepository
     ) {
         this.orderRepository = orderRepository;
-        this.mapper = mapper;
+        this.orderMapper = orderMapper;
         this.dishService = dishService;
+        this.userRepository = userRepository;
+        this.restaurantRepository = restaurantRepository;
     }
 
     @Override
     protected List<OrderEntity> findWithFilter(OrderSearchFilter filter, Pageable pageable) {
         return orderRepository.searchAllByFilter(
                 filter.userId(),
+                filter.restaurantId(),
                 pageable
         );
     }
 
     @Override
     protected OrderMapper getMapper() {
-        return mapper;
+        return orderMapper;
     }
 
     @Transactional
-    public OrderResponse create(OrderRequest request) {
-        OrderEntity entity = mapper.toEntity(request);
+    public OrderResponse createOrder(OrderRequest request) {
+        UserEntity user = userRepository.findById(request.userId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        RestaurantEntity restaurant = restaurantRepository.findById(request.restaurantId())
+                .orElseThrow(() -> new IllegalArgumentException("Restaurant not found"));
+
+        OrderEntity entity = orderMapper.toEntity(request, user);
+        entity.setRestaurant(restaurant);
         entity.setDateTime(LocalDateTime.now().withNano(0));
         entity.setStatus(OrderStatus.PENDING);
 
@@ -78,78 +96,7 @@ public class OrderService extends BaseService<OrderEntity, OrderResponse, OrderS
         entity.setTotalPrice(totalPrice);
 
         OrderEntity saved = orderRepository.save(entity);
-
-        return mapper.toResponse(saved);
-    }
-
-    @Transactional
-    public OrderResponse confirmOrder(Long orderId) {
-        OrderEntity order = getOrderById(orderId);
-
-        if (order.getStatus() != OrderStatus.PENDING) {
-            throw new IllegalStateException("Only PENDING orders can be confirmed");
-        }
-
-        order.setStatus(OrderStatus.CONFIRMED);
-        return mapper.toResponse(orderRepository.save(order));
-    }
-
-    @Transactional
-    public OrderResponse confirmOrder(OrderEntity order) {
-        if (order.getStatus() != OrderStatus.PENDING) {
-            throw new IllegalStateException("Only PENDING orders can be confirmed");
-        }
-
-        order.setStatus(OrderStatus.CONFIRMED);
-        return mapper.toResponse(orderRepository.save(order));
-    }
-
-    @Transactional
-    public OrderResponse startCooking(Long orderId) {
-        OrderEntity order = getOrderById(orderId);
-
-        if (order.getStatus() != OrderStatus.CONFIRMED) {
-            throw new IllegalStateException("Only CONFIRMED orders can be start cooking");
-        }
-
-        order.setStatus(OrderStatus.COOKING);
-        return mapper.toResponse(orderRepository.save(order));
-    }
-
-    @Transactional
-    public OrderResponse markAsReady(Long orderId) {
-        OrderEntity order = getOrderById(orderId);
-
-        if (order.getStatus() != OrderStatus.COOKING) {
-            throw new IllegalStateException("Only COOKING orders can be marked as ready");
-        }
-
-        order.setStatus(OrderStatus.READY);
-        return mapper.toResponse(orderRepository.save(order));
-    }
-
-    @Transactional
-    public OrderResponse startDelivery(Long orderId) {
-        OrderEntity order = getOrderById(orderId);
-
-        if (order.getStatus() != OrderStatus.READY) {
-            throw new IllegalStateException("Only READY orders can be taken for delivery");
-        }
-
-        order.setStatus(OrderStatus.DELIVERING);
-        return mapper.toResponse(orderRepository.save(order));
-    }
-
-    @Transactional
-    public OrderResponse completeDelivery(Long orderId) {
-        OrderEntity order = getOrderById(orderId);
-
-        if (order.getStatus() != OrderStatus.DELIVERING) {
-            throw new IllegalStateException("Only DELIVERING orders can be completed");
-        }
-
-        order.setStatus(OrderStatus.DELIVERED);
-        return mapper.toResponse(orderRepository.save(order));
+        return orderMapper.toResponse(saved);
     }
 
     @Transactional
@@ -161,10 +108,10 @@ public class OrderService extends BaseService<OrderEntity, OrderResponse, OrderS
         }
 
         order.setStatus(OrderStatus.CANCELED);
-        return mapper.toResponse(orderRepository.save(order));
+        return orderMapper.toResponse(orderRepository.save(order));
     }
 
-    private OrderEntity getOrderById(Long orderId) {
+    public OrderEntity getOrderById(Long orderId) {
         return orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("Order not found: " + orderId));
     }

@@ -8,10 +8,10 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface RestaurantRepository extends JpaRepository<RestaurantEntity, Long> {
-    @Query("""
-            SELECT r FROM RestaurantEntity r
-            WHERE (:name IS NULL OR r.name = :name)
-            """)
+    @Query(value = """
+        SELECT * FROM restaurants r
+        WHERE (:name IS NULL OR r.name ILIKE COALESCE(CONCAT('%', :name, '%'), ''))
+        """, nativeQuery = true)
     List<RestaurantEntity> searchAllByFilter(
             @Param("name") String name,
             Pageable pageable

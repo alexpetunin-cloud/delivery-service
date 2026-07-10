@@ -3,13 +3,18 @@ package com.petunincloud.delivery.service.payments;
 import com.petunincloud.delivery.service.common.BaseService;
 import com.petunincloud.delivery.service.orders.OrderRepository;
 import com.petunincloud.delivery.service.orders.OrderService;
+import com.petunincloud.delivery.service.orders.OrderStatus;
+import com.petunincloud.delivery.service.orders.dto.OrderResponse;
 import com.petunincloud.delivery.service.orders.entity.OrderEntity;
 import com.petunincloud.delivery.service.payments.dto.PaymentRequest;
 import com.petunincloud.delivery.service.payments.dto.PaymentResponse;
+import com.petunincloud.delivery.service.users.UserEntity;
+import com.petunincloud.delivery.service.users.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -18,20 +23,23 @@ import java.util.UUID;
 public class PaymentService extends BaseService<PaymentEntity, PaymentResponse, PaymentSearchFilter> {
 
     private final PaymentRepository paymentRepository;
-    private final PaymentMapper mapper;
+    private final PaymentMapper paymentMapper;
     private final OrderRepository orderRepository;
     private final OrderService orderService;
+    private final UserRepository userRepository;
 
     public PaymentService(
             PaymentRepository paymentRepository,
-            PaymentMapper mapper,
+            PaymentMapper paymentMapper,
             OrderRepository orderRepository,
-            OrderService orderService
+            OrderService orderService,
+            UserRepository userRepository
     ) {
         this.paymentRepository = paymentRepository;
-        this.mapper = mapper;
+        this.paymentMapper = paymentMapper;
         this.orderRepository = orderRepository;
         this.orderService = orderService;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -42,15 +50,13 @@ public class PaymentService extends BaseService<PaymentEntity, PaymentResponse, 
                 filter.status(),
                 filter.fromDate(),
                 filter.toDate(),
-                filter.minAmount(),
-                filter.maxAmount(),
                 pageable
         );
     }
 
     @Override
     protected PaymentMapper getMapper() {
-        return mapper;
+        return paymentMapper;
     }
 
     @Transactional
@@ -58,7 +64,10 @@ public class PaymentService extends BaseService<PaymentEntity, PaymentResponse, 
         OrderEntity order = orderRepository.findById(request.orderId())
                 .orElseThrow(() -> new IllegalArgumentException("Order not found: " + request.orderId()));
 
-        PaymentEntity payment = mapper.toEntity(request.userId(), order);
+        UserEntity user = userRepository.findById(request.userId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + request.userId()));
+
+        PaymentEntity payment = paymentMapper.toEntity(user, order);
 
         payment.setAmount(order.getTotalPrice());
         payment.setPaymentMethod("CARD");
@@ -66,7 +75,7 @@ public class PaymentService extends BaseService<PaymentEntity, PaymentResponse, 
         payment.setCreatedAt(LocalDateTime.now().withNano(0));
 
         PaymentEntity saved = paymentRepository.save(payment);
-        return mapper.toResponse(saved);
+        return paymentMapper.toResponse(saved);
     }
 
     @Transactional
@@ -88,9 +97,9 @@ public class PaymentService extends BaseService<PaymentEntity, PaymentResponse, 
 
             PaymentEntity savedPayment = paymentRepository.save(payment);
 
-            orderService.confirmOrder(payment.getOrder());
+            confirmOrder(payment.getOrder().getId());
 
-            return mapper.toResponse(savedPayment);
+            return paymentMapper.toResponse(savedPayment);
 
         } else {
             payment.setStatus(PaymentStatus.FAILED);
@@ -98,7 +107,19 @@ public class PaymentService extends BaseService<PaymentEntity, PaymentResponse, 
 
             PaymentEntity savedPayment = paymentRepository.save(payment);
 
-            return mapper.toResponse(savedPayment);
+            return paymentMapper.toResponse(savedPayment);
         }
+    }
+
+    @Transactional
+    private void confirmOrder(Long orderId) {
+        OrderEntity order = orderService.getOrderById(orderId);
+
+        if (order.getStatus() != OrderStatus.PENDING) {
+            throw new IllegalStateException("Only PENDING orders can be confirmed");
+        }
+
+        order.setStatus(OrderStatus.CONFIRMED);
+        orderRepository.save(order);
     }
 }

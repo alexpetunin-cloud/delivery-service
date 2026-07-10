@@ -10,6 +10,8 @@ import java.util.List;
 public record OrderResponse(
         Long id,
         Long userId,
+        Long restaurantId,
+        String restaurantName,
         LocalDateTime dateTime,
         OrderStatus status,
         BigDecimal totalPrice,

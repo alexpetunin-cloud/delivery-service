@@ -26,52 +26,7 @@ public class OrderController extends BaseController<OrderService, OrderEntity, O
         log.info("Called createOrder with parameters = {}", request);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(service.create(request));
-    }
-
-    @PatchMapping("/{orderId}/confirm")
-    public ResponseEntity<OrderResponse> confirmOrder (
-            @PathVariable("orderId") Long orderId
-    ) {
-        return ResponseEntity.ok(
-                service.confirmOrder(orderId)
-        );
-    }
-
-    @PatchMapping("/{orderId}/cook")
-    public ResponseEntity<OrderResponse> startCooking (
-            @PathVariable("orderId") Long orderId
-    ) {
-        return ResponseEntity.ok(
-                service.startCooking(orderId)
-        );
-    }
-
-    @PatchMapping("/{orderId}/ready")
-    public ResponseEntity<OrderResponse> markAsReady (
-            @PathVariable("orderId") Long orderId
-    ) {
-        return ResponseEntity.ok(
-                service.markAsReady(orderId)
-        );
-    }
-
-    @PatchMapping("/{orderId}/deliver")
-    public ResponseEntity<OrderResponse> startDelivery (
-            @PathVariable("orderId") Long orderId
-    ) {
-        return ResponseEntity.ok(
-                service.startDelivery(orderId)
-        );
-    }
-
-    @PatchMapping("/{orderId}/complete")
-    public ResponseEntity<OrderResponse> completeDelivery (
-            @PathVariable("orderId") Long orderId
-    ) {
-        return ResponseEntity.ok(
-                service.completeDelivery(orderId)
-        );
+                .body(service.createOrder(request));
     }
 
     @PatchMapping("/{orderId}/cancel")

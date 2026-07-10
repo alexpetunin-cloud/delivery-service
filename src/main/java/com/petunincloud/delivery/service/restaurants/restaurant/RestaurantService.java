@@ -1,6 +1,12 @@
 package com.petunincloud.delivery.service.restaurants.restaurant;
 
 import com.petunincloud.delivery.service.common.BaseService;
+import com.petunincloud.delivery.service.orders.OrderMapper;
+import com.petunincloud.delivery.service.orders.OrderRepository;
+import com.petunincloud.delivery.service.orders.OrderService;
+import com.petunincloud.delivery.service.orders.OrderStatus;
+import com.petunincloud.delivery.service.orders.dto.OrderResponse;
+import com.petunincloud.delivery.service.orders.entity.OrderEntity;
 import com.petunincloud.delivery.service.restaurants.dish.DishEntity;
 import com.petunincloud.delivery.service.restaurants.dish.DishMapper;
 import com.petunincloud.delivery.service.restaurants.dish.DishRepository;
@@ -9,6 +15,8 @@ import com.petunincloud.delivery.service.restaurants.dish.dto.DishResponse;
 import com.petunincloud.delivery.service.restaurants.restaurant.dto.RestaurantRequest;
 import com.petunincloud.delivery.service.restaurants.restaurant.dto.RestaurantResponse;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -20,18 +28,27 @@ public class RestaurantService extends BaseService<RestaurantEntity, RestaurantR
     private final RestaurantMapper restaurantMapper;
     private final DishRepository dishRepository;
     private final DishMapper dishMapper;
-
+    private final OrderService orderService;
+    private final OrderRepository orderRepository;
+    private final OrderMapper orderMapper;
+    private final static Logger log = LoggerFactory.getLogger(RestaurantService.class);
 
     public RestaurantService(
             RestaurantRepository restaurantRepository,
             RestaurantMapper restaurantMapper,
             DishRepository dishRepository,
-            DishMapper dishMapper
+            DishMapper dishMapper,
+            OrderService orderService,
+            OrderRepository orderRepository,
+            OrderMapper orderMapper
     ) {
         this.restaurantRepository = restaurantRepository;
         this.restaurantMapper = restaurantMapper;
         this.dishRepository = dishRepository;
         this.dishMapper = dishMapper;
+        this.orderService = orderService;
+        this.orderRepository = orderRepository;
+        this.orderMapper = orderMapper;
     }
 
     @Override
@@ -70,5 +87,37 @@ public class RestaurantService extends BaseService<RestaurantEntity, RestaurantR
         restaurantRepository.save(restaurant);
 
         return dishMapper.toResponse(savedDish);
+    }
+
+    @Transactional
+    public OrderResponse startCooking(Long orderId) {
+        OrderEntity order = orderService.getOrderById(orderId);
+
+        if (order.getStatus() != OrderStatus.CONFIRMED) {
+            throw new IllegalStateException("Only CONFIRMED orders can start cooking");
+        }
+
+        order.setStatus(OrderStatus.COOKING);
+        OrderEntity saved = orderRepository.save(order);
+
+        log.info("Order {} started cooking", orderId);
+
+        return orderMapper.toResponse(saved);
+    }
+
+    @Transactional
+    public OrderResponse markAsReady(Long orderId) {
+        OrderEntity order = orderService.getOrderById(orderId);
+
+        if (order.getStatus() != OrderStatus.COOKING) {
+            throw new IllegalStateException("Only COOKING orders can be marked as ready");
+        }
+
+        order.setStatus(OrderStatus.READY);
+        OrderEntity saved = orderRepository.save(order);
+
+        log.info("Order {} is ready for delivery", orderId);
+
+        return orderMapper.toResponse(saved);
     }
 }
