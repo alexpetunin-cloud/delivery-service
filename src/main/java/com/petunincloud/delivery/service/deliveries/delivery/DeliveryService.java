@@ -29,11 +29,13 @@ public class DeliveryService extends BaseService<DeliveryEntity, DeliveryRespons
     private final OrderService orderService;
     private final DeliveryMapper deliveryMapper;
 
-    public DeliveryService(DeliveryRepository deliveryRepository,
-                           CourierRepository courierRepository,
-                           OrderRepository orderRepository,
-                           OrderService orderService,
-                           DeliveryMapper deliveryMapper) {
+    public DeliveryService(
+            DeliveryRepository deliveryRepository,
+            CourierRepository courierRepository,
+            OrderRepository orderRepository,
+            OrderService orderService,
+            DeliveryMapper deliveryMapper
+    ) {
         this.deliveryRepository = deliveryRepository;
         this.courierRepository = courierRepository;
         this.orderRepository = orderRepository;
@@ -47,8 +49,8 @@ public class DeliveryService extends BaseService<DeliveryEntity, DeliveryRespons
                 filter.orderId(),
                 filter.courierId(),
                 filter.status(),
-                filter.fromDate(),
-                filter.toDate(),
+                filter.assignedAt(),
+                filter.deliveredAt(),
                 pageable
         );
     }
@@ -78,7 +80,7 @@ public class DeliveryService extends BaseService<DeliveryEntity, DeliveryRespons
         delivery.setOrder(order);
         delivery.setCourier(courier);
         delivery.setStatus(DeliveryStatus.ASSIGNED);
-        delivery.setAssignedAt(LocalDateTime.now());
+        delivery.setAssignedAt(LocalDateTime.now().withNano(0));
 
         delivery.setPickupAddress(order.getRestaurant().getAddress());
         delivery.setDeliveryAddress(order.getUser().getAddress());
@@ -113,7 +115,7 @@ public class DeliveryService extends BaseService<DeliveryEntity, DeliveryRespons
 
         order.setStatus(OrderStatus.DELIVERED);
         delivery.setStatus(DeliveryStatus.DELIVERED);
-        delivery.setDeliveredAt(LocalDateTime.now());
+        delivery.setDeliveredAt(LocalDateTime.now().withNano(0));
         courier.setStatus(CourierStatus.AVAILABLE);
 
         orderRepository.save(order);

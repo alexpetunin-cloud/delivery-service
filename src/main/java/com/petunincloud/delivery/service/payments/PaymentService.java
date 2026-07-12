@@ -4,7 +4,6 @@ import com.petunincloud.delivery.service.common.BaseService;
 import com.petunincloud.delivery.service.orders.OrderRepository;
 import com.petunincloud.delivery.service.orders.OrderService;
 import com.petunincloud.delivery.service.orders.OrderStatus;
-import com.petunincloud.delivery.service.orders.dto.OrderResponse;
 import com.petunincloud.delivery.service.orders.entity.OrderEntity;
 import com.petunincloud.delivery.service.payments.dto.PaymentRequest;
 import com.petunincloud.delivery.service.payments.dto.PaymentResponse;
@@ -14,7 +13,6 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;

@@ -11,19 +11,19 @@ import java.util.Optional;
 
 public interface DeliveryRepository extends JpaRepository<DeliveryEntity, Long> {
     @Query("""
-            SELECT d FROM DeliveryEntity d
-            WHERE (:orderId IS NULL OR d.order.id = :orderId)
-              AND (:courierId IS NULL OR d.courier.id = :courierId)
-              AND (:status IS NULL OR d.status = :status)
-              AND (:fromDate IS NULL OR d.assignedAt >= :fromDate)
-              AND (:toDate IS NULL OR d.assignedAt <= :toDate)
-            """)
+        SELECT d FROM DeliveryEntity d
+          WHERE d.order.id = COALESCE(:orderId, d.order.id)
+          AND d.courier.id = COALESCE(:courierId, d.courier.id)
+          AND d.status = COALESCE(:status, d.status)
+          AND d.assignedAt >= COALESCE(:assignedAt, d.assignedAt)
+          AND d.deliveredAt <= COALESCE(:deliveredAt, d.deliveredAt)
+        """)
     List<DeliveryEntity> searchAllByFilter(
             @Param("orderId") Long orderId,
             @Param("courierId") Long courierId,
             @Param("status") DeliveryStatus status,
-            @Param("fromDate") LocalDateTime fromDate,
-            @Param("toDate") LocalDateTime toDate,
+            @Param("assignedAt") LocalDateTime assignedAt,
+            @Param("deliveredAt") LocalDateTime deliveredAt,
             Pageable pageable
     );
 

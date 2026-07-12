@@ -9,16 +9,16 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CourierRepository extends JpaRepository<CourierEntity, Long> {
-    @Query("""
-        SELECT c FROM CourierEntity c
-        WHERE (:name IS NULL OR LOWER(c.name) LIKE LOWER(COALESCE(CONCAT('%', :name, '%'), '')))
+    @Query(value = """
+        SELECT * FROM couriers c
+        WHERE (:name IS NULL OR c.name ILIKE COALESCE(CONCAT('%', :name, '%'), ''))
           AND (:phone IS NULL OR c.phone = :phone)
           AND (:status IS NULL OR c.status = :status)
-        """)
+        """, nativeQuery = true)
     List<CourierEntity> searchAllByFilter(
             @Param("name") String name,
             @Param("phone") String phone,
-            @Param("status") CourierStatus status,
+            @Param("status") String status,
             Pageable pageable
     );
 

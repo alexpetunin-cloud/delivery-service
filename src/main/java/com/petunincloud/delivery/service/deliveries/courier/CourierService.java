@@ -28,7 +28,7 @@ public class CourierService extends BaseService<CourierEntity, CourierResponse, 
         return courierRepository.searchAllByFilter(
                 filter.name(),
                 filter.phone(),
-                filter.status(),
+                filter.status() != null ? filter.status().name() : null,
                 pageable
         );
     }

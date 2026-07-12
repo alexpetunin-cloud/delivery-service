@@ -36,23 +36,17 @@ public class UserService extends BaseService<UserEntity, UserResponse, UserSearc
 
     @Transactional
     public UserResponse createUser(UserRequest request) {
-        // 1. Проверяем, что email уникален
         if (userRepository.findByEmail(request.email()).isPresent()) {
             throw new IllegalArgumentException("Email already exists: " + request.email());
         }
 
-        // 2. Проверяем, что phone уникален
         if (userRepository.findByPhone(request.phone()).isPresent()) {
             throw new IllegalArgumentException("Phone already exists: " + request.phone());
         }
 
-        // 3. Создаём сущность
         UserEntity entity = userMapper.toEntity(request);
-
-        // 4. Сохраняем в БД
         UserEntity saved = userRepository.save(entity);
 
-        // 5. Возвращаем DTO
         return userMapper.toResponse(saved);
     }
 

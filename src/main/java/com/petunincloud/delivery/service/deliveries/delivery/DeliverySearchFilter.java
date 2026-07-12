@@ -8,8 +8,8 @@ public record DeliverySearchFilter(
         Long orderId,
         Long courierId,
         DeliveryStatus status,
-        LocalDateTime fromDate,
-        LocalDateTime toDate,
+        LocalDateTime assignedAt,
+        LocalDateTime deliveredAt,
         Integer pageSize,
         Integer pageNumber
 ) implements BaseFilter {}

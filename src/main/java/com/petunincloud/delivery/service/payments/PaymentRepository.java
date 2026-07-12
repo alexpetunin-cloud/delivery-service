@@ -5,18 +5,17 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
 public interface PaymentRepository extends JpaRepository<PaymentEntity, Long> {
     @Query("""
         SELECT p FROM PaymentEntity p
-        WHERE (:userId IS NULL OR p.user.id = :userId)
-          AND (:orderId IS NULL OR p.order.id = :orderId)
-          AND (:status IS NULL OR p.status = :status)
-          AND (:fromDate IS NULL OR p.createdAt >= :fromDate)
-          AND (:toDate IS NULL OR p.createdAt <= :toDate)
+        WHERE p.user.id = COALESCE(:userId, p.user.id)
+          AND p.order.id = COALESCE(:orderId, p.order.id)
+          AND p.status = COALESCE(:status, p.status)
+          AND p.createdAt >= COALESCE(:fromDate, p.createdAt)
+          AND p.createdAt <= COALESCE(:toDate, p.createdAt)
         """)
     List<PaymentEntity> searchAllByFilter(
             @Param("userId") Long userId,
