@@ -1,7 +1,7 @@
 package com.petunincloud.delivery.service.deliveries.delivery;
 
 import com.petunincloud.delivery.service.deliveries.courier.CourierEntity;
-import com.petunincloud.delivery.service.orders.entity.OrderEntity;
+import com.petunincloud.delivery.service.orders.order.OrderEntity;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;

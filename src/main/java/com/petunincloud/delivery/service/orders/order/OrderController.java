@@ -1,9 +1,8 @@
-package com.petunincloud.delivery.service.orders;
+package com.petunincloud.delivery.service.orders.order;
 
 import com.petunincloud.delivery.service.common.BaseController;
-import com.petunincloud.delivery.service.orders.dto.OrderRequest;
-import com.petunincloud.delivery.service.orders.dto.OrderResponse;
-import com.petunincloud.delivery.service.orders.entity.OrderEntity;
+import com.petunincloud.delivery.service.orders.order.dto.OrderRequest;
+import com.petunincloud.delivery.service.orders.order.dto.OrderResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;

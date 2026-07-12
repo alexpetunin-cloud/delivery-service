@@ -1,4 +1,4 @@
-package com.petunincloud.delivery.service.orders;
+package com.petunincloud.delivery.service.orders.order;
 
 import com.petunincloud.delivery.service.common.BaseFilter;
 

@@ -1,4 +1,4 @@
-package com.petunincloud.delivery.service.orders;
+package com.petunincloud.delivery.service.orders.order;
 
 public enum OrderStatus {
     PENDING,      // Создан, ожидает подтверждения

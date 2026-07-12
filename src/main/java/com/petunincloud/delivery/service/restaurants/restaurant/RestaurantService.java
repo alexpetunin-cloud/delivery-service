@@ -1,12 +1,12 @@
 package com.petunincloud.delivery.service.restaurants.restaurant;
 
 import com.petunincloud.delivery.service.common.BaseService;
-import com.petunincloud.delivery.service.orders.OrderMapper;
-import com.petunincloud.delivery.service.orders.OrderRepository;
-import com.petunincloud.delivery.service.orders.OrderService;
-import com.petunincloud.delivery.service.orders.OrderStatus;
-import com.petunincloud.delivery.service.orders.dto.OrderResponse;
-import com.petunincloud.delivery.service.orders.entity.OrderEntity;
+import com.petunincloud.delivery.service.orders.order.OrderMapper;
+import com.petunincloud.delivery.service.orders.order.OrderRepository;
+import com.petunincloud.delivery.service.orders.order.OrderService;
+import com.petunincloud.delivery.service.orders.order.OrderStatus;
+import com.petunincloud.delivery.service.orders.order.dto.OrderResponse;
+import com.petunincloud.delivery.service.orders.order.OrderEntity;
 import com.petunincloud.delivery.service.restaurants.dish.DishEntity;
 import com.petunincloud.delivery.service.restaurants.dish.DishMapper;
 import com.petunincloud.delivery.service.restaurants.dish.DishRepository;

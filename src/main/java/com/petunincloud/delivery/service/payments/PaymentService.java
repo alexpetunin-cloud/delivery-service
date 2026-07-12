@@ -1,10 +1,10 @@
 package com.petunincloud.delivery.service.payments;
 
 import com.petunincloud.delivery.service.common.BaseService;
-import com.petunincloud.delivery.service.orders.OrderRepository;
-import com.petunincloud.delivery.service.orders.OrderService;
-import com.petunincloud.delivery.service.orders.OrderStatus;
-import com.petunincloud.delivery.service.orders.entity.OrderEntity;
+import com.petunincloud.delivery.service.orders.order.OrderRepository;
+import com.petunincloud.delivery.service.orders.order.OrderService;
+import com.petunincloud.delivery.service.orders.order.OrderStatus;
+import com.petunincloud.delivery.service.orders.order.OrderEntity;
 import com.petunincloud.delivery.service.payments.dto.PaymentRequest;
 import com.petunincloud.delivery.service.payments.dto.PaymentResponse;
 import com.petunincloud.delivery.service.users.UserEntity;

@@ -1,5 +1,6 @@
-package com.petunincloud.delivery.service.orders.dto;
+package com.petunincloud.delivery.service.orders.order.dto;
 
+import com.petunincloud.delivery.service.orders.order_item.dto.OrderItemRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.NotEmpty;

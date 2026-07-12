@@ -1,7 +1,6 @@
 package com.petunincloud.delivery.service.restaurants.restaurant;
 import com.petunincloud.delivery.service.common.BaseController;
-import com.petunincloud.delivery.service.orders.OrderService;
-import com.petunincloud.delivery.service.orders.dto.OrderResponse;
+import com.petunincloud.delivery.service.orders.order.dto.OrderResponse;
 import com.petunincloud.delivery.service.restaurants.dish.dto.DishRequest;
 import com.petunincloud.delivery.service.restaurants.dish.dto.DishResponse;
 import com.petunincloud.delivery.service.restaurants.restaurant.dto.RestaurantRequest;

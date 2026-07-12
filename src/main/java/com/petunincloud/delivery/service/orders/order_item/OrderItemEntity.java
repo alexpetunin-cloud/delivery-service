@@ -1,5 +1,6 @@
-package com.petunincloud.delivery.service.orders.entity;
+package com.petunincloud.delivery.service.orders.order_item;
 
+import com.petunincloud.delivery.service.orders.order.OrderEntity;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 
