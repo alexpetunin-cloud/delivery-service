@@ -36,4 +36,6 @@ public interface DeliveryRepository extends JpaRepository<DeliveryEntity, Long> 
     Optional<DeliveryEntity> findByIdWithOrderAndCourier(
             @Param("id") Long id
     );
+
+    boolean existsByOrderId(Long orderId);
 }

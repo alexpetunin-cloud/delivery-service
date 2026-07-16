@@ -62,11 +62,16 @@ public class DeliveryService extends BaseService<DeliveryEntity, DeliveryRespons
     @Transactional
     public DeliveryResponse assignCourierToOrder(Long orderId) {
         OrderEntity order = orderService.getOrderById(orderId);
+
         if (order.getStatus() != OrderStatus.READY) {
             throw new IllegalStateException("Order must be READY for delivery");
         }
         if (order.getStatus() == OrderStatus.DELIVERING || order.getStatus() == OrderStatus.DELIVERED) {
             throw new IllegalStateException("Order is already in delivery process");
+        }
+
+        if (deliveryRepository.existsByOrderId(orderId)) {
+            throw new IllegalStateException("Delivery already assigned for this order");
         }
 
         CourierEntity courier = courierRepository.findTopByStatus(CourierStatus.AVAILABLE)
@@ -80,7 +85,6 @@ public class DeliveryService extends BaseService<DeliveryEntity, DeliveryRespons
         delivery.setCourier(courier);
         delivery.setStatus(DeliveryStatus.ASSIGNED);
         delivery.setAssignedAt(LocalDateTime.now().withNano(0));
-
         delivery.setPickupAddress(order.getRestaurant().getAddress());
         delivery.setDeliveryAddress(order.getUser().getAddress());
 

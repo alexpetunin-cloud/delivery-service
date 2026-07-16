@@ -46,6 +46,10 @@ public class CourierService extends BaseService<CourierEntity, CourierResponse, 
 
     @Transactional
     public CourierResponse createCourier(CourierRequest request) {
+        if (courierRepository.findByPhone(request.phone()).isPresent()) {
+            throw new IllegalArgumentException("Courier with this phone already exists");
+        }
+
         CourierEntity courier = courierMapper.toEntity(request);
         courier.setStatus(CourierStatus.AVAILABLE);
 
