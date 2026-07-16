@@ -3,8 +3,8 @@ package com.petunincloud.delivery.service.orders.order;
 import com.petunincloud.delivery.service.common.BaseMapper;
 import com.petunincloud.delivery.service.orders.order.dto.OrderRequest;
 import com.petunincloud.delivery.service.orders.order.dto.OrderResponse;
-import com.petunincloud.delivery.service.orders.order_item.OrderItemEntity;
-import com.petunincloud.delivery.service.orders.order_item.dto.OrderItemResponse;
+import com.petunincloud.delivery.service.orders.orderItem.OrderItemEntity;
+import com.petunincloud.delivery.service.orders.orderItem.dto.OrderItemResponse;
 import com.petunincloud.delivery.service.users.UserEntity;
 import org.springframework.stereotype.Component;
 

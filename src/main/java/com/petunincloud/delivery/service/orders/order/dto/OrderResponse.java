@@ -1,6 +1,6 @@
 package com.petunincloud.delivery.service.orders.order.dto;
 
-import com.petunincloud.delivery.service.orders.order_item.dto.OrderItemResponse;
+import com.petunincloud.delivery.service.orders.orderItem.dto.OrderItemResponse;
 import com.petunincloud.delivery.service.orders.order.OrderStatus;
 
 import java.math.BigDecimal;

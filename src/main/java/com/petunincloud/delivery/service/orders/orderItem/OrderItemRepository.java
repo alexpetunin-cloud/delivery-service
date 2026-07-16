@@ -1,4 +1,4 @@
-package com.petunincloud.delivery.service.orders.order_item;
+package com.petunincloud.delivery.service.orders.orderItem;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

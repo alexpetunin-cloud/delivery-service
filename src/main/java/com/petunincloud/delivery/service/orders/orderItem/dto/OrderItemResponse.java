@@ -1,4 +1,4 @@
-package com.petunincloud.delivery.service.orders.order_item.dto;
+package com.petunincloud.delivery.service.orders.orderItem.dto;
 
 import java.math.BigDecimal;
 

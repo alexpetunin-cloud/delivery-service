@@ -1,8 +1,8 @@
-package com.petunincloud.delivery.service.orders.order_item;
+package com.petunincloud.delivery.service.orders.orderItem;
 
 import com.petunincloud.delivery.service.orders.order.OrderEntity;
-import com.petunincloud.delivery.service.orders.order_item.dto.OrderItemRequest;
-import com.petunincloud.delivery.service.orders.order_item.dto.OrderItemResponse;
+import com.petunincloud.delivery.service.orders.orderItem.dto.OrderItemRequest;
+import com.petunincloud.delivery.service.orders.orderItem.dto.OrderItemResponse;
 import org.springframework.stereotype.Component;
 
 @Component

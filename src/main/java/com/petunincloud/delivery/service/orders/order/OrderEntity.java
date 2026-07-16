@@ -1,6 +1,6 @@
 package com.petunincloud.delivery.service.orders.order;
 
-import com.petunincloud.delivery.service.orders.order_item.OrderItemEntity;
+import com.petunincloud.delivery.service.orders.orderItem.OrderItemEntity;
 import com.petunincloud.delivery.service.restaurants.restaurant.RestaurantEntity;
 import com.petunincloud.delivery.service.users.UserEntity;
 import jakarta.persistence.*;

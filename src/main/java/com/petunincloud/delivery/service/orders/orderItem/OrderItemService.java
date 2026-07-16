@@ -1,10 +1,10 @@
-package com.petunincloud.delivery.service.orders.order_item;
+package com.petunincloud.delivery.service.orders.orderItem;
 
 import com.petunincloud.delivery.service.orders.order.OrderEntity;
 import com.petunincloud.delivery.service.orders.order.OrderRepository;
 import com.petunincloud.delivery.service.orders.order.OrderStatus;
-import com.petunincloud.delivery.service.orders.order_item.dto.OrderItemRequest;
-import com.petunincloud.delivery.service.orders.order_item.dto.OrderItemResponse;
+import com.petunincloud.delivery.service.orders.orderItem.dto.OrderItemRequest;
+import com.petunincloud.delivery.service.orders.orderItem.dto.OrderItemResponse;
 import com.petunincloud.delivery.service.restaurants.dish.DishService;
 import com.petunincloud.delivery.service.restaurants.dish.dto.DishResponse;
 import jakarta.transaction.Transactional;

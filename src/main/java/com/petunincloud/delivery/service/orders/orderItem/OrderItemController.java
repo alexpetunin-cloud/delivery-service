@@ -1,7 +1,7 @@
-package com.petunincloud.delivery.service.orders.order_item;
+package com.petunincloud.delivery.service.orders.orderItem;
 
-import com.petunincloud.delivery.service.orders.order_item.dto.OrderItemRequest;
-import com.petunincloud.delivery.service.orders.order_item.dto.OrderItemResponse;
+import com.petunincloud.delivery.service.orders.orderItem.dto.OrderItemRequest;
+import com.petunincloud.delivery.service.orders.orderItem.dto.OrderItemResponse;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

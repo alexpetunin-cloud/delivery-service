@@ -1,4 +1,4 @@
-package com.petunincloud.delivery.service.orders.order_item;
+package com.petunincloud.delivery.service.orders.orderItem;
 
 import com.petunincloud.delivery.service.orders.order.OrderEntity;
 import jakarta.persistence.*;
