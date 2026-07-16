@@ -2,6 +2,7 @@ package com.petunincloud.delivery.service.deliveries.delivery;
 
 import com.petunincloud.delivery.service.common.BaseController;
 import com.petunincloud.delivery.service.deliveries.delivery.dto.DeliveryResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,11 +13,12 @@ public class DeliveryController extends BaseController<DeliveryService, Delivery
         super(service);
     }
 
-    @PatchMapping("/assign/{orderId}")
+    @PostMapping("/assign/{orderId}")
     public ResponseEntity<DeliveryResponse> assignCourier(
             @PathVariable Long orderId
     ) {
-        return ResponseEntity.ok(service.assignCourierToOrder(orderId));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(service.assignCourierToOrder(orderId));
     }
 
     // Курьер доставил заказ

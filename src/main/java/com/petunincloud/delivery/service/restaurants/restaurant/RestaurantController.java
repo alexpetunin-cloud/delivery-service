@@ -45,7 +45,7 @@ public class RestaurantController extends BaseController<RestaurantService, Rest
                 .body(response);
     }
 
-    @PatchMapping("/{orderId}/cook")
+    @PatchMapping("/orders/{orderId}/cook")
     public ResponseEntity<OrderResponse> startCooking(
             @PathVariable Long orderId
     ) {
@@ -55,7 +55,7 @@ public class RestaurantController extends BaseController<RestaurantService, Rest
                 .body(service.startCooking(orderId));
     }
 
-    @PatchMapping("/{orderId}/ready")
+    @PatchMapping("/orders/{orderId}/ready")
     public ResponseEntity<OrderResponse> markAsReady(
             @PathVariable Long orderId
     ) {

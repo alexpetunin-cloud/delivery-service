@@ -18,6 +18,15 @@ public class OrderController extends BaseController<OrderService, OrderEntity, O
         super(service);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<OrderResponse> getOrderById(
+            @PathVariable Long id
+    ) {
+        log.info("Called getOrderById with id = {}", id);
+        OrderResponse order = service.getOrderResponseById(id);
+        return ResponseEntity.ok(order);
+    }
+
     @PostMapping
     public ResponseEntity<OrderResponse> createOrder (
             @RequestBody OrderRequest request

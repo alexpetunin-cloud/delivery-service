@@ -114,4 +114,9 @@ public class OrderService extends BaseService<OrderEntity, OrderResponse, OrderS
         return orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("Order not found: " + orderId));
     }
+
+    public OrderResponse getOrderResponseById(Long orderId) {
+        OrderEntity entity = getOrderById(orderId);
+        return orderMapper.toResponse(entity);
+    }
 }
