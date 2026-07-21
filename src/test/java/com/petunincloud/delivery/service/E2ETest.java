@@ -12,6 +12,9 @@ import com.petunincloud.delivery.service.restaurants.dish.DishEntity;
 import com.petunincloud.delivery.service.restaurants.dish.DishRepository;
 import com.petunincloud.delivery.service.restaurants.restaurant.RestaurantEntity;
 import com.petunincloud.delivery.service.restaurants.restaurant.RestaurantRepository;
+import com.petunincloud.delivery.service.security.SecurityUtils;
+import com.petunincloud.delivery.service.users.RoleEntity;
+import com.petunincloud.delivery.service.users.RoleRepository;
 import com.petunincloud.delivery.service.users.UserEntity;
 import com.petunincloud.delivery.service.users.UserRepository;
 import jakarta.transaction.Transactional;
@@ -20,12 +23,17 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
+import java.util.Set;
 
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -34,8 +42,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@Import(TestSecurityConfig.class)
 class E2ETest {
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -56,18 +64,37 @@ class E2ETest {
     @Autowired
     private CourierRepository courierRepository;
 
-    private Long userId;
+    @Autowired
+    private RoleRepository roleRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    private String userEmail;
     private Long restaurantId;
     private Long dishId;
 
+    @MockitoBean
+    private SecurityUtils securityUtils;
+
     @BeforeEach
     void setUp() {
+        RoleEntity clientRole = roleRepository.findByName("ROLE_CLIENT")
+                .orElseGet(() -> {
+                    RoleEntity role = new RoleEntity();
+                    role.setName("ROLE_CLIENT");
+                    return roleRepository.save(role);
+                });
+
         UserEntity user = new UserEntity();
         user.setEmail("user@gmail.com");
+        user.setPassword(passwordEncoder.encode("password123"));
         user.setPhone("+79231001040");
         user.setName("Александр");
         user.setAddress("ул. Стахановская 1");
-        userId = userRepository.save(user).getId();
+        user.setRoles(Set.of(clientRole));
+        when(securityUtils.getCurrentUser()).thenReturn(user);
+        userEmail = userRepository.save(user).getEmail();
 
         RestaurantEntity restaurant = new RestaurantEntity();
         restaurant.setName("Бургер Кинг");
@@ -90,7 +117,7 @@ class E2ETest {
     @Test
     void fullDeliveryFlow_ShouldCompleteSuccessfully() throws Exception {
         OrderItemRequest item = new OrderItemRequest(dishId, 2);
-        OrderRequest orderRequest = new OrderRequest(userId, restaurantId, java.util.List.of(item));
+        OrderRequest orderRequest = new OrderRequest(userEmail, restaurantId, java.util.List.of(item));
 
         String orderResponse = mockMvc.perform(post("/api/orders")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -101,7 +128,7 @@ class E2ETest {
 
         Long orderId = objectMapper.readTree(orderResponse).get("id").asLong();
 
-        PaymentRequest paymentRequest = new PaymentRequest(orderId, userId);
+        PaymentRequest paymentRequest = new PaymentRequest(orderId, userEmail);
 
         String paymentResponse = mockMvc.perform(post("/api/payments/initiate")
                         .contentType(MediaType.APPLICATION_JSON)

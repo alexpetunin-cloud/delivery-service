@@ -2,6 +2,9 @@ package com.petunincloud.delivery.service.users;
 
 import jakarta.persistence.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Table(name = "users")
 public class UserEntity {
@@ -9,8 +12,11 @@ public class UserEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String email;
+
+    @Column(nullable = false)
+    private String password;
 
     @Column(nullable = false)
     private String phone;
@@ -27,25 +33,37 @@ public class UserEntity {
     @Column(name = "delivery_instructions")
     private String deliveryInstructions; // Домофон, этаж, ориентиры
 
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<RoleEntity> roles = new HashSet<>();
+
     public UserEntity() {
     }
 
     public UserEntity(
             Long id,
             String email,
+            String password,
             String phone,
             String name,
             String address,
             String apartment,
-            String deliveryInstructions
+            String deliveryInstructions,
+            Set<RoleEntity> roles
     ) {
         this.id = id;
         this.email = email;
+        this.password = password;
         this.phone = phone;
         this.name = name;
         this.address = address;
         this.apartment = apartment;
         this.deliveryInstructions = deliveryInstructions;
+        this.roles = roles;
     }
 
     public Long getId() {
@@ -54,6 +72,10 @@ public class UserEntity {
 
     public String getEmail() {
         return email;
+    }
+
+    public String getPassword() {
+        return password;
     }
 
     public String getPhone() {
@@ -76,12 +98,20 @@ public class UserEntity {
         return deliveryInstructions;
     }
 
+    public Set<RoleEntity> getRoles() {
+        return roles;
+    }
+
     public void setId(Long id) {
         this.id = id;
     }
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public void setPhone(String phone) {
@@ -102,5 +132,9 @@ public class UserEntity {
 
     public void setDeliveryInstructions(String deliveryInstructions) {
         this.deliveryInstructions = deliveryInstructions;
+    }
+
+    public void setRoles(Set<RoleEntity> roles) {
+        this.roles = roles;
     }
 }

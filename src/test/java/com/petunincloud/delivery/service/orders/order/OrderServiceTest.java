@@ -1,5 +1,6 @@
 package com.petunincloud.delivery.service.orders.order;
 
+import com.petunincloud.delivery.service.TestSecurityConfig;
 import com.petunincloud.delivery.service.orders.order.dto.OrderRequest;
 import com.petunincloud.delivery.service.orders.orderItem.dto.OrderItemRequest;
 import com.petunincloud.delivery.service.orders.order.dto.OrderResponse;
@@ -7,13 +8,14 @@ import com.petunincloud.delivery.service.restaurants.dish.DishService;
 import com.petunincloud.delivery.service.restaurants.dish.dto.DishResponse;
 import com.petunincloud.delivery.service.restaurants.restaurant.RestaurantEntity;
 import com.petunincloud.delivery.service.restaurants.restaurant.RestaurantRepository;
+import com.petunincloud.delivery.service.security.SecurityUtils;
 import com.petunincloud.delivery.service.users.UserEntity;
-import com.petunincloud.delivery.service.users.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.annotation.Import;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -24,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@Import(TestSecurityConfig.class)
 @ExtendWith(MockitoExtension.class)
 class OrderServiceTest {
 
@@ -37,29 +40,30 @@ class OrderServiceTest {
     private DishService dishService;
 
     @Mock
-    private UserRepository userRepository;
+    private RestaurantRepository restaurantRepository;
 
     @Mock
-    private RestaurantRepository restaurantRepository;
+    private SecurityUtils securityUtils;
 
     @InjectMocks
     private OrderService orderService;
 
     @Test
     void createOrder_ShouldCreateOrderWithItems_WhenValidRequest() {
-        Long userId = 1L;
         Long restaurantId = 10L;
         Long dishId = 100L;
 
         UserEntity user = new UserEntity();
-        user.setId(userId);
+        user.setId(1L);
+
+        when(securityUtils.getCurrentUser()).thenReturn(user);
 
         RestaurantEntity restaurant = new RestaurantEntity();
         restaurant.setId(restaurantId);
         restaurant.setAddress("ул. Ленина, д. 1");
 
         OrderItemRequest itemRequest = new OrderItemRequest(dishId, 2);
-        OrderRequest request = new OrderRequest(userId, restaurantId, List.of(itemRequest));
+        OrderRequest request = new OrderRequest("user@gmail.com", restaurantId, List.of(itemRequest));
 
         OrderEntity entity = new OrderEntity();
         entity.setId(1L);
@@ -70,7 +74,7 @@ class OrderServiceTest {
 
         OrderResponse response = new OrderResponse(
                 1L,
-                userId,
+                1L,
                 restaurantId,
                 "Ресторан",
                 LocalDateTime.now(),
@@ -79,13 +83,12 @@ class OrderServiceTest {
                 List.of()
         );
 
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(restaurantRepository.findById(restaurantId)).thenReturn(Optional.of(restaurant));
 
         DishResponse dishMock = new DishResponse(dishId, "Пицца", BigDecimal.valueOf(150));
         when(dishService.getDishById(dishId)).thenReturn(dishMock);
 
-        when(orderMapper.toEntity(request, user)).thenReturn(entity);
+        when(orderMapper.toEntity(user)).thenReturn(entity);
         when(orderRepository.save(any(OrderEntity.class))).thenReturn(entity);
         when(orderMapper.toResponse(entity)).thenReturn(response);
 
@@ -96,37 +99,38 @@ class OrderServiceTest {
         assertEquals(0, BigDecimal.valueOf(300).compareTo(result.totalPrice()));
 
         verify(orderRepository, times(1)).save(any(OrderEntity.class));
-        verify(orderMapper, times(1)).toEntity(request, user);
+        verify(orderMapper, times(1)).toEntity(user);
         verify(orderMapper, times(1)).toResponse(entity);
     }
 
     @Test
-    void createOrder_ShouldThrowException_WhenUserNotFound() {
-        Long userId = 999L;
-        OrderRequest request = new OrderRequest(userId, 1L, List.of());
-
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
-
-        assertThrows(IllegalArgumentException.class, () -> orderService.createOrder(request));
-    }
-
-    @Test
     void createOrder_ShouldThrowException_WhenRestaurantNotFound() {
-        Long userId = 1L;
         Long restaurantId = 999L;
-        OrderRequest request = new OrderRequest(userId, restaurantId, List.of());
 
-        when(userRepository.findById(userId)).thenReturn(Optional.of(new UserEntity()));
+        UserEntity user = new UserEntity();
+        user.setId(1L);
+        when(securityUtils.getCurrentUser()).thenReturn(user);
+
+        OrderRequest request = new OrderRequest("user@gmail.com", restaurantId, List.of());
+
         when(restaurantRepository.findById(restaurantId)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> orderService.createOrder(request));
+        assertThrows(IllegalArgumentException.class, () ->
+                orderService.createOrder(request)
+        );
     }
 
     @Test
     void cancelOrder_ShouldCancelPendingOrder() {
         Long orderId = 1L;
+
+        UserEntity user = new UserEntity();
+        user.setId(1L);
+        when(securityUtils.getCurrentUser()).thenReturn(user);
+
         OrderEntity order = new OrderEntity();
         order.setId(orderId);
+        order.setUser(user);
         order.setStatus(OrderStatus.PENDING);
 
         OrderResponse response = new OrderResponse(
@@ -153,8 +157,14 @@ class OrderServiceTest {
     @Test
     void cancelOrder_ShouldThrowException_WhenOrderDelivered() {
         Long orderId = 1L;
+
+        UserEntity user = new UserEntity();
+        user.setId(1L);
+        when(securityUtils.getCurrentUser()).thenReturn(user);
+
         OrderEntity order = new OrderEntity();
         order.setId(orderId);
+        order.setUser(user);
         order.setStatus(OrderStatus.DELIVERED);
 
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));

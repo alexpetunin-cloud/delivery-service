@@ -34,17 +34,19 @@ class OrderRepositoryTest {
     @BeforeEach
     void setUp() {
         user1 = new UserEntity();
-        user1.setEmail("user1@gmail.com");
+        user1.setEmail("user1@test.com");
         user1.setPhone("+79990000001");
-        user1.setName("Алексей");
-        user1.setAddress("ул. Советская 100");
+        user1.setName("User One");
+        user1.setAddress("Address 1");
+        user1.setPassword("password123");
         entityManager.persist(user1); // Сохраняет объект в БД
 
         user2 = new UserEntity();
-        user2.setEmail("user2@mail.ru");
+        user2.setEmail("user2@test.com");
         user2.setPhone("+79990000002");
-        user2.setName("Михаил");
-        user2.setAddress("ул. Ленина 78");
+        user2.setName("User Two");
+        user2.setAddress("Address 2");
+        user2.setPassword("password123");
         entityManager.persist(user2);
 
         restaurant = new RestaurantEntity();

@@ -10,15 +10,15 @@ import java.util.List;
 
 public interface PaymentRepository extends JpaRepository<PaymentEntity, Long> {
     @Query("""
-        SELECT p FROM PaymentEntity p
-        WHERE p.user.id = COALESCE(:userId, p.user.id)
-          AND p.order.id = COALESCE(:orderId, p.order.id)
-          AND p.status = COALESCE(:status, p.status)
-          AND p.createdAt >= COALESCE(:fromDate, p.createdAt)
-          AND p.createdAt <= COALESCE(:toDate, p.createdAt)
-        """)
+    SELECT p FROM PaymentEntity p
+    WHERE (:email IS NULL OR p.user.email = :email)
+      AND p.order.id = COALESCE(:orderId, p.order.id)
+      AND p.status = COALESCE(:status, p.status)
+      AND p.createdAt >= COALESCE(:fromDate, p.createdAt)
+      AND p.createdAt <= COALESCE(:toDate, p.createdAt)
+    """)
     List<PaymentEntity> searchAllByFilter(
-            @Param("userId") Long userId,
+            @Param("email") String email,
             @Param("orderId") Long orderId,
             @Param("status") PaymentStatus status,
             @Param("fromDate") LocalDateTime fromDate,

@@ -1,14 +1,18 @@
 package com.petunincloud.delivery.service.orders.order;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.petunincloud.delivery.service.TestSecurityConfig;
 import com.petunincloud.delivery.service.orders.orderItem.dto.OrderItemRequest;
 import com.petunincloud.delivery.service.orders.order.dto.OrderRequest;
 import com.petunincloud.delivery.service.orders.order.dto.OrderResponse;
 import com.petunincloud.delivery.service.orders.orderItem.dto.OrderItemResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -23,7 +27,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(OrderController.class)
+@SpringBootTest
+@AutoConfigureMockMvc(addFilters = false)
+@ActiveProfiles("test")
+@Import(TestSecurityConfig.class)
 class OrderControllerTest {
 
     @Autowired
@@ -36,21 +43,26 @@ class OrderControllerTest {
 
     @Test
     void createOrder_ShouldReturnCreatedOrder() throws Exception {
-        OrderItemRequest itemRequest = new OrderItemRequest(100L, 2);
-        OrderRequest request = new OrderRequest(1L, 10L, List.of(itemRequest));
+        String email = "client@delivery.com";
+        Long restaurantId = 10L;
+        Long dishId = 100L;
+
+        OrderItemRequest itemRequest = new OrderItemRequest(dishId, 2);
+        OrderRequest request = new OrderRequest(email, restaurantId, List.of(itemRequest));
 
         OrderResponse mockResponse = new OrderResponse(
                 1L,
                 1L,
-                10L,
+                restaurantId,
                 "Ресторан",
                 LocalDateTime.now(),
                 OrderStatus.PENDING,
                 BigDecimal.valueOf(300),
-                List.of(new OrderItemResponse(100L, "Пицца", 2, BigDecimal.valueOf(150)))
+                List.of(new OrderItemResponse(dishId, "Пицца", 2, BigDecimal.valueOf(150)))
         );
 
-        when(orderService.createOrder(any(OrderRequest.class))).thenReturn(mockResponse);
+        when(orderService.createOrder(any(OrderRequest.class)))
+                .thenReturn(mockResponse);
 
         mockMvc.perform(post("/api/orders")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -85,7 +97,7 @@ class OrderControllerTest {
     }
 
     @Test
-    void cancelOrder_ShouldReturn404_WhenOrderNotFound() throws Exception {
+    void cancelOrder_ShouldReturn400_WhenOrderNotFound() throws Exception {
         Long orderId = 999L;
 
         when(orderService.cancelOrder(orderId))

@@ -5,7 +5,7 @@ import com.petunincloud.delivery.service.common.BaseFilter;
 import java.time.LocalDateTime;
 
 public record PaymentSearchFilter(
-        Long userId,
+        String email,
         Long orderId,
         PaymentStatus status,
         LocalDateTime fromDate,

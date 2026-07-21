@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.*;
 public class OrderController extends BaseController<OrderService, OrderEntity, OrderResponse, OrderSearchFilter> {
     private final static Logger log = LoggerFactory.getLogger(OrderController.class);
 
-    public OrderController(OrderService service) {
+    public OrderController(
+            OrderService service
+    ) {
         super(service);
     }
 
@@ -23,18 +25,19 @@ public class OrderController extends BaseController<OrderService, OrderEntity, O
             @PathVariable Long id
     ) {
         log.info("Called getOrderById with id = {}", id);
+
         OrderResponse order = service.getOrderResponseById(id);
         return ResponseEntity.ok(order);
     }
 
     @PostMapping
-    public ResponseEntity<OrderResponse> createOrder (
+    public ResponseEntity<OrderResponse> createOrder(
             @RequestBody OrderRequest request
     ) {
         log.info("Called createOrder with parameters = {}", request);
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(service.createOrder(request));
+        OrderResponse response = service.createOrder(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PatchMapping("/{orderId}/cancel")

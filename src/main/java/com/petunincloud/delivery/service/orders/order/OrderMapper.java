@@ -1,7 +1,6 @@
 package com.petunincloud.delivery.service.orders.order;
 
 import com.petunincloud.delivery.service.common.BaseMapper;
-import com.petunincloud.delivery.service.orders.order.dto.OrderRequest;
 import com.petunincloud.delivery.service.orders.order.dto.OrderResponse;
 import com.petunincloud.delivery.service.orders.orderItem.OrderItemEntity;
 import com.petunincloud.delivery.service.orders.orderItem.dto.OrderItemResponse;
@@ -48,7 +47,7 @@ public class OrderMapper implements BaseMapper<OrderEntity, OrderResponse> {
         throw new UnsupportedOperationException("Not implemented");
     }
 
-    public OrderEntity toEntity(OrderRequest request, UserEntity user) {
+    public OrderEntity toEntity(UserEntity user) {
         OrderEntity order = new OrderEntity();
         order.setUser(user);
         return order;

@@ -21,21 +21,21 @@
 
 ## 🛠️ Технологии
 
-| Технология | Версия |
-| :--- |:-------|
-| Java | 26 |
-| Spring Boot | 4.1.0 |
-| Spring Data JPA | 4.1.0 |
-| Spring Security | 7.1.0 |
-| PostgreSQL | 18.4 |
-| H2 (тесты) | 2.4.240 |
-| Maven | 4.0.0 |
-| Docker | 4.82.0 |
-| JUnit 5 | 6.0.3 |
-| Mockito | 5.23.0 |
-| JJWT (JWT) | 0.11.5 |
-| Hibernate | 7.4.1.Final |
-| Jackson | 2.18.0 |
+| Технология      | Версия      |
+|:----------------|:------------|
+| Java            | 26          |
+| Spring Boot     | 4.1.0       |
+| Spring Data JPA | 4.1.0       |
+| Spring Security | 7.1.0       |
+| PostgreSQL      | 18.4        |
+| H2 (тесты)      | 2.4.240     |
+| Maven           | 4.0.0       |
+| Docker          | 4.82.0      |
+| JUnit 5         | 6.0.3       |
+| Mockito         | 5.23.0      |
+| JJWT (JWT)      | 0.11.5      |
+| Hibernate       | 7.4.1.Final |
+| Jackson         | 2.18.0      |
 
 ---
 
@@ -43,16 +43,16 @@
 
 ### Модули
 
-| Модуль | Описание |
-| :--- | :--- |
-| `users` | Пользователи, роли, регистрация |
-| `restaurants` | Рестораны и блюда |
-| `orders` | Заказы и позиции заказов |
-| `payments` | Платежи (симуляция банка) |
-| `deliveries` | Доставка и курьеры |
-| `security` | JWT-аутентификация |
-| `common` | Базовые классы (пагинация, мапперы) |
-| `exception` | Централизованная обработка ошибок |
+| Модуль        | Описание                            |
+|:--------------|:------------------------------------|
+| `users`       | Пользователи, роли, регистрация     |
+| `restaurants` | Рестораны и блюда                   |
+| `orders`      | Заказы и позиции заказов            |
+| `payments`    | Платежи (симуляция банка)           |
+| `deliveries`  | Доставка и курьеры                  |
+| `security`    | JWT-аутентификация                  |
+| `common`      | Базовые классы (пагинация, мапперы) |
+| `exception`   | Централизованная обработка ошибок   |
 
 ### Сущности
 
@@ -80,7 +80,7 @@ PENDING → CONFIRMED → COOKING → READY → DELIVERING → DELIVERED
 ### 1. Клонировать репозиторий
 
 ```bash
-git clone https://github.com/your-username/delivery-service.git
+git clone https://github.com/alexpetunin-cloud/delivery-service.git
 cd delivery-service
 ```
 
@@ -105,6 +105,12 @@ jwt.expiration=86400000
 
 ```bash
 mvn spring-boot:run
+```
+
+ИЛИ ЕСЛИ ПЕРВЫЙ СПОСОБ НЕ РАБОТАЕТ
+
+```bash
+./mvnw spring-boot:run
 ```
 
 Приложение запустится на порту `8080`.
@@ -169,6 +175,12 @@ Content-Type: application/json
 mvn test
 ```
 
+ИЛИ ЕСЛИ ПЕРВЫЙ СПОСОБ НЕ РАБОТАЕТ
+
+```bash
+./mvnw test
+```
+
 Покрыты:
 - OrderController, OrderRepository, OrderService, OrderItemService
 - Сквозной E2E-тест
@@ -196,10 +208,9 @@ src/
 │       │   │   └── restaurant/
 │       │   ├── security/
 │       │   ├── users/
-│       │   ├── DataInitializer.java
 │       │   └── DeliveryServiceApplication.java
 │       └── resources/
-│           └── application.properties.java
+│           └── application.properties
 └── test/
     ├── java/
     │   └── com.petunincloud.delivery.service/

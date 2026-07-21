@@ -7,6 +7,8 @@ import com.petunincloud.delivery.service.orders.orderItem.dto.OrderItemRequest;
 import com.petunincloud.delivery.service.orders.orderItem.dto.OrderItemResponse;
 import com.petunincloud.delivery.service.restaurants.dish.DishService;
 import com.petunincloud.delivery.service.restaurants.dish.dto.DishResponse;
+import com.petunincloud.delivery.service.security.SecurityUtils;
+import com.petunincloud.delivery.service.users.UserEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,6 +38,9 @@ class OrderItemServiceTest {
     @Mock
     private OrderItemMapper orderItemMapper;
 
+    @Mock
+    private SecurityUtils securityUtils;
+
     @InjectMocks
     private OrderItemService orderItemService;
 
@@ -47,8 +52,13 @@ class OrderItemServiceTest {
         BigDecimal dishPrice = BigDecimal.valueOf(150);
         BigDecimal existingTotal = BigDecimal.valueOf(200);
 
+        UserEntity currentUser = new UserEntity();
+        currentUser.setId(1L);
+        when(securityUtils.getCurrentUser()).thenReturn(currentUser);
+
         OrderEntity order = new OrderEntity();
         order.setId(orderId);
+        order.setUser(currentUser);
         order.setStatus(OrderStatus.PENDING);
         order.setTotalPrice(existingTotal);
         order.setItems(new ArrayList<>());
@@ -216,11 +226,16 @@ class OrderItemServiceTest {
 
     @Test
     void removeItemFromOrder_ShouldRemoveItemAndUpdateTotalPrice() {
+        UserEntity currentUser = new UserEntity();
+        currentUser.setId(1L);
+        when(securityUtils.getCurrentUser()).thenReturn(currentUser);
+
         Long orderId = 1L;
         Long itemId = 1L;
 
         OrderEntity order = new OrderEntity();
         order.setId(orderId);
+        order.setUser(currentUser);
         order.setStatus(OrderStatus.PENDING);
         order.setTotalPrice(BigDecimal.valueOf(500));
         order.setItems(new ArrayList<>());
@@ -241,10 +256,10 @@ class OrderItemServiceTest {
         orderItemService.removeItemFromOrder(orderId, itemId);
 
         assertEquals(0, BigDecimal.valueOf(200).compareTo(order.getTotalPrice()));
+        assertEquals(0, order.getItems().size());
 
         verify(orderRepository, times(1)).findById(orderId);
         verify(orderItemRepository, times(1)).findById(itemId);
-        verify(orderItemRepository, times(1)).delete(item);
         verify(orderRepository, times(1)).save(order);
     }
 
@@ -265,11 +280,16 @@ class OrderItemServiceTest {
 
     @Test
     void removeItemFromOrder_ShouldThrowException_WhenItemNotFound() {
+        UserEntity currentUser = new UserEntity();
+        currentUser.setId(1L);
+        when(securityUtils.getCurrentUser()).thenReturn(currentUser);
+
         Long orderId = 1L;
         Long itemId = 999L;
 
         OrderEntity order = new OrderEntity();
         order.setId(orderId);
+        order.setUser(currentUser);
         order.setStatus(OrderStatus.PENDING);
 
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
@@ -325,11 +345,16 @@ class OrderItemServiceTest {
 
     @Test
     void removeItemFromOrder_ShouldThrowException_WhenItemDoesNotBelongToOrder() {
+        UserEntity currentUser = new UserEntity();
+        currentUser.setId(1L);
+        when(securityUtils.getCurrentUser()).thenReturn(currentUser);
+
         Long orderId = 1L;
         Long itemId = 2L;
 
         OrderEntity order = new OrderEntity();
         order.setId(orderId);
+        order.setUser(currentUser);
         order.setStatus(OrderStatus.PENDING);
 
         OrderEntity anotherOrder = new OrderEntity();

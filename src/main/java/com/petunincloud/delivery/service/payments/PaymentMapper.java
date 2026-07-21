@@ -11,12 +11,11 @@ public class PaymentMapper implements BaseMapper<PaymentEntity, PaymentResponse>
 
     public PaymentEntity toEntity(UserEntity user, OrderEntity order) {
         PaymentEntity payment = new PaymentEntity();
-        payment.setOrder(order);
         payment.setUser(user);
+        payment.setOrder(order);
         return payment;
     }
 
-    @Override
     public PaymentResponse toResponse(PaymentEntity entity) {
         return new PaymentResponse(
                 entity.getId(),

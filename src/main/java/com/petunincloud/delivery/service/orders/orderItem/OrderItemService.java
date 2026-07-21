@@ -7,6 +7,8 @@ import com.petunincloud.delivery.service.orders.orderItem.dto.OrderItemRequest;
 import com.petunincloud.delivery.service.orders.orderItem.dto.OrderItemResponse;
 import com.petunincloud.delivery.service.restaurants.dish.DishService;
 import com.petunincloud.delivery.service.restaurants.dish.dto.DishResponse;
+import com.petunincloud.delivery.service.security.SecurityUtils;
+import com.petunincloud.delivery.service.users.UserEntity;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
@@ -22,17 +24,20 @@ public class OrderItemService {
     private final OrderItemRepository orderItemRepository;
     private final OrderRepository orderRepository;
     private final DishService dishService;
+    private final SecurityUtils securityUtils;
 
     public OrderItemService(
             OrderItemMapper orderItemMapper,
             OrderRepository orderRepository,
             DishService dishService,
-            OrderItemRepository orderItemRepository
+            OrderItemRepository orderItemRepository,
+            SecurityUtils securityUtils
     ) {
         this.orderItemMapper = orderItemMapper;
         this.orderRepository = orderRepository;
         this.dishService = dishService;
         this.orderItemRepository = orderItemRepository;
+        this.securityUtils = securityUtils;
     }
 
     public List<OrderItemResponse> getOrderItems(Long orderId) {
@@ -53,15 +58,18 @@ public class OrderItemService {
             throw new IllegalStateException("Cannot modify order in status: " + order.getStatus());
         }
 
+        UserEntity currentUser = securityUtils.getCurrentUser();
+        if (!order.getUser().getId().equals(currentUser.getId())) {
+            throw new IllegalArgumentException("You can only modify your own orders");
+        }
+
         DishResponse dish = dishService.getDishById(request.dishId());
 
         OrderItemEntity entity = orderItemMapper.toEntity(request, order);
-
         entity.setDishName(dish.name());
         entity.setPrice(dish.price());
 
         OrderItemEntity saved = orderItemRepository.save(entity);
-
         order.getItems().add(saved);
 
         BigDecimal newTotal = order.getTotalPrice()
@@ -74,12 +82,18 @@ public class OrderItemService {
         return orderItemMapper.toResponse(saved);
     }
 
+    @Transactional
     public void removeItemFromOrder(Long orderId, Long itemId) {
         OrderEntity order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("Order not found"));
 
         if (order.getStatus() == OrderStatus.DELIVERED || order.getStatus() == OrderStatus.CANCELED) {
             throw new IllegalStateException("Cannot modify order in status: " + order.getStatus());
+        }
+
+        UserEntity currentUser = securityUtils.getCurrentUser();
+        if (!order.getUser().getId().equals(currentUser.getId())) {
+            throw new IllegalArgumentException("You can only modify your own orders");
         }
 
         OrderItemEntity item = orderItemRepository.findById(itemId)
@@ -96,7 +110,7 @@ public class OrderItemService {
                 order.getTotalPrice()
                         .subtract(itemTotal));
 
-        orderItemRepository.delete(item);
+        order.getItems().remove(item);
         orderRepository.save(order);
     }
 }

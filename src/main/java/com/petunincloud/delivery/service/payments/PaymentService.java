@@ -8,7 +8,6 @@ import com.petunincloud.delivery.service.orders.order.OrderEntity;
 import com.petunincloud.delivery.service.payments.dto.PaymentRequest;
 import com.petunincloud.delivery.service.payments.dto.PaymentResponse;
 import com.petunincloud.delivery.service.users.UserEntity;
-import com.petunincloud.delivery.service.users.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,26 +23,23 @@ public class PaymentService extends BaseService<PaymentEntity, PaymentResponse, 
     private final PaymentMapper paymentMapper;
     private final OrderRepository orderRepository;
     private final OrderService orderService;
-    private final UserRepository userRepository;
 
     public PaymentService(
             PaymentRepository paymentRepository,
             PaymentMapper paymentMapper,
             OrderRepository orderRepository,
-            OrderService orderService,
-            UserRepository userRepository
+            OrderService orderService
     ) {
         this.paymentRepository = paymentRepository;
         this.paymentMapper = paymentMapper;
         this.orderRepository = orderRepository;
         this.orderService = orderService;
-        this.userRepository = userRepository;
     }
 
     @Override
     protected List<PaymentEntity> findWithFilter(PaymentSearchFilter filter, Pageable pageable) {
         return paymentRepository.searchAllByFilter(
-                filter.userId(),
+                filter.email(),
                 filter.orderId(),
                 filter.status(),
                 filter.fromDate(),
@@ -58,15 +54,11 @@ public class PaymentService extends BaseService<PaymentEntity, PaymentResponse, 
     }
 
     @Transactional
-    public PaymentResponse initiatePayment(PaymentRequest request) {
+    public PaymentResponse initiatePayment(PaymentRequest request, UserEntity user) {
         OrderEntity order = orderRepository.findById(request.orderId())
                 .orElseThrow(() -> new IllegalArgumentException("Order not found: " + request.orderId()));
 
-        UserEntity user = userRepository.findById(request.userId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + request.userId()));
-
         PaymentEntity payment = paymentMapper.toEntity(user, order);
-
         payment.setAmount(order.getTotalPrice());
         payment.setPaymentMethod("CARD");
         payment.setStatus(PaymentStatus.PENDING);
@@ -85,28 +77,13 @@ public class PaymentService extends BaseService<PaymentEntity, PaymentResponse, 
             throw new IllegalStateException("Payment already processed");
         }
 
-        // Рандомный успех обработки платежа
-        boolean isSuccess = Math.random() < 0.95;
+        payment.setStatus(PaymentStatus.SUCCESS);
+        payment.setTransactionId(UUID.randomUUID().toString());
+        payment.setCompletedAt(LocalDateTime.now().withNano(0));
+        confirmOrder(payment.getOrder().getId());
 
-        if (isSuccess) {
-            payment.setStatus(PaymentStatus.SUCCESS);
-            payment.setTransactionId(UUID.randomUUID().toString());
-            payment.setCompletedAt(LocalDateTime.now().withNano(0));
-
-            PaymentEntity savedPayment = paymentRepository.save(payment);
-
-            confirmOrder(payment.getOrder().getId());
-
-            return paymentMapper.toResponse(savedPayment);
-
-        } else {
-            payment.setStatus(PaymentStatus.FAILED);
-            payment.setCompletedAt(LocalDateTime.now().withNano(0));
-
-            PaymentEntity savedPayment = paymentRepository.save(payment);
-
-            return paymentMapper.toResponse(savedPayment);
-        }
+        PaymentEntity saved = paymentRepository.save(payment);
+        return paymentMapper.toResponse(saved);
     }
 
     @Transactional

@@ -9,8 +9,8 @@ import com.petunincloud.delivery.service.restaurants.dish.DishService;
 import com.petunincloud.delivery.service.restaurants.dish.dto.DishResponse;
 import com.petunincloud.delivery.service.restaurants.restaurant.RestaurantEntity;
 import com.petunincloud.delivery.service.restaurants.restaurant.RestaurantRepository;
+import com.petunincloud.delivery.service.security.SecurityUtils;
 import com.petunincloud.delivery.service.users.UserEntity;
-import com.petunincloud.delivery.service.users.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -26,21 +26,21 @@ public class OrderService extends BaseService<OrderEntity, OrderResponse, OrderS
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
     private final DishService dishService;
-    private final UserRepository userRepository;
     private final RestaurantRepository restaurantRepository;
+    private final SecurityUtils securityUtils;
 
     public OrderService(
             OrderRepository orderRepository,
             OrderMapper orderMapper,
             DishService dishService,
-            UserRepository userRepository,
-            RestaurantRepository restaurantRepository
+            RestaurantRepository restaurantRepository,
+            SecurityUtils securityUtils
     ) {
         this.orderRepository = orderRepository;
         this.orderMapper = orderMapper;
         this.dishService = dishService;
-        this.userRepository = userRepository;
         this.restaurantRepository = restaurantRepository;
+        this.securityUtils = securityUtils;
     }
 
     @Override
@@ -59,13 +59,12 @@ public class OrderService extends BaseService<OrderEntity, OrderResponse, OrderS
 
     @Transactional
     public OrderResponse createOrder(OrderRequest request) {
-        UserEntity user = userRepository.findById(request.userId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        UserEntity currentUser = securityUtils.getCurrentUser();
 
         RestaurantEntity restaurant = restaurantRepository.findById(request.restaurantId())
                 .orElseThrow(() -> new IllegalArgumentException("Restaurant not found"));
 
-        OrderEntity entity = orderMapper.toEntity(request, user);
+        OrderEntity entity = orderMapper.toEntity(currentUser);
         entity.setRestaurant(restaurant);
         entity.setDateTime(LocalDateTime.now().withNano(0));
         entity.setStatus(OrderStatus.PENDING);
@@ -111,8 +110,15 @@ public class OrderService extends BaseService<OrderEntity, OrderResponse, OrderS
     }
 
     public OrderEntity getOrderById(Long orderId) {
-        return orderRepository.findById(orderId)
+        OrderEntity order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("Order not found: " + orderId));
+
+        UserEntity currentUser = securityUtils.getCurrentUser();
+        if (!order.getUser().getId().equals(currentUser.getId())) {
+            throw new IllegalArgumentException("You can only access your own orders");
+        }
+
+        return order;
     }
 
     public OrderResponse getOrderResponseById(Long orderId) {
