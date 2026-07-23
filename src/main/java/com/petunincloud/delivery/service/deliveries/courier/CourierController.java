@@ -6,10 +6,7 @@ import com.petunincloud.delivery.service.deliveries.courier.dto.CourierResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/couriers")
@@ -25,5 +22,10 @@ public class CourierController extends BaseController<CourierService, CourierEnt
         CourierResponse response = service.createCourier(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(response);
+    }
+
+    @GetMapping("/available")
+    public ResponseEntity<CourierResponse> findAvailableCourier() {
+        return ResponseEntity.ok(service.findAvailableCourier());
     }
 }
