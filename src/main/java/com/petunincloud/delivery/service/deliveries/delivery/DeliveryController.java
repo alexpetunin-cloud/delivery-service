@@ -28,4 +28,9 @@ public class DeliveryController extends BaseController<DeliveryService, Delivery
     ) {
         return ResponseEntity.ok(service.completeDelivery(deliveryId));
     }
+
+    @GetMapping("/{deliveryId}")
+    public ResponseEntity<DeliveryResponse> getDeliveryById(Long deliveryId) {
+        return ResponseEntity.ok(service.getDeliveryById(deliveryId));
+    }
 }
