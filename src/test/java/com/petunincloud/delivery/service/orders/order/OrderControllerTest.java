@@ -22,8 +22,7 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -40,6 +39,31 @@ class OrderControllerTest {
 
     @MockitoBean
     private OrderService orderService;
+
+    @Test
+    void getOrderById_ShouldGetOrder() throws Exception{
+        Long orderId = 1L;
+        Long restaurantId = 10L;
+        Long dishId = 100L;
+
+        OrderResponse mockResponse = new OrderResponse(
+                1L,
+                1L,
+                restaurantId,
+                "Ресторан",
+                LocalDateTime.now(),
+                OrderStatus.PENDING,
+                BigDecimal.valueOf(300),
+                List.of(new OrderItemResponse(dishId, "Пицца", 2, BigDecimal.valueOf(150)))
+        );
+
+        when(orderService.getOrderResponseById(orderId))
+                .thenReturn(mockResponse);
+
+        mockMvc.perform(get("/api/orders/{orderId}", orderId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(orderId));
+    }
 
     @Test
     void createOrder_ShouldReturnCreatedOrder() throws Exception {

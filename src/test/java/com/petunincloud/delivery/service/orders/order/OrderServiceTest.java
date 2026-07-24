@@ -171,4 +171,56 @@ class OrderServiceTest {
 
         assertThrows(IllegalStateException.class, () -> orderService.cancelOrder(orderId));
     }
+
+    @Test
+    void getOrderResponseById_ShouldReturnOrderResponse() {
+        Long orderId = 1L;
+
+        UserEntity user = new UserEntity();
+        user.setId(1L);
+        when(securityUtils.getCurrentUser())
+                .thenReturn(user);
+
+        OrderEntity order = new OrderEntity();
+        order.setId(orderId);
+        order.setUser(user);
+        order.setStatus(OrderStatus.PENDING);
+
+        OrderResponse response = new OrderResponse(
+                orderId,
+                1L,
+                1L,
+                "Ресторан",
+                LocalDateTime.now(),
+                OrderStatus.PENDING,
+                BigDecimal.valueOf(300),
+                List.of()
+        );
+
+        when(orderRepository.findById(orderId))
+                .thenReturn(Optional.of(order));
+        when(orderMapper.toResponse(order))
+                .thenReturn(response);
+
+        OrderResponse result = orderService.getOrderResponseById(orderId);
+
+        assertNotNull(result);
+        assertEquals(orderId, result.id());
+
+        verify(orderRepository, times(1))
+                .findById(orderId);
+        verify(orderMapper, times(1))
+                .toResponse(order);
+    }
+
+    @Test
+    void getOrderResponseById_ShouldThrowException_WhenOrderNotFound() {
+        Long orderId = 999L;
+
+        when(orderRepository.findById(orderId))
+                .thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class,
+                () -> orderService.getOrderResponseById(orderId));
+    }
 }

@@ -99,7 +99,7 @@ public class OrderService extends BaseService<OrderEntity, OrderResponse, OrderS
 
     @Transactional
     public OrderResponse cancelOrder(Long orderId) {
-        OrderEntity order = getOrderById(orderId);
+        OrderEntity order = getOrderByIdForUser(orderId);
 
         if (order.getStatus() == OrderStatus.DELIVERED || order.getStatus() == OrderStatus.CANCELED) {
             throw new IllegalStateException("Cannot cancel DELIVERED or already CANCELED order");
@@ -109,7 +109,8 @@ public class OrderService extends BaseService<OrderEntity, OrderResponse, OrderS
         return orderMapper.toResponse(orderRepository.save(order));
     }
 
-    public OrderEntity getOrderById(Long orderId) {
+    // Для пользователей (с проверкой владельца)
+    public OrderEntity getOrderByIdForUser(Long orderId) {
         OrderEntity order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("Order not found: " + orderId));
 
@@ -117,12 +118,17 @@ public class OrderService extends BaseService<OrderEntity, OrderResponse, OrderS
         if (!order.getUser().getId().equals(currentUser.getId())) {
             throw new IllegalArgumentException("You can only access your own orders");
         }
-
         return order;
     }
 
+    // Для системы (без проверки владельца)
+    public OrderEntity getOrderById(Long orderId) {
+        return orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found: " + orderId));
+    }
+
     public OrderResponse getOrderResponseById(Long orderId) {
-        OrderEntity entity = getOrderById(orderId);
+        OrderEntity entity = getOrderByIdForUser(orderId);
         return orderMapper.toResponse(entity);
     }
 }
