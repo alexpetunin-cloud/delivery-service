@@ -182,7 +182,8 @@ mvn test
 ```
 
 Покрыты:
-- OrderController, OrderRepository, OrderService, OrderItemService, CourierService, DeliveryService, PaymentService
+- Все сервисы
+- OrderController, OrderRepository
 - Сквозной E2E-тест
 
 ---

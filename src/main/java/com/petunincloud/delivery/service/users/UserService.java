@@ -1,6 +1,7 @@
 package com.petunincloud.delivery.service.users;
 
 import com.petunincloud.delivery.service.common.BaseService;
+import com.petunincloud.delivery.service.security.SecurityUtils;
 import com.petunincloud.delivery.service.users.dto.UserPatchRequest;
 import com.petunincloud.delivery.service.users.dto.UserRequest;
 import com.petunincloud.delivery.service.users.dto.UserResponse;
@@ -15,13 +16,16 @@ public class UserService extends BaseService<UserEntity, UserResponse, UserSearc
 
     private final UserMapper userMapper;
     private final UserRepository userRepository;
+    private final SecurityUtils securityUtils;
 
     public UserService(
             UserMapper userMapper,
-            UserRepository userRepository
+            UserRepository userRepository,
+            SecurityUtils securityUtils
     ) {
         this.userMapper = userMapper;
         this.userRepository = userRepository;
+        this.securityUtils = securityUtils;
     }
 
     @Override
@@ -57,12 +61,20 @@ public class UserService extends BaseService<UserEntity, UserResponse, UserSearc
     }
 
     public UserResponse findByEmail(String email) {
+        UserEntity currentUser = securityUtils.getCurrentUser();
+        if (!currentUser.getEmail().equals(email)) {
+            throw new IllegalArgumentException("You can only access your own profile");
+        }
         return userRepository.findByEmail(email)
                 .map(userMapper::toResponse)
                 .orElseThrow(() -> new IllegalArgumentException("User not found by email: " + email));
     }
 
     public UserResponse findByPhone(String phone) {
+        UserEntity currentUser = securityUtils.getCurrentUser();
+        if (!currentUser.getPhone().equals(phone)) {
+            throw new IllegalArgumentException("You can only access your own profile");
+        }
         return userRepository.findByPhone(phone)
                 .map(userMapper::toResponse)
                 .orElseThrow(() -> new IllegalArgumentException("User not found by phone: " + phone));
@@ -70,6 +82,11 @@ public class UserService extends BaseService<UserEntity, UserResponse, UserSearc
 
     @Transactional
     public UserResponse updateUser(String email, UserPatchRequest request) {
+        UserEntity currentUser = securityUtils.getCurrentUser();
+        if (!currentUser.getEmail().equals(email)) {
+            throw new IllegalArgumentException("You can only update your own profile");
+        }
+
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
 
@@ -112,6 +129,11 @@ public class UserService extends BaseService<UserEntity, UserResponse, UserSearc
 
     @Transactional
     public void deleteUser(String email) {
+        UserEntity currentUser = securityUtils.getCurrentUser();
+        if (!currentUser.getEmail().equals(email)) {
+            throw new IllegalArgumentException("You can only delete your own profile");
+        }
+
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
 

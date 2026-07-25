@@ -41,4 +41,20 @@ public class UserController extends BaseController<UserService, UserEntity, User
         service.deleteUser(email);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/email/{email}")
+    public ResponseEntity<UserResponse> findByEmail(
+            @PathVariable String email
+    ) {
+        UserResponse response = service.findByEmail(email);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/phone/{phone}")
+    public ResponseEntity<UserResponse> findByPhone(
+            @PathVariable String phone
+    ) {
+        UserResponse response = service.findByPhone(phone);
+        return ResponseEntity.ok(response);
+    }
 }
