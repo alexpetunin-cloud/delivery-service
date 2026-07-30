@@ -2,12 +2,8 @@ package com.petunincloud.delivery.service.security;
 
 import com.petunincloud.delivery.service.security.dto.AuthRequest;
 import com.petunincloud.delivery.service.security.dto.AuthResponse;
-import com.petunincloud.delivery.service.users.RoleEntity;
-import com.petunincloud.delivery.service.users.RoleRepository;
-import com.petunincloud.delivery.service.users.UserEntity;
-import com.petunincloud.delivery.service.users.UserRepository;
+import com.petunincloud.delivery.service.users.*;
 import jakarta.validation.Valid;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,7 +19,6 @@ import java.util.Set;
 
 @RestController
 @RequestMapping("/api/auth")
-@Profile("!test")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
@@ -32,6 +27,7 @@ public class AuthController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
+    private final UserMapper userMapper;
 
     public AuthController(
             AuthenticationManager authenticationManager,
@@ -39,7 +35,8 @@ public class AuthController {
             JwtUtils jwtUtils,
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
-            RoleRepository roleRepository
+            RoleRepository roleRepository,
+            UserMapper userMapper
     ) {
         this.authenticationManager = authenticationManager;
         this.userDetailsService = userDetailsService;
@@ -47,10 +44,13 @@ public class AuthController {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.roleRepository = roleRepository;
+        this.userMapper = userMapper;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
+    public ResponseEntity<AuthResponse> login(
+            @RequestBody AuthRequest request
+    ) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.email(), request.password())
         );
@@ -72,12 +72,8 @@ public class AuthController {
         RoleEntity clientRole = roleRepository.findByName("ROLE_CLIENT")
                 .orElseThrow(() -> new IllegalArgumentException("Default role not found"));
 
-        UserEntity user = new UserEntity();
-        user.setEmail(request.email());
+        UserEntity user = userMapper.toEntity(request);
         user.setPassword(passwordEncoder.encode(request.password()));
-        user.setName(request.name());
-        user.setPhone(request.phone());
-        user.setAddress(request.address());
         user.setRoles(Set.of(clientRole));
 
         userRepository.save(user);

@@ -183,7 +183,8 @@ mvn test
 
 Покрыты:
 - Все сервисы
-- OrderController, OrderRepository
+- Все контроллеры
+- OrderRepository
 - Сквозной E2E-тест
 
 ---

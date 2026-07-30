@@ -36,7 +36,7 @@ public class RestaurantController extends BaseController<RestaurantService, Rest
 
     @PostMapping("/{restaurantId}/dishes")
     public ResponseEntity<DishResponse> addDishToRestaurant(
-            @PathVariable Long restaurantId,
+            @PathVariable("restaurantId") Long restaurantId,
             @RequestBody @Valid DishRequest request
     ) {
         log.info("Called addDishToRestaurant for id = {} with parameters = {}", restaurantId, request);
@@ -48,7 +48,7 @@ public class RestaurantController extends BaseController<RestaurantService, Rest
 
     @PatchMapping("/orders/{orderId}/cook")
     public ResponseEntity<OrderResponse> startCooking(
-            @PathVariable Long orderId
+            @PathVariable("orderId") Long orderId
     ) {
         log.info("Called startCooking for id = {}", orderId);
 
@@ -58,7 +58,7 @@ public class RestaurantController extends BaseController<RestaurantService, Rest
 
     @PatchMapping("/orders/{orderId}/ready")
     public ResponseEntity<OrderResponse> markAsReady(
-            @PathVariable Long orderId
+            @PathVariable("orderId") Long orderId
     ) {
         log.info("Called markAsReady for id = {}", orderId);
 

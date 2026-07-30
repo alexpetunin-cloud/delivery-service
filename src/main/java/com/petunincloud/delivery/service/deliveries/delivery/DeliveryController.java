@@ -15,7 +15,7 @@ public class DeliveryController extends BaseController<DeliveryService, Delivery
 
     @PostMapping("/assign/{orderId}")
     public ResponseEntity<DeliveryResponse> assignCourier(
-            @PathVariable Long orderId
+            @PathVariable("orderId") Long orderId
     ) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(service.assignCourierToOrder(orderId));
@@ -24,13 +24,15 @@ public class DeliveryController extends BaseController<DeliveryService, Delivery
     // Курьер доставил заказ
     @PatchMapping("/{deliveryId}/complete")
     public ResponseEntity<DeliveryResponse> completeDelivery(
-            @PathVariable Long deliveryId
+            @PathVariable("deliveryId") Long deliveryId
     ) {
         return ResponseEntity.ok(service.completeDelivery(deliveryId));
     }
 
     @GetMapping("/{deliveryId}")
-    public ResponseEntity<DeliveryResponse> getDeliveryById(Long deliveryId) {
+    public ResponseEntity<DeliveryResponse> getDeliveryById(
+            @PathVariable("deliveryId") Long deliveryId
+    ) {
         return ResponseEntity.ok(service.getDeliveryById(deliveryId));
     }
 }

@@ -25,14 +25,18 @@ public class PaymentController extends BaseController<PaymentService, PaymentEnt
     }
 
     @PostMapping("/initiate")
-    public ResponseEntity<PaymentResponse> initiatePayment(@RequestBody @Valid PaymentRequest request) {
+    public ResponseEntity<PaymentResponse> initiatePayment(
+            @RequestBody @Valid PaymentRequest request
+    ) {
         UserEntity currentUser = securityUtils.getCurrentUser();
         PaymentResponse response = service.initiatePayment(request, currentUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/{paymentId}/process")
-    public ResponseEntity<PaymentResponse> processPayment(@PathVariable Long paymentId) {
+    public ResponseEntity<PaymentResponse> processPayment(
+            @PathVariable("paymentId") Long paymentId
+    ) {
         return ResponseEntity.ok(service.processPayment(paymentId));
     }
 }

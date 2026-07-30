@@ -27,7 +27,7 @@ public class UserController extends BaseController<UserService, UserEntity, User
 
     @PatchMapping("/{email}")
     public ResponseEntity<UserResponse> updateUser(
-            @PathVariable String email,
+            @PathVariable("email") String email,
             @RequestBody @Valid UserPatchRequest request
     ) {
         UserResponse response = service.updateUser(email, request);
@@ -36,7 +36,7 @@ public class UserController extends BaseController<UserService, UserEntity, User
 
     @DeleteMapping("/{email}")
     public ResponseEntity<Void> deleteUser(
-            @PathVariable String email
+            @PathVariable("email") String email
     ) {
         service.deleteUser(email);
         return ResponseEntity.noContent().build();
@@ -44,7 +44,7 @@ public class UserController extends BaseController<UserService, UserEntity, User
 
     @GetMapping("/email/{email}")
     public ResponseEntity<UserResponse> findByEmail(
-            @PathVariable String email
+            @PathVariable("email") String email
     ) {
         UserResponse response = service.findByEmail(email);
         return ResponseEntity.ok(response);
@@ -52,7 +52,7 @@ public class UserController extends BaseController<UserService, UserEntity, User
 
     @GetMapping("/phone/{phone}")
     public ResponseEntity<UserResponse> findByPhone(
-            @PathVariable String phone
+            @PathVariable("phone") String phone
     ) {
         UserResponse response = service.findByPhone(phone);
         return ResponseEntity.ok(response);

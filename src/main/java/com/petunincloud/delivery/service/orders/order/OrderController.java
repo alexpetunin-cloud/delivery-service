@@ -22,7 +22,7 @@ public class OrderController extends BaseController<OrderService, OrderEntity, O
 
     @GetMapping("/{id}")
     public ResponseEntity<OrderResponse> getOrderById(
-            @PathVariable Long id
+            @PathVariable("id") Long id
     ) {
         log.info("Called getOrderById with id = {}", id);
 
@@ -45,7 +45,6 @@ public class OrderController extends BaseController<OrderService, OrderEntity, O
             @PathVariable("orderId") Long orderId
     ) {
         return ResponseEntity.ok(
-                service.cancelOrder(orderId)
-        );
+                service.cancelOrder(orderId));
     }
 }
