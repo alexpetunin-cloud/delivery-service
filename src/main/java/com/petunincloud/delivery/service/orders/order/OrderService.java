@@ -12,6 +12,8 @@ import com.petunincloud.delivery.service.restaurants.restaurant.RestaurantReposi
 import com.petunincloud.delivery.service.security.SecurityUtils;
 import com.petunincloud.delivery.service.users.UserEntity;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +25,7 @@ import java.util.List;
 @Service
 public class OrderService extends BaseService<OrderEntity, OrderResponse, OrderSearchFilter> {
 
+    private static final Logger log = LoggerFactory.getLogger(OrderService.class);
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
     private final DishService dishService;
@@ -45,6 +48,8 @@ public class OrderService extends BaseService<OrderEntity, OrderResponse, OrderS
 
     @Override
     protected List<OrderEntity> findWithFilter(OrderSearchFilter filter, Pageable pageable) {
+        log.debug("Searching orders with filter: {}, pageable: {}", filter, pageable);
+
         return orderRepository.searchAllByFilter(
                 filter.userId(),
                 filter.restaurantId(),
@@ -59,75 +64,145 @@ public class OrderService extends BaseService<OrderEntity, OrderResponse, OrderS
 
     @Transactional
     public OrderResponse createOrder(OrderRequest request) {
-        UserEntity currentUser = securityUtils.getCurrentUser();
+        log.info("Creating new order for user: {}, restaurant: {}, items count: {}",
+                request.email(),
+                request.restaurantId(),
+                request.items().size());
 
-        RestaurantEntity restaurant = restaurantRepository.findById(request.restaurantId())
-                .orElseThrow(() -> new IllegalArgumentException("Restaurant not found"));
+        long startTime = System.currentTimeMillis();
 
-        OrderEntity entity = orderMapper.toEntity(currentUser);
-        entity.setRestaurant(restaurant);
-        entity.setDateTime(LocalDateTime.now().withNano(0));
-        entity.setStatus(OrderStatus.PENDING);
+        try {
+            UserEntity currentUser = securityUtils.getCurrentUser();
+            log.debug("Authenticated user: {}", currentUser.getEmail());
 
-        List<OrderItemEntity> items = new ArrayList<>();
-        BigDecimal totalPrice = BigDecimal.ZERO;
+            RestaurantEntity restaurant = restaurantRepository.findById(request.restaurantId())
+                    .orElseThrow(() -> {
+                        log.warn("Restaurant not found: {}", request.restaurantId());
+                        return new IllegalArgumentException("Restaurant not found");
+                    });
 
-        for (OrderItemRequest itemReq : request.items()) {
-            DishResponse dish = dishService.getDishById(itemReq.dishId());
+            log.debug("Restaurant found: id={}, name={}", restaurant.getId(), restaurant.getName());
 
-            OrderItemEntity item = new OrderItemEntity();
-            item.setDishId(dish.id());
-            item.setDishName(dish.name());
-            item.setQuantity(itemReq.quantity());
-            item.setPrice(dish.price());
-            item.setOrder(entity);
+            OrderEntity entity = orderMapper.toEntity(currentUser);
+            entity.setRestaurant(restaurant);
+            entity.setDateTime(LocalDateTime.now().withNano(0));
+            entity.setStatus(OrderStatus.PENDING);
 
-            items.add(item);
+            log.debug("Order entity created with status PENDING");
 
-            totalPrice = totalPrice.add(
-                    dish.price()
-                    .multiply(BigDecimal.valueOf(itemReq.quantity()))
-            );
+            List<OrderItemEntity> items = new ArrayList<>();
+            BigDecimal totalPrice = BigDecimal.ZERO;
+
+            for (OrderItemRequest itemReq : request.items()) {
+                DishResponse dish = dishService.getDishById(itemReq.dishId());
+                log.debug("Adding dish: id={}, name={}, quantity={}, price={}",
+                        dish.id(), dish.name(), itemReq.quantity(), dish.price());
+
+                OrderItemEntity item = new OrderItemEntity();
+                item.setDishId(dish.id());
+                item.setDishName(dish.name());
+                item.setQuantity(itemReq.quantity());
+                item.setPrice(dish.price());
+                item.setOrder(entity);
+
+                items.add(item);
+
+                BigDecimal itemTotal = dish.price().multiply(BigDecimal.valueOf(itemReq.quantity()));
+                totalPrice = totalPrice.add(itemTotal);
+
+                log.trace("Item total: {}, running total: {}", itemTotal, totalPrice);
+            }
+
+            entity.setItems(items);
+            entity.setTotalPrice(totalPrice);
+
+            log.info("Order total price calculated: {} for {} items", totalPrice, items.size());
+
+            OrderEntity saved = orderRepository.save(entity);
+            OrderResponse response = orderMapper.toResponse(saved);
+
+            long duration = System.currentTimeMillis() - startTime;
+            log.info("Order created successfully: id={}, total={}, user={}, duration={}ms",
+                    saved.getId(), saved.getTotalPrice(), saved.getUser().getEmail(), duration);
+
+            return response;
+
+        } catch (Exception e) {
+            log.error("Failed to create order for user: {}, restaurant: {}. Error: {}",
+                    request.email(), request.restaurantId(), e.getMessage(), e);
+            throw e;
         }
-
-        entity.setItems(items);
-        entity.setTotalPrice(totalPrice);
-
-        OrderEntity saved = orderRepository.save(entity);
-        return orderMapper.toResponse(saved);
     }
 
     @Transactional
     public OrderResponse cancelOrder(Long orderId) {
-        OrderEntity order = getOrderByIdForUser(orderId);
+        log.info("Cancelling order: {}", orderId);
 
-        if (order.getStatus() == OrderStatus.DELIVERED || order.getStatus() == OrderStatus.CANCELED) {
-            throw new IllegalStateException("Cannot cancel DELIVERED or already CANCELED order");
+        long startTime = System.currentTimeMillis();
+
+        try {
+            OrderEntity order = getOrderByIdForUser(orderId);
+            log.debug("Order found: id={}, status={}, total={}",
+                    order.getId(), order.getStatus(), order.getTotalPrice());
+
+            if (order.getStatus() == OrderStatus.DELIVERED || order.getStatus() == OrderStatus.CANCELED) {
+                log.warn("Cannot cancel order: id={}, current status={}", orderId, order.getStatus());
+                throw new IllegalStateException("Cannot cancel DELIVERED or already CANCELED order");
+            }
+
+            order.setStatus(OrderStatus.CANCELED);
+            OrderEntity saved = orderRepository.save(order);
+            OrderResponse response = orderMapper.toResponse(saved);
+
+            long duration = System.currentTimeMillis() - startTime;
+            log.info("Order cancelled successfully: id={}, previous status={}, duration={}ms",
+                    saved.getId(), order.getStatus(), duration);
+
+            return response;
+
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            log.warn("Failed to cancel order: {}, reason: {}", orderId, e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Unexpected error cancelling order: {}", orderId, e);
+            throw e;
         }
-
-        order.setStatus(OrderStatus.CANCELED);
-        return orderMapper.toResponse(orderRepository.save(order));
     }
 
     // Для пользователей (с проверкой владельца)
     public OrderEntity getOrderByIdForUser(Long orderId) {
+        log.debug("Fetching order by id for user: {}", orderId);
+
         OrderEntity order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new IllegalArgumentException("Order not found: " + orderId));
+                .orElseThrow(() -> {
+                    log.warn("Order not found: {}", orderId);
+                    return new IllegalArgumentException("Order not found: " + orderId);
+                });
 
         UserEntity currentUser = securityUtils.getCurrentUser();
         if (!order.getUser().getId().equals(currentUser.getId())) {
+            log.warn("Access denied: user {} tried to access order {}", currentUser.getEmail(), orderId);
             throw new IllegalArgumentException("You can only access your own orders");
         }
+
+        log.debug("Order fetched: id={}, status={}, user={}",
+                order.getId(), order.getStatus(), order.getUser().getEmail());
         return order;
     }
 
     // Для системы (без проверки владельца)
     public OrderEntity getOrderById(Long orderId) {
+        log.debug("Fetching order by id (system): {}", orderId);
+
         return orderRepository.findById(orderId)
-                .orElseThrow(() -> new IllegalArgumentException("Order not found: " + orderId));
+                .orElseThrow(() -> {
+                    log.warn("Order not found (system call): {}", orderId);
+                    return new IllegalArgumentException("Order not found: " + orderId);
+                });
     }
 
     public OrderResponse getOrderResponseById(Long orderId) {
+        log.info("Getting order response by id: {}", orderId);
         OrderEntity entity = getOrderByIdForUser(orderId);
         return orderMapper.toResponse(entity);
     }
