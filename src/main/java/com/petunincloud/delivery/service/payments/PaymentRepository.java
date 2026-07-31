@@ -15,7 +15,7 @@ public interface PaymentRepository extends JpaRepository<PaymentEntity, Long> {
       AND p.order.id = COALESCE(:orderId, p.order.id)
       AND p.status = COALESCE(:status, p.status)
       AND p.createdAt >= COALESCE(:fromDate, p.createdAt)
-      AND p.createdAt <= COALESCE(:toDate, p.createdAt)
+      AND p.completedAt <= COALESCE(:toDate, p.completedAt)
     """)
     List<PaymentEntity> searchAllByFilter(
             @Param("email") String email,
