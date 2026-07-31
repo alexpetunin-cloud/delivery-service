@@ -9,13 +9,14 @@
 Это **монолитное Spring Boot приложение**, которое моделирует работу сервиса доставки еды.
 Реализован полный цикл заказа:
 
-1. Пользователь выбирает блюда из меню ресторана
-2. Создаёт заказ (`PENDING`)
-3. Инициализирует и обрабатывает платёж
-4. После успешной оплаты заказ подтверждается (`CONFIRMED`)
-5. Ресторан начинает готовку (`COOKING`) и отмечает готовность (`READY`)
-6. Система назначает свободного курьера (`DELIVERING`)
-7. Курьер завершает доставку (`DELIVERED`)
+1. Сначала пользователь регистрируется/логинится
+2. Пользователь выбирает блюда из меню ресторана
+3. Создаёт заказ (`PENDING`)
+4. Инициализирует и обрабатывает платёж
+5. После успешной оплаты заказ подтверждается (`CONFIRMED`)
+6. Ресторан начинает готовку (`COOKING`) и отмечает готовность (`READY`)
+7. Система назначает свободного курьера (`DELIVERING`)
+8. Курьер завершает доставку (`DELIVERED`)
 
 ---
 
@@ -194,25 +195,25 @@ mvn test
 ```
 src/
 ├── main/
-│   └── java/
-│       ├── com.petunincloud.delivery.service/
-│       │   ├── common/
-│       │   ├── deliveries/
-│       │   │   ├── courier/
-│       │   │   └── delivery/
-│       │   ├── exception/
-│       │   ├── orders/
-│       │   │   ├── order/
-│       │   │   └── orderItem/
-│       │   ├── payments/
-│       │   ├── restaurants/
-│       │   │   ├── dish/
-│       │   │   └── restaurant/
-│       │   ├── security/
-│       │   ├── users/
-│       │   └── DeliveryServiceApplication.java
-│       └── resources/
-│           └── application.properties
+│   ├── java/
+│   │   └── com.petunincloud.delivery.service/
+│   │       ├── common/
+│   │       ├── deliveries/
+│   │       │   ├── courier/
+│   │       │   └── delivery/
+│   │       ├── exception/
+│   │       ├── orders/
+│   │       │   ├── order/
+│   │       │   └── orderItem/
+│   │       ├── payments/
+│   │       ├── restaurants/
+│   │       │   ├── dish/
+│   │       │   └── restaurant/
+│   │       ├── security/
+│   │       ├── users/
+│   │       └── DeliveryServiceApplication.java
+│   └── resources/
+│       └── application.properties
 └── test/
     ├── java/
     │   └── com.petunincloud.delivery.service/
