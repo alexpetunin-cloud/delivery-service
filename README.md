@@ -151,51 +151,6 @@ mvn spring-boot:run
 
 ---
 
-## 📋 Настройка для тестов (`application-test.properties`)
-
-Для запуска тестов используется **H2 (in-memory)** — быстрая база данных, которая не требует установки.
-
-Создайте файл `src/test/resources/application-test.properties`:
-
-```properties
-# H2 (in-memory)
-spring.datasource.url=jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-spring.datasource.driver-class-name=org.h2.Driver
-spring.datasource.username=sa
-spring.datasource.password=
-
-# Hibernate
-spring.jpa.hibernate.ddl-auto=create-drop
-spring.jpa.show-sql=true
-spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect
-spring.jpa.properties.hibernate.format_sql=true
-
-# JWT (для тестов)
-jwt.secret=test-secret-key-for-tests
-jwt.expiration=86400000
-
-# Логирование
-logging.level.root=INFO
-logging.level.com.petunincloud.delivery.service=DEBUG
-logging.level.org.hibernate.SQL=INFO
-```
-
----
-
-## 🧪 Запуск тестов
-
-```bash
-./mvnw test
-```
-
-или
-
-```bash
-mvn test
-```
-
----
-
 ## 📬 Примеры запросов
 
 ### Регистрация
@@ -253,8 +208,47 @@ Content-Type: application/json
 
 ## 🧪 Тесты
 
+### 📋 Настройка для тестов (`application-test.properties`)
+
+Для запуска тестов используется **H2 (in-memory)** — быстрая база данных, которая не требует установки.
+
+Создайте файл `src/test/resources/application-test.properties`:
+
+```properties
+# H2 (in-memory)
+spring.datasource.url=jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+spring.datasource.driver-class-name=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=
+
+# Hibernate
+spring.jpa.hibernate.ddl-auto=create-drop
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect
+spring.jpa.properties.hibernate.format_sql=true
+
+# JWT (для тестов)
+jwt.secret=test-secret-key-for-tests
+jwt.expiration=86400000
+
+# Логирование
+logging.level.root=INFO
+logging.level.com.petunincloud.delivery.service=DEBUG
+logging.level.org.hibernate.SQL=INFO
+```
+
+---
+
+### 🧪 Запуск тестов
+
 ```bash
 ./mvnw test
+```
+
+или
+
+```bash
+mvn test
 ```
 
 Покрыты:
