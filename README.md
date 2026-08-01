@@ -22,21 +22,21 @@
 
 ## 🛠️ Технологии
 
-| Технология      | Версия      |
-|:----------------|:------------|
-| Java            | 26          |
-| Spring Boot     | 4.1.0       |
-| Spring Data JPA | 4.1.0       |
-| Spring Security | 7.1.0       |
-| PostgreSQL      | 18.4        |
-| H2 (тесты)      | 2.4.240     |
-| Maven           | 4.0.0       |
-| Docker          | 4.82.0      |
-| JUnit 5         | 6.0.3       |
-| Mockito         | 5.23.0      |
-| JJWT (JWT)      | 0.11.5      |
-| Hibernate       | 7.4.1.Final |
-| Jackson         | 2.18.0      |
+| Технология      | Версия                         |
+|:----------------|:-------------------------------|
+| Java            | 21 (Amazon Corretto, в Docker) |
+| Spring Boot     | 4.1.0                          |
+| Spring Data JPA | 4.1.0                          |
+| Spring Security | 7.1.0                          |
+| PostgreSQL      | 16 (Docker)                    |
+| H2 (тесты)      | 2.4.240                        |
+| Maven           | 4.0.0                          |
+| Docker          | 4.82.0                         |
+| JUnit 5         | 6.0.3                          |
+| Mockito         | 5.23.0                         |
+| JJWT (JWT)      | 0.11.5                         |
+| Hibernate       | 7.4.1.Final                    |
+| Jackson         | 2.18.0                         |
 
 ---
 
@@ -46,14 +46,14 @@
 
 | Модуль        | Описание                            |
 |:--------------|:------------------------------------|
-| `users`       | Пользователи, роли, регистрация     |
-| `restaurants` | Рестораны и блюда                   |
+| `common`      | Базовые классы (пагинация, мапперы) |
+| `deliveries`  | Доставка и курьеры                  |
+| `exception`   | Централизованная обработка ошибок   |
 | `orders`      | Заказы и позиции заказов            |
 | `payments`    | Платежи (симуляция банка)           |
-| `deliveries`  | Доставка и курьеры                  |
+| `restaurants` | Рестораны и блюда                   |
 | `security`    | JWT-аутентификация                  |
-| `common`      | Базовые классы (пагинация, мапперы) |
-| `exception`   | Централизованная обработка ошибок   |
+| `users`       | Пользователи, роли, регистрация     |
 
 ### Сущности
 
@@ -76,7 +76,7 @@ PENDING → CONFIRMED → COOKING → READY → DELIVERING → DELIVERED
 
 ---
 
-## 🚀 Как запустить
+## 🚀 Быстрый старт (Docker Compose) — рекомендуется
 
 ### 1. Клонировать репозиторий
 
@@ -85,36 +85,114 @@ git clone https://github.com/alexpetunin-cloud/delivery-service.git
 cd delivery-service
 ```
 
-### 2. Запустить PostgreSQL через Docker
+### 2. Запустить всё одной командой
+
+```bash
+docker compose up -d
+```
+
+Приложение будет доступно по адресу: `http://localhost:8080`
+
+### 3. Остановить приложение
+
+```bash
+docker compose down
+```
+
+### 4. Пересобрать после изменений в коде
+
+```bash
+docker compose up -d --build
+```
+
+---
+
+## 🧪 Запуск без Docker (локально)
+
+### 1. Запустить PostgreSQL через Docker
 
 ```bash
 docker run --name postgres-db -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=delivery_db -p 5432:5432 -d postgres
 ```
 
-### 3. Настроить `application.properties`
+### 2. Настроить `application.properties`
 
 ```properties
+# Подключение к БД
 spring.datasource.url=jdbc:postgresql://localhost:5432/delivery_db
 spring.datasource.username=postgres
 spring.datasource.password=postgres
 
+# Hibernate (JPA)
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+
+# JWT
 jwt.secret=your-256-bit-secret-key
 jwt.expiration=86400000
+
+# Логирование (опционально)
+logging.level.com.petunincloud.delivery.service=DEBUG
+logging.level.org.hibernate.SQL=DEBUG
 ```
 
-### 4. Запустить приложение
+### 3. Запустить приложение
 
 ```bash
 mvn spring-boot:run
 ```
 
-ИЛИ ЕСЛИ ПЕРВЫЙ СПОСОБ НЕ РАБОТАЕТ
+Или через Maven Wrapper:
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
-Приложение запустится на порту `8080`.
+---
+
+## 📋 Настройка для тестов (`application-test.properties`)
+
+Для запуска тестов используется **H2 (in-memory)** — быстрая база данных, которая не требует установки.
+
+Создайте файл `src/test/resources/application-test.properties`:
+
+```properties
+# H2 (in-memory)
+spring.datasource.url=jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+spring.datasource.driver-class-name=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=
+
+# Hibernate
+spring.jpa.hibernate.ddl-auto=create-drop
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect
+spring.jpa.properties.hibernate.format_sql=true
+
+# JWT (для тестов)
+jwt.secret=test-secret-key-for-tests
+jwt.expiration=86400000
+
+# Логирование
+logging.level.root=INFO
+logging.level.com.petunincloud.delivery.service=DEBUG
+logging.level.org.hibernate.SQL=INFO
+```
+
+---
+
+## 🧪 Запуск тестов
+
+```bash
+./mvnw test
+```
+
+или
+
+```bash
+mvn test
+```
 
 ---
 
@@ -148,6 +226,7 @@ Content-Type: application/json
 ```
 
 Ответ:
+
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -170,13 +249,9 @@ Content-Type: application/json
 }
 ```
 
+---
+
 ## 🧪 Тесты
-
-```bash
-mvn test
-```
-
-ИЛИ ЕСЛИ ПЕРВЫЙ СПОСОБ НЕ РАБОТАЕТ
 
 ```bash
 ./mvnw test
@@ -240,8 +315,7 @@ src/
 
 ## 👨‍💻 Автор
 
-**Петунин Александр**
-
+**Петунин Александр**  
 [GitHub](https://github.com/alexpetunin-cloud)
 
 ---
