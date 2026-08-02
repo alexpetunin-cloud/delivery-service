@@ -3,6 +3,7 @@ package com.petunincloud.delivery.service.orders.order;
 import com.petunincloud.delivery.service.common.BaseController;
 import com.petunincloud.delivery.service.orders.order.dto.OrderRequest;
 import com.petunincloud.delivery.service.orders.order.dto.OrderResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/orders")
+@SecurityRequirement(name = "bearerAuth")
 public class OrderController extends BaseController<OrderService, OrderEntity, OrderResponse, OrderSearchFilter> {
     private final static Logger log = LoggerFactory.getLogger(OrderController.class);
 

@@ -2,6 +2,7 @@ package com.petunincloud.delivery.service.orders.orderItem;
 
 import com.petunincloud.delivery.service.orders.orderItem.dto.OrderItemRequest;
 import com.petunincloud.delivery.service.orders.orderItem.dto.OrderItemResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/orders/{orderId}/items")
+@SecurityRequirement(name = "bearerAuth")
 public class OrderItemController {
 
     private final static Logger log = LoggerFactory.getLogger(OrderItemController.class);

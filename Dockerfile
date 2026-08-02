@@ -7,10 +7,13 @@ WORKDIR /app
 COPY mvnw .
 COPY .mvn .mvn
 COPY pom.xml .
-COPY src src
-
-# Делаем mvnw исполняемым и собираем проект
 RUN chmod +x mvnw
+
+# Скачиваем зависимости в кэш
+RUN ./mvnw dependency:go-offline
+
+# Теперь копируем исходники и собираем
+COPY src src
 RUN ./mvnw clean package -DskipTests
 
 # Этап выполнения (runtime)

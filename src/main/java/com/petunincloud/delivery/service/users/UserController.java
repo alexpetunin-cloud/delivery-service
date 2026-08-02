@@ -4,6 +4,7 @@ import com.petunincloud.delivery.service.common.BaseController;
 import com.petunincloud.delivery.service.users.dto.UserPatchRequest;
 import com.petunincloud.delivery.service.users.dto.UserRequest;
 import com.petunincloud.delivery.service.users.dto.UserResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/users")
+@SecurityRequirement(name = "bearerAuth")
 public class UserController extends BaseController<UserService, UserEntity, UserResponse, UserSearchFilter> {
     public UserController(UserService service) {
         super(service);

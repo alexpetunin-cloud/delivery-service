@@ -5,6 +5,7 @@ import com.petunincloud.delivery.service.payments.dto.PaymentRequest;
 import com.petunincloud.delivery.service.payments.dto.PaymentResponse;
 import com.petunincloud.delivery.service.security.SecurityUtils;
 import com.petunincloud.delivery.service.users.UserEntity;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/payments")
+@SecurityRequirement(name = "bearerAuth")
 public class PaymentController extends BaseController<PaymentService, PaymentEntity, PaymentResponse, PaymentSearchFilter> {
 
     private final SecurityUtils securityUtils;

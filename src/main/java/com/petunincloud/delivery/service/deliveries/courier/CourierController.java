@@ -3,6 +3,7 @@ package com.petunincloud.delivery.service.deliveries.courier;
 import com.petunincloud.delivery.service.common.BaseController;
 import com.petunincloud.delivery.service.deliveries.courier.dto.CourierRequest;
 import com.petunincloud.delivery.service.deliveries.courier.dto.CourierResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/couriers")
+@SecurityRequirement(name = "bearerAuth")
 public class CourierController extends BaseController<CourierService, CourierEntity, CourierResponse, CourierSearchFilter> {
 
     private final static Logger log = LoggerFactory.getLogger(CourierController.class);

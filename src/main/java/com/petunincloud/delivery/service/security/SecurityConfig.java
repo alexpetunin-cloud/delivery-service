@@ -29,7 +29,11 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll() // регистрация и логин открыты
+                        .requestMatchers(
+                                "/api/auth/**",  // регистрация и логин открыты
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui.html").permitAll()
                         .requestMatchers("/api/restaurants/**").hasAnyRole("ADMIN", "RESTAURANT")
                         .requestMatchers("/api/couriers/**").hasAnyRole("ADMIN", "COURIER")
                         .requestMatchers("/api/orders/**").authenticated()

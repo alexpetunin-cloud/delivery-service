@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
 
-@RequestMapping("/api")
 public abstract class BaseController<S extends BaseService<E, D, F>, E, D, F extends BaseFilter> {
     protected final S service;
 
