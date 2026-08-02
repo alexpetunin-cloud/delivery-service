@@ -55,7 +55,7 @@ public class CourierServiceTest {
         CourierResponse result = courierService.createCourier(request);
 
         assertNotNull(result);
-        assertEquals(CourierStatus.OFFLINE, result.status());
+        assertEquals(CourierStatus.AVAILABLE, result.status());
 
         verify(courierRepository, times(1)).findByPhone("+77779992345");
         verify(courierMapper, times(1)).toEntity(request);
