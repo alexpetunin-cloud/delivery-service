@@ -18,7 +18,7 @@ public abstract class BaseController<S extends BaseService<E, D, F>, E, D, F ext
     @GetMapping
     public ResponseEntity<List<D>> getAll(F filter) {
         Logger log = LoggerFactory.getLogger(getClass()); // Логирование происходит под класс, который вызывает этот метод
-        log.info("Called getAll with filter: {}", filter);
+        log.info("GET {} - filter: {}", getClass().getSimpleName(), filter);
 
         return ResponseEntity.ok(service.search(filter));
     }
