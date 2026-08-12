@@ -160,11 +160,8 @@ public class OrderService extends BaseService<OrderEntity, OrderResponse, OrderS
 
             return response;
 
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            log.warn("Failed to cancel order: {}, reason: {}", orderId, e.getMessage());
-            throw e;
         } catch (Exception e) {
-            log.error("Unexpected error cancelling order: {}", orderId, e);
+            log.error("Unexpected error cancelling order: {}. Error: {}", orderId, e.getMessage());
             throw e;
         }
     }

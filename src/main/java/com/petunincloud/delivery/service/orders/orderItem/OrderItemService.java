@@ -11,6 +11,8 @@ import com.petunincloud.delivery.service.security.SecurityUtils;
 import com.petunincloud.delivery.service.users.UserEntity;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -25,6 +27,7 @@ public class OrderItemService {
     private final OrderRepository orderRepository;
     private final DishService dishService;
     private final SecurityUtils securityUtils;
+    private final static Logger log = LoggerFactory.getLogger(OrderItemService.class);
 
     public OrderItemService(
             OrderItemMapper orderItemMapper,
@@ -41,76 +44,135 @@ public class OrderItemService {
     }
 
     public List<OrderItemResponse> getOrderItems(Long orderId) {
-        OrderEntity order = orderRepository.findByIdWithItems(orderId)
-                .orElseThrow(() -> new IllegalArgumentException("Order not found"));
+        log.info("Get items of order={}", orderId);
+        long startTime = System.currentTimeMillis();
 
-        return order.getItems().stream()
-                .map(orderItemMapper::toResponse)
-                .collect(Collectors.toList());
+        try {
+            OrderEntity order = orderRepository.findByIdWithItems(orderId)
+                    .orElseThrow(() -> {
+                        log.warn("Order not found: {}", orderId);
+                        return new IllegalArgumentException("Order not found");
+                    });
+
+            long duration = System.currentTimeMillis() - startTime;
+            log.info("Success get items of order={}, duration={}ms", orderId, duration);
+
+            return order.getItems().stream()
+                    .map(orderItemMapper::toResponse)
+                    .collect(Collectors.toList());
+
+        } catch (Exception e) {
+            log.error("Failed to get items of order: {}. Error: {}", orderId, e.getMessage());
+            throw e;
+        }
     }
 
     @Transactional
     public OrderItemResponse addItemToOrder(Long orderId, @Valid OrderItemRequest request) {
-        OrderEntity order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new IllegalArgumentException("Order not found"));
+        log.info("Add item to order: {}, request: {}", orderId, request);
+        long startTime = System.currentTimeMillis();
 
-        if (order.getStatus() == OrderStatus.DELIVERED || order.getStatus() == OrderStatus.CANCELED) {
-            throw new IllegalStateException("Cannot modify order in status: " + order.getStatus());
+        try {
+            OrderEntity order = orderRepository.findById(orderId)
+                    .orElseThrow(() -> {
+                        log.warn("Order not found: {}", orderId);
+                        return new IllegalArgumentException("Order not found");
+                    });
+
+            if (order.getStatus() == OrderStatus.DELIVERED || order.getStatus() == OrderStatus.CANCELED) {
+                log.warn("Cannot modify order: {} in status: {}", orderId, order.getStatus());
+                throw new IllegalStateException("Cannot modify order in status: " + order.getStatus());
+            }
+
+            UserEntity currentUser = securityUtils.getCurrentUser();
+            if (!order.getUser().getId().equals(currentUser.getId())) {
+                log.warn("Cannot modify order: {}, user: {}", orderId, currentUser.getEmail());
+                throw new IllegalArgumentException("You can only modify your own orders");
+            }
+
+            DishResponse dish = dishService.getDishById(request.dishId());
+
+            OrderItemEntity entity = orderItemMapper.toEntity(request, order);
+            entity.setDishName(dish.name());
+            entity.setPrice(dish.price());
+
+            OrderItemEntity saved = orderItemRepository.save(entity);
+            order.getItems().add(saved);
+
+            BigDecimal newTotal = order.getTotalPrice()
+                    .add(dish.price()
+                            .multiply(BigDecimal.valueOf(request.quantity())));
+
+            order.setTotalPrice(newTotal);
+            log.info("Set total price: {} to order: {}", newTotal, orderId);
+
+            orderRepository.save(order);
+
+            long duration = System.currentTimeMillis() - startTime;
+            log.info("Success add item: {} to order: {}, user: {}, duration={}ms",
+                    request, orderId, currentUser.getEmail(), duration);
+
+            return orderItemMapper.toResponse(saved);
+
+        } catch (Exception e) {
+            log.error("Failed add item: {} to order: {}. Error: {}", request, orderId, e.getMessage());
+            throw e;
         }
-
-        UserEntity currentUser = securityUtils.getCurrentUser();
-        if (!order.getUser().getId().equals(currentUser.getId())) {
-            throw new IllegalArgumentException("You can only modify your own orders");
-        }
-
-        DishResponse dish = dishService.getDishById(request.dishId());
-
-        OrderItemEntity entity = orderItemMapper.toEntity(request, order);
-        entity.setDishName(dish.name());
-        entity.setPrice(dish.price());
-
-        OrderItemEntity saved = orderItemRepository.save(entity);
-        order.getItems().add(saved);
-
-        BigDecimal newTotal = order.getTotalPrice()
-                .add(dish.price()
-                        .multiply(BigDecimal.valueOf(request.quantity())));
-
-        order.setTotalPrice(newTotal);
-        orderRepository.save(order);
-
-        return orderItemMapper.toResponse(saved);
     }
 
     @Transactional
     public void removeItemFromOrder(Long orderId, Long itemId) {
-        OrderEntity order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new IllegalArgumentException("Order not found"));
+        log.info("Remove item: {} from order: {}", itemId, orderId);
+        long startTime = System.currentTimeMillis();
 
-        if (order.getStatus() == OrderStatus.DELIVERED || order.getStatus() == OrderStatus.CANCELED) {
-            throw new IllegalStateException("Cannot modify order in status: " + order.getStatus());
+        try {
+            OrderEntity order = orderRepository.findById(orderId)
+                    .orElseThrow(() -> {
+                        log.info("Order not found: {}", orderId);
+                        return new IllegalArgumentException("Order not found");
+                    });
+
+            if (order.getStatus() == OrderStatus.DELIVERED || order.getStatus() == OrderStatus.CANCELED) {
+                log.warn("Cannot modify order: {} in status: {}", orderId, order.getStatus());
+                throw new IllegalStateException("Cannot modify order in status: " + order.getStatus());
+            }
+
+            UserEntity currentUser = securityUtils.getCurrentUser();
+            if (!order.getUser().getId().equals(currentUser.getId())) {
+                log.warn("Cannot modify order: {}, user: {}", orderId, currentUser.getEmail());
+                throw new IllegalArgumentException("You can only modify your own orders");
+            }
+
+            OrderItemEntity item = orderItemRepository.findById(itemId)
+                    .orElseThrow(() -> {
+                        log.warn("Item not found: {}", itemId);
+                        return new IllegalArgumentException("Item not found");
+                    });
+
+            if (!item.getOrder().getId().equals(orderId)) {
+                log.warn("Cannot remove the item: {}, doesn't belong to this order: {}", itemId, orderId);
+                throw new IllegalArgumentException("Item does not belong to this order");
+            }
+
+            BigDecimal itemTotal = item.getPrice()
+                    .multiply(BigDecimal.valueOf(item.getQuantity()));
+
+            order.setTotalPrice(
+                    order.getTotalPrice()
+                            .subtract(itemTotal));
+
+            log.info("Set new total price: {} to order: {}", order.getTotalPrice(), orderId);
+
+            order.getItems().remove(item);
+            orderRepository.save(order);
+
+            long duration = System.currentTimeMillis() - startTime;
+            log.info("Success remove item: {} from order: {}, user: {}, duration={}ms",
+                    itemId, orderId, currentUser.getEmail(), duration);
+
+        } catch (Exception e) {
+            log.error("Failed remove item: {} from order: {}. Error: {}", itemId, orderId, e.getMessage());
+            throw e;
         }
-
-        UserEntity currentUser = securityUtils.getCurrentUser();
-        if (!order.getUser().getId().equals(currentUser.getId())) {
-            throw new IllegalArgumentException("You can only modify your own orders");
-        }
-
-        OrderItemEntity item = orderItemRepository.findById(itemId)
-                .orElseThrow(() -> new IllegalArgumentException("Item not found"));
-
-        if (!item.getOrder().getId().equals(orderId)) {
-            throw new IllegalArgumentException("Item does not belong to this order");
-        }
-
-        BigDecimal itemTotal = item.getPrice()
-                .multiply(BigDecimal.valueOf(item.getQuantity()));
-
-        order.setTotalPrice(
-                order.getTotalPrice()
-                        .subtract(itemTotal));
-
-        order.getItems().remove(item);
-        orderRepository.save(order);
     }
 }

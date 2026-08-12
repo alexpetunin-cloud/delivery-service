@@ -28,10 +28,29 @@ public class OrderItemController {
     public ResponseEntity<List<OrderItemResponse>> getOrderItems(
             @PathVariable("orderId") Long orderId
     ) {
-        log.info("Called getOrderItems for orderId = {}", orderId);
+        log.info("GET /api/orders/{}/items", orderId);
+        long startTime = System.currentTimeMillis();
 
-        return ResponseEntity.ok()
-                .body(orderItemService.getOrderItems(orderId));
+        try {
+            List<OrderItemResponse> response = orderItemService.getOrderItems(orderId);
+
+            long duration = System.currentTimeMillis() - startTime;
+            log.info("GET /api/orders/{}/items completed: {}, duration={}ms",
+                    orderId, HttpStatus.OK, duration);
+
+            return ResponseEntity.ok()
+                    .body(response);
+
+        } catch (IllegalArgumentException e) {
+            log.warn("GET /api/orders/{}/items failed: {}",
+                    orderId, e.getMessage());
+            throw e;
+
+        } catch (Exception e) {
+            log.error("GET /api/orders/{}/items unexpected error",
+                    orderId, e);
+            throw e;
+        }
     }
 
     @PostMapping
@@ -39,8 +58,29 @@ public class OrderItemController {
             @PathVariable("orderId") Long orderId,
             @RequestBody @Valid OrderItemRequest request
     ) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(orderItemService.addItemToOrder(orderId, request));
+        log.info("POST /api/orders/{}/items", orderId);
+        long startTime = System.currentTimeMillis();
+
+        try {
+            OrderItemResponse response = orderItemService.addItemToOrder(orderId, request);
+
+            long duration = System.currentTimeMillis() - startTime;
+            log.info("POST /api/orders/{}/items completed: {}, duration={}ms",
+                    orderId, HttpStatus.CREATED, duration);
+
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(response);
+
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            log.warn("POST /api/orders/{}/items failed: {}",
+                    orderId, e.getMessage());
+            throw e;
+
+        } catch (Exception e) {
+            log.error("POST /api/orders/{}/items unexpected error",
+                    orderId, e);
+            throw e;
+        }
     }
 
     @DeleteMapping("{itemId}")
@@ -48,8 +88,28 @@ public class OrderItemController {
             @PathVariable("orderId") Long orderId,
             @PathVariable("itemId") Long itemId
     ) {
-        orderItemService.removeItemFromOrder(orderId, itemId);
-        return ResponseEntity.noContent()
-                .build();
+        log.info("DELETE /api/orders/{}/items/{}", orderId, itemId);
+        long startTime = System.currentTimeMillis();
+
+        try {
+            orderItemService.removeItemFromOrder(orderId, itemId);
+
+            long duration = System.currentTimeMillis() - startTime;
+            log.info("DELETE /api/orders/{}/items/{} completed: {}, duration={}ms",
+                    orderId, itemId, HttpStatus.NO_CONTENT, duration);
+
+            return ResponseEntity.noContent()
+                    .build();
+
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            log.warn("DELETE /api/orders/{}/items/{} failed: {}",
+                    orderId, itemId, e.getMessage());
+            throw e;
+
+        } catch (Exception e) {
+            log.error("DELETE /api/orders/{}/items/{} unexpected error",
+                    orderId, itemId, e);
+            throw e;
+        }
     }
 }

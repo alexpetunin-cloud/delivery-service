@@ -59,7 +59,7 @@ public class CourierService extends BaseService<CourierEntity, CourierResponse, 
             return courierMapper.toResponse(courier);
 
         } catch (Exception e) {
-            log.error("Failed to find available courier, {}", e.getMessage());
+            log.error("Failed to find available courier. Error: {}", e.getMessage());
             throw e;
         }
     }
@@ -87,7 +87,7 @@ public class CourierService extends BaseService<CourierEntity, CourierResponse, 
             return courierMapper.toResponse(saved);
 
         } catch (Exception e) {
-            log.error("Failed to create courier: name={}, phone={}, {}",
+            log.error("Failed to create courier: name={}, phone={}. Error: {}",
                     request.name(), request.phone(), e.getMessage());
             throw e;
         }

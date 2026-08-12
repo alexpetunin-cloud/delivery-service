@@ -115,7 +115,7 @@ public class DeliveryService extends BaseService<DeliveryEntity, DeliveryRespons
             return deliveryMapper.toResponse(saved);
 
         } catch (Exception e) {
-            log.error("Failed assign courier to order={}, {}",
+            log.error("Failed assign courier to order={}. Error: {}",
                     orderId, e.getMessage());
             throw e;
         }
@@ -138,7 +138,7 @@ public class DeliveryService extends BaseService<DeliveryEntity, DeliveryRespons
             return deliveryMapper.toResponse(delivery);
 
         } catch (Exception e) {
-            log.error("Failed to get delivery={}, {}", id, e.getMessage());
+            log.error("Failed to get delivery={}. Error: {}", id, e.getMessage());
             throw e;
         }
     }
@@ -182,7 +182,7 @@ public class DeliveryService extends BaseService<DeliveryEntity, DeliveryRespons
             return deliveryMapper.toResponse(saved);
 
         } catch (Exception e) {
-            log.error("Failed complete delivery={}, {}", deliveryId, e.getMessage());
+            log.error("Failed complete delivery={}. Error: {}", deliveryId, e.getMessage());
             throw e;
         }
     }
