@@ -9,6 +9,8 @@ import com.petunincloud.delivery.service.payments.dto.PaymentRequest;
 import com.petunincloud.delivery.service.payments.dto.PaymentResponse;
 import com.petunincloud.delivery.service.users.UserEntity;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +21,7 @@ import java.util.UUID;
 @Service
 public class PaymentService extends BaseService<PaymentEntity, PaymentResponse, PaymentSearchFilter> {
 
+    private final static Logger log = LoggerFactory.getLogger(PaymentService.class);
     private final PaymentRepository paymentRepository;
     private final PaymentMapper paymentMapper;
     private final OrderRepository orderRepository;
@@ -38,6 +41,7 @@ public class PaymentService extends BaseService<PaymentEntity, PaymentResponse, 
 
     @Override
     protected List<PaymentEntity> findWithFilter(PaymentSearchFilter filter, Pageable pageable) {
+        log.debug("Searching payments with filter: {}, pageable: {}", filter, pageable);
         return paymentRepository.searchAllByFilter(
                 filter.email(),
                 filter.orderId(),
@@ -55,46 +59,98 @@ public class PaymentService extends BaseService<PaymentEntity, PaymentResponse, 
 
     @Transactional
     public PaymentResponse initiatePayment(PaymentRequest request, UserEntity user) {
-        OrderEntity order = orderRepository.findById(request.orderId())
-                .orElseThrow(() -> new IllegalArgumentException("Order not found: " + request.orderId()));
+        log.info("Initiate payment: {} for user: {}", request, user.getEmail());
+        long startTime = System.currentTimeMillis();
 
-        PaymentEntity payment = paymentMapper.toEntity(user, order);
-        payment.setAmount(order.getTotalPrice());
-        payment.setPaymentMethod("CARD");
-        payment.setStatus(PaymentStatus.PENDING);
-        payment.setCreatedAt(LocalDateTime.now().withNano(0));
+        try {
+            OrderEntity order = orderRepository.findById(request.orderId())
+                    .orElseThrow(() -> {
+                        log.warn("Order not found: " + request.orderId());
+                        return new IllegalArgumentException("Order not found: " + request.orderId());
+                    });
 
-        PaymentEntity saved = paymentRepository.save(payment);
-        return paymentMapper.toResponse(saved);
+            PaymentEntity payment = paymentMapper.toEntity(user, order);
+            payment.setAmount(order.getTotalPrice());
+            payment.setPaymentMethod("CARD");
+
+            payment.setStatus(PaymentStatus.PENDING);
+            log.info("Set status of PENDING for payment: {}", payment.getId());
+
+            payment.setCreatedAt(LocalDateTime.now().withNano(0));
+            PaymentEntity saved = paymentRepository.save(payment);
+
+            long duration = System.currentTimeMillis() - startTime;
+            log.info("Success initiate payment: {} for user: {}, duration={}ms",
+                    request, user.getEmail(), duration);
+            return paymentMapper.toResponse(saved);
+
+        } catch (Exception e) {
+            log.error("Failed initiate payment: {} for user: {}. Error: {}",
+                    request, user.getEmail(), e.getMessage());
+            throw e;
+        }
+
     }
 
     @Transactional
     public PaymentResponse processPayment(Long paymentId) {
-        PaymentEntity payment = paymentRepository.findById(paymentId)
-                .orElseThrow(() -> new IllegalArgumentException("Payment not found"));
+        log.info("Process payment: {}", paymentId);
+        long startTime = System.currentTimeMillis();
 
-        if (payment.getStatus() != PaymentStatus.PENDING) {
-            throw new IllegalStateException("Payment already processed");
+        try {
+            PaymentEntity payment = paymentRepository.findById(paymentId)
+                    .orElseThrow(() -> {
+                        log.warn("Payment not found: {}", paymentId);
+                        return new IllegalArgumentException("Payment not found: " + paymentId);
+                    });
+
+            if (payment.getStatus() != PaymentStatus.PENDING) {
+                log.warn("Payment already processed: {} (status: {})", payment.getId(), payment.getStatus());
+                throw new IllegalStateException("Payment already processed");
+            }
+
+            payment.setStatus(PaymentStatus.SUCCESS);
+            log.info("Set status of SUCCESS for payment: {}", payment.getId());
+
+            payment.setTransactionId(UUID.randomUUID().toString());
+            payment.setCompletedAt(LocalDateTime.now().withNano(0));
+            confirmOrder(payment.getOrder().getId());
+            PaymentEntity saved = paymentRepository.save(payment);
+
+            long duration = System.currentTimeMillis() - startTime;
+            log.info("Success process payment: {}, duration={}ms", payment.getId(), duration);
+
+            return paymentMapper.toResponse(saved);
+
+        } catch (Exception e) {
+            log.error("Failed process payment: {}. Error: {}", paymentId, e.getMessage());
+            throw e;
         }
-
-        payment.setStatus(PaymentStatus.SUCCESS);
-        payment.setTransactionId(UUID.randomUUID().toString());
-        payment.setCompletedAt(LocalDateTime.now().withNano(0));
-        confirmOrder(payment.getOrder().getId());
-
-        PaymentEntity saved = paymentRepository.save(payment);
-        return paymentMapper.toResponse(saved);
     }
 
     @Transactional
     private void confirmOrder(Long orderId) {
-        OrderEntity order = orderService.getOrderById(orderId);
+        log.info("Confirm order: {}", orderId);
+        long startTime = System.currentTimeMillis();
 
-        if (order.getStatus() != OrderStatus.PENDING) {
-            throw new IllegalStateException("Only PENDING orders can be confirmed");
+        try {
+            OrderEntity order = orderService.getOrderById(orderId);
+
+            if (order.getStatus() != OrderStatus.PENDING) {
+                log.warn("Order: {} status not equals of PENDING (status: {})", order.getId(), order.getStatus());
+                throw new IllegalStateException("Only PENDING orders can be confirmed");
+            }
+
+            order.setStatus(OrderStatus.CONFIRMED);
+            log.info("Set status of CONFIRMED for order: {}", order.getId());
+            orderRepository.save(order);
+
+            long duration = System.currentTimeMillis() - startTime;
+            log.info("Success confirm order: {}, duration={}ms", orderId, duration);
+
+        } catch (Exception e) {
+            log.error("Failed confirm order: {}. Error: {}", orderId, e.getMessage());
+            throw e;
         }
-
-        order.setStatus(OrderStatus.CONFIRMED);
-        orderRepository.save(order);
     }
 }
