@@ -53,6 +53,7 @@ public class RestaurantService extends BaseService<RestaurantEntity, RestaurantR
 
     @Override
     protected List<RestaurantEntity> findWithFilter(RestaurantSearchFilter filter, Pageable pageable) {
+        log.debug("Searching restaurants with filter: {}, pageable: {}", filter, pageable);
         return restaurantRepository.searchAllByFilter(
                 filter.name(),
                 pageable
@@ -66,58 +67,116 @@ public class RestaurantService extends BaseService<RestaurantEntity, RestaurantR
 
     @Transactional
     public RestaurantResponse createRestaurant(RestaurantRequest request) {
-        RestaurantEntity entity = restaurantMapper.toEntity(request);
-        RestaurantEntity saved = restaurantRepository.save(entity);
-        return restaurantMapper.toResponse(saved);
+        log.info("Create restaurant with request: {}", request);
+        long startTime = System.currentTimeMillis();
+
+        try {
+            RestaurantEntity entity = restaurantMapper.toEntity(request);
+            RestaurantEntity saved = restaurantRepository.save(entity);
+
+            long duration = System.currentTimeMillis() - startTime;
+            log.info("Success create restaurant with request: {}, duration={}ms", request, duration);
+
+            return restaurantMapper.toResponse(saved);
+
+        } catch (Exception e) {
+            log.error("Failed create restaurant with request: {}. Error: {}", request, e.getMessage());
+            throw e;
+        }
     }
 
     @Transactional
     public DishResponse addDishToRestaurant(Long restaurantId, DishRequest request) {
-        RestaurantEntity restaurant = restaurantRepository.findById(restaurantId)
-                .orElseThrow(() -> new IllegalArgumentException("Restaurant not found: " + restaurantId));
+        log.info("Add dish: {} to restaurant: {}", request, restaurantId);
+        long startTime = System.currentTimeMillis();
 
-        DishEntity dish = new DishEntity();
-        dish.setName(request.name());
-        dish.setPrice(request.price());
-        dish.setRestaurant(restaurant);
+        try {
+            RestaurantEntity restaurant = restaurantRepository.findById(restaurantId)
+                    .orElseThrow(() -> {
+                        log.warn("Restaurant not found: {}", restaurantId);
+                        return new IllegalArgumentException("Restaurant not found: " + restaurantId);
+                    });
 
-        DishEntity savedDish = dishRepository.save(dish);
+            DishEntity dish = new DishEntity();
+            dish.setName(request.name());
+            dish.setPrice(request.price());
+            dish.setRestaurant(restaurant);
 
-        restaurant.getMenu().add(savedDish);
-        restaurantRepository.save(restaurant);
+            DishEntity savedDish = dishRepository.save(dish);
 
-        return dishMapper.toResponse(savedDish);
+            restaurant.getMenu().add(savedDish);
+            restaurantRepository.save(restaurant);
+
+            long duration = System.currentTimeMillis() - startTime;
+            log.info("Success add dish: {} to restaurant: {}, duration={}ms",
+                    request, restaurantId, duration);
+
+            return dishMapper.toResponse(savedDish);
+
+        } catch (Exception e) {
+            log.error("Failed add dish: {} to restaurant: {}. Error: {}",
+                    request, restaurantId, e.getMessage());
+            throw e;
+        }
     }
 
     @Transactional
     public OrderResponse startCooking(Long orderId) {
-        OrderEntity order = orderService.getOrderById(orderId);
+        log.info("Start cooking for order: {}", orderId);
+        long startTime = System.currentTimeMillis();
 
-        if (order.getStatus() != OrderStatus.CONFIRMED) {
-            throw new IllegalStateException("Only CONFIRMED orders can start cooking");
+        try {
+            OrderEntity order = orderService.getOrderById(orderId);
+
+            if (order.getStatus() != OrderStatus.CONFIRMED) {
+                log.warn("Сan`t start cooking until the order is not CONFIRMED (status: {})", order.getStatus());
+                throw new IllegalStateException("Only CONFIRMED orders can start cooking");
+            }
+
+            order.setStatus(OrderStatus.COOKING);
+            log.info("Set status of COOKING for order: {}", orderId);
+
+            OrderEntity saved = orderRepository.save(order);
+
+            long duration = System.currentTimeMillis() - startTime;
+            log.info("Success start cooking for order: {}, duration={}ms", orderId, duration);
+
+            return orderMapper.toResponse(saved);
+
+        } catch (Exception e) {
+            log.error("Failed start cooking for order: {}. Error: {}",
+                    orderId, e.getMessage());
+            throw e;
         }
-
-        order.setStatus(OrderStatus.COOKING);
-        OrderEntity saved = orderRepository.save(order);
-
-        log.info("Order {} started cooking", orderId);
-
-        return orderMapper.toResponse(saved);
     }
 
     @Transactional
     public OrderResponse markAsReady(Long orderId) {
-        OrderEntity order = orderService.getOrderById(orderId);
+        log.info("Mark as ready for order: {}", orderId);
+        long startTime = System.currentTimeMillis();
 
-        if (order.getStatus() != OrderStatus.COOKING) {
-            throw new IllegalStateException("Only COOKING orders can be marked as ready");
+        try {
+            OrderEntity order = orderService.getOrderById(orderId);
+
+            if (order.getStatus() != OrderStatus.COOKING) {
+                log.warn("Сan`t start cooking until the order is not COOKING (status: {})", order.getStatus());
+                throw new IllegalStateException("Only COOKING orders can be marked as ready");
+            }
+
+            order.setStatus(OrderStatus.READY);
+            log.info("Set status of READY for order: {}", orderId);
+
+            OrderEntity saved = orderRepository.save(order);
+
+            long duration = System.currentTimeMillis() - startTime;
+            log.info("Success mark as ready for order: {}, duration={}ms", orderId, duration);
+
+            return orderMapper.toResponse(saved);
+
+        } catch (Exception e) {
+            log.error("Failed mark as ready for order: {}. Error: {}",
+                    orderId, e.getMessage());
+            throw e;
         }
-
-        order.setStatus(OrderStatus.READY);
-        OrderEntity saved = orderRepository.save(order);
-
-        log.info("Order {} is ready for delivery", orderId);
-
-        return orderMapper.toResponse(saved);
     }
 }

@@ -30,10 +30,23 @@ public class RestaurantController extends BaseController<RestaurantService, Rest
     public ResponseEntity<RestaurantResponse> createRestaurant (
             @RequestBody @Valid RestaurantRequest request
     ) {
-        log.info("Called createRestaurant with parameters = {}", request);
+        log.info("POST /api/restaurants with request: {}", request);
+        long startTime = System.currentTimeMillis();
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(service.createRestaurant(request));
+        try {
+            RestaurantResponse response = service.createRestaurant(request);
+
+            long duration = System.currentTimeMillis() - startTime;
+            log.info("POST /api/restaurants with request: {} completed: {}, duration={}ms",
+                    request, HttpStatus.CREATED, duration);
+
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(response);
+
+        } catch (Exception e) {
+            log.error("POST /api/restaurants with request: {} unexpected error", request, e);
+            throw e;
+        }
     }
 
     @PostMapping("/{restaurantId}/dishes")
@@ -41,30 +54,84 @@ public class RestaurantController extends BaseController<RestaurantService, Rest
             @PathVariable("restaurantId") Long restaurantId,
             @RequestBody @Valid DishRequest request
     ) {
-        log.info("Called addDishToRestaurant for id = {} with parameters = {}", restaurantId, request);
+        log.info("POST /api/restaurants/{}/dishes with request: {}", restaurantId, request);
+        long startTime = System.currentTimeMillis();
 
-        DishResponse response = service.addDishToRestaurant(restaurantId, request);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(response);
+        try {
+            DishResponse response = service.addDishToRestaurant(restaurantId, request);
+
+            long duration = System.currentTimeMillis() - startTime;
+            log.info("POST /api/restaurants/{}/dishes with request: {} completed: {}, duration={}ms",
+                    restaurantId, request, HttpStatus.CREATED, duration);
+
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(response);
+
+        } catch (IllegalArgumentException e) {
+            log.warn("POST /api/restaurants/{}/dishes with request: {} failed: {}",
+                    restaurantId, request, e.getMessage());
+            throw e;
+
+        } catch (Exception e) {
+            log.error("POST /api/restaurants/{}/dishes with request: {} unexpected error",
+                    restaurantId, request, e);
+            throw e;
+        }
     }
 
     @PatchMapping("/orders/{orderId}/cook")
     public ResponseEntity<OrderResponse> startCooking(
             @PathVariable("orderId") Long orderId
     ) {
-        log.info("Called startCooking for id = {}", orderId);
+        log.info("PATCH /api/restaurants/orders/{}/cook", orderId);
+        long startTime = System.currentTimeMillis();
 
-        return ResponseEntity.ok()
-                .body(service.startCooking(orderId));
+        try {
+            OrderResponse response = service.startCooking(orderId);
+
+            long duration = System.currentTimeMillis() - startTime;
+            log.info("PATCH /api/restaurants/orders/{}/cook completed: {}, duration={}ms",
+                    orderId, HttpStatus.OK, duration);
+
+            return ResponseEntity.ok(response);
+
+        } catch (IllegalStateException e) {
+            log.warn("PATCH /api/restaurants/orders/{}/cook failed: {}",
+                    orderId, e.getMessage());
+            throw e;
+
+        } catch (Exception e) {
+            log.error("PATCH /api/restaurants/orders/{}/cook unexpected error",
+                    orderId, e);
+            throw e;
+        }
     }
 
     @PatchMapping("/orders/{orderId}/ready")
     public ResponseEntity<OrderResponse> markAsReady(
             @PathVariable("orderId") Long orderId
     ) {
-        log.info("Called markAsReady for id = {}", orderId);
+        log.info("PATCH /api/restaurants/orders/{}/ready", orderId);
+        long startTime = System.currentTimeMillis();
 
-        return ResponseEntity.ok()
-                .body(service.markAsReady(orderId));
+        try {
+            OrderResponse response = service.markAsReady(orderId);
+
+            long duration = System.currentTimeMillis() - startTime;
+            log.info("PATCH /api/restaurants/orders/{}/ready completed: {}, duration={}ms",
+                    orderId, HttpStatus.OK, duration);
+
+            return ResponseEntity.ok(response);
+
+        } catch (IllegalStateException e) {
+            log.warn("PATCH /api/restaurants/orders/{}/ready failed: {}",
+                    orderId, e.getMessage());
+            throw e;
+
+        } catch (Exception e) {
+            log.error("PATCH /api/restaurants/orders/{}/ready unexpected error",
+                    orderId, e);
+            throw e;
+        }
     }
 }
