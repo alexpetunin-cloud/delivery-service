@@ -6,6 +6,8 @@ import com.petunincloud.delivery.service.users.dto.UserRequest;
 import com.petunincloud.delivery.service.users.dto.UserResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/users")
 @SecurityRequirement(name = "bearerAuth")
 public class UserController extends BaseController<UserService, UserEntity, UserResponse, UserSearchFilter> {
+    private final static Logger log = LoggerFactory.getLogger(UserController.class);
+
     public UserController(UserService service) {
         super(service);
     }
@@ -22,9 +26,27 @@ public class UserController extends BaseController<UserService, UserEntity, User
     public ResponseEntity<UserResponse> createUser(
             @RequestBody @Valid UserRequest request
     ) {
-        UserResponse response = service.createUser(request);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(response);
+        log.info("POST /api/users with request: {}", request);
+        long startTime = System.currentTimeMillis();
+
+        try {
+            UserResponse response = service.createUser(request);
+
+            long duration = System.currentTimeMillis() - startTime;
+            log.info("POST /api/users with request: {} completed: {}, duration={}ms",
+                    request, HttpStatus.CREATED, duration);
+
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(response);
+
+        } catch (IllegalArgumentException e) {
+            log.warn("POST /api/users with request: {} failed: {}", request, e.getMessage());
+            throw e;
+
+        } catch (Exception e) {
+            log.error("POST /api/users with request: {} unexpected error", request, e);
+            throw e;
+        }
     }
 
     @PatchMapping("/{email}")
@@ -32,31 +54,103 @@ public class UserController extends BaseController<UserService, UserEntity, User
             @PathVariable("email") String email,
             @RequestBody @Valid UserPatchRequest request
     ) {
-        UserResponse response = service.updateUser(email, request);
-        return ResponseEntity.ok(response);
+        log.info("PATCH /api/users/{} with request: {}", email, request);
+        long startTime = System.currentTimeMillis();
+
+        try {
+            UserResponse response = service.updateUser(email, request);
+
+            long duration = System.currentTimeMillis() - startTime;
+            log.info("PATCH /api/users/{} with request: {} completed: {}, duration={}ms",
+                    email, request, HttpStatus.OK, duration);
+
+            return ResponseEntity.ok(response);
+
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            log.warn("PATCH /api/users/{} with request: {} failed: {}", email, request, e.getMessage());
+            throw e;
+
+        } catch (Exception e) {
+            log.error("PATCH /api/users/{} with request: {} unexpected error", email, request, e);
+            throw e;
+        }
     }
 
     @DeleteMapping("/{email}")
     public ResponseEntity<Void> deleteUser(
             @PathVariable("email") String email
     ) {
-        service.deleteUser(email);
-        return ResponseEntity.noContent().build();
+        log.info("DELETE /api/users/{}", email);
+        long startTime = System.currentTimeMillis();
+
+        try {
+            service.deleteUser(email);
+
+            long duration = System.currentTimeMillis() - startTime;
+            log.info("DELETE /api/users/{} completed: {}, duration={}ms",
+                    email, HttpStatus.NO_CONTENT, duration);
+
+            return ResponseEntity.noContent().build();
+
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            log.warn("DELETE /api/users/{} failed: {}", email, e.getMessage());
+            throw e;
+
+        } catch (Exception e) {
+            log.error("DELETE /api/users/{} unexpected error", email, e);
+            throw e;
+        }
     }
 
     @GetMapping("/email/{email}")
     public ResponseEntity<UserResponse> findByEmail(
             @PathVariable("email") String email
     ) {
-        UserResponse response = service.findByEmail(email);
-        return ResponseEntity.ok(response);
+        log.info("GET /api/users/email/{}", email);
+        long startTime = System.currentTimeMillis();
+
+        try {
+            UserResponse response = service.findByEmail(email);
+
+            long duration = System.currentTimeMillis() - startTime;
+            log.info("GET /api/users/email/{} completed: {}, duration={}ms",
+                    email, HttpStatus.OK, duration);
+
+            return ResponseEntity.ok(response);
+
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            log.warn("GET /api/users/email/{} failed: {}", email, e.getMessage());
+            throw e;
+
+        } catch (Exception e) {
+            log.error("GET /api/users/email/{} unexpected error", email, e);
+            throw e;
+        }
     }
 
     @GetMapping("/phone/{phone}")
     public ResponseEntity<UserResponse> findByPhone(
             @PathVariable("phone") String phone
     ) {
-        UserResponse response = service.findByPhone(phone);
-        return ResponseEntity.ok(response);
+        log.info("GET /api/users/phone/{}", phone);
+        long startTime = System.currentTimeMillis();
+
+        try {
+            UserResponse response = service.findByPhone(phone);
+
+            long duration = System.currentTimeMillis() - startTime;
+            log.info("GET /api/users/phone/{} completed: {}, duration={}ms",
+                    phone, HttpStatus.OK, duration);
+
+            return ResponseEntity.ok(response);
+
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            log.warn("GET /api/users/phone/{} failed: {}", phone, e.getMessage());
+            throw e;
+
+        } catch (Exception e) {
+            log.error("GET /api/users/phone/{} unexpected error", phone, e);
+            throw e;
+        }
     }
 }
