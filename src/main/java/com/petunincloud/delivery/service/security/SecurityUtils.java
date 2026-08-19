@@ -17,10 +17,13 @@ public class SecurityUtils {
 
     public UserEntity getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
         if (auth == null || !auth.isAuthenticated()) {
             throw new IllegalStateException("User is not authenticated");
         }
+
         String email = auth.getName();
+
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
     }

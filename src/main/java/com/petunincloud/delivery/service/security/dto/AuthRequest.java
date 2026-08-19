@@ -18,10 +18,7 @@ public record AuthRequest(
         String name,
 
         @NotBlank(message = "Phone number is required")
-        @Pattern(
-                regexp = "^\\+?\\d{10,15}$",
-                message = "Phone number must be valid (e.g., +79991234567)"
-        )
+        @Pattern(regexp = "^\\+?\\d{10,15}$", message = "Phone number must be valid (e.g., +79991234567)")
         String phone,
 
         @NotBlank(message = "Delivery address is required")

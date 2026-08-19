@@ -20,6 +20,5 @@ public record UserRequest(
         String address,
 
         String apartment, // необязательно
-
         String deliveryInstructions // необязательно
 ) {}

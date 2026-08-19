@@ -52,27 +52,27 @@ public class DeliveryServiceTest {
         Long orderId = 1L;
 
         UserEntity user = new UserEntity();
+        RestaurantEntity restaurant = new RestaurantEntity();
+        OrderEntity order = new OrderEntity();
+        CourierEntity courier = new CourierEntity();
+        DeliveryEntity delivery = new DeliveryEntity();
+
         user.setId(1L);
         user.setAddress("ул. Пушкина, 25");
 
-        RestaurantEntity restaurant = new RestaurantEntity();
         restaurant.setId(1L);
         restaurant.setAddress("ул. Ленина, д. 1");
 
-        OrderEntity order = new OrderEntity();
         order.setId(orderId);
         order.setStatus(OrderStatus.READY);
         order.setUser(user);
         order.setRestaurant(restaurant);
 
-        CourierEntity courier = new CourierEntity(
-                1L,
-                "Алексей",
-                "+70002341234",
-                CourierStatus.AVAILABLE
-        );
+        courier.setId(1L);
+        courier.setName("Алексей");
+        courier.setPhone("+70002341234");
+        courier.setStatus(CourierStatus.AVAILABLE);
 
-        DeliveryEntity delivery = new DeliveryEntity();
         delivery.setOrder(order);
         delivery.setCourier(courier);
         delivery.setStatus(DeliveryStatus.ASSIGNED);
@@ -92,14 +92,20 @@ public class DeliveryServiceTest {
                 null
         );
 
-        when(orderService.getOrderById(orderId)).thenReturn(order);
-        when(deliveryRepository.existsByOrderId(orderId)).thenReturn(false);
+        when(orderService.getOrderById(orderId))
+                .thenReturn(order);
+        when(deliveryRepository.existsByOrderId(orderId))
+                .thenReturn(false);
         when(courierRepository.findTopByStatus(CourierStatus.AVAILABLE))
                 .thenReturn(Optional.of(courier));
-        when(courierRepository.save(any(CourierEntity.class))).thenReturn(courier);
-        when(orderRepository.save(any(OrderEntity.class))).thenReturn(order);
-        when(deliveryRepository.save(any(DeliveryEntity.class))).thenReturn(delivery);
-        when(deliveryMapper.toResponse(delivery)).thenReturn(deliveryResponse);
+        when(courierRepository.save(any(CourierEntity.class)))
+                .thenReturn(courier);
+        when(orderRepository.save(any(OrderEntity.class)))
+                .thenReturn(order);
+        when(deliveryRepository.save(any(DeliveryEntity.class)))
+                .thenReturn(delivery);
+        when(deliveryMapper.toResponse(delivery))
+                .thenReturn(deliveryResponse);
 
         DeliveryResponse result = deliveryService.assignCourierToOrder(orderId);
 
@@ -110,101 +116,139 @@ public class DeliveryServiceTest {
         assertEquals(order.getRestaurant().getAddress(), delivery.getPickupAddress());
         assertEquals(order.getUser().getAddress(), delivery.getDeliveryAddress());
 
-        verify(orderService, times(1)).getOrderById(orderId);
-        verify(deliveryRepository, times(1)).existsByOrderId(orderId);
-        verify(courierRepository, times(1)).findTopByStatus(CourierStatus.AVAILABLE);
-        verify(courierRepository, times(1)).save(any(CourierEntity.class));
-        verify(orderRepository, times(1)).save(any(OrderEntity.class));
-        verify(deliveryRepository, times(1)).save(any(DeliveryEntity.class));
-        verify(deliveryMapper, times(1)).toResponse(delivery);
+        verify(orderService, times(1))
+                .getOrderById(orderId);
+        verify(deliveryRepository, times(1))
+                .existsByOrderId(orderId);
+        verify(courierRepository, times(1))
+                .findTopByStatus(CourierStatus.AVAILABLE);
+        verify(courierRepository, times(1))
+                .save(any(CourierEntity.class));
+        verify(orderRepository, times(1))
+                .save(any(OrderEntity.class));
+        verify(deliveryRepository, times(1))
+                .save(any(DeliveryEntity.class));
+        verify(deliveryMapper, times(1))
+                .toResponse(delivery);
     }
 
     @Test
     void assignCourierToOrder_ShouldThrowException_WhenStatusNotReady() {
         Long orderId = 1L;
+
         OrderEntity order = new OrderEntity();
+
         order.setId(orderId);
         order.setStatus(OrderStatus.PENDING);
 
-        when(orderService.getOrderById(orderId)).thenReturn(order);
+        when(orderService.getOrderById(orderId))
+                .thenReturn(order);
 
         assertThrows(IllegalStateException.class,
                 () -> deliveryService.assignCourierToOrder(orderId));
 
-        verify(courierRepository, never()).save(any(CourierEntity.class));
-        verify(deliveryRepository, never()).save(any(DeliveryEntity.class));
-        verify(orderRepository, never()).save(any(OrderEntity.class));
+        verify(courierRepository, never())
+                .save(any(CourierEntity.class));
+        verify(deliveryRepository, never())
+                .save(any(DeliveryEntity.class));
+        verify(orderRepository, never())
+                .save(any(OrderEntity.class));
     }
 
     @Test
     void assignCourierToOrder_ShouldThrowException_WhenStatusDelivering() {
         Long orderId = 1L;
+
         OrderEntity order = new OrderEntity();
+
         order.setId(orderId);
         order.setStatus(OrderStatus.DELIVERING);
 
-        when(orderService.getOrderById(orderId)).thenReturn(order);
+        when(orderService.getOrderById(orderId))
+                .thenReturn(order);
 
         assertThrows(IllegalStateException.class,
                 () -> deliveryService.assignCourierToOrder(orderId));
 
-        verify(courierRepository, never()).save(any(CourierEntity.class));
-        verify(deliveryRepository, never()).save(any(DeliveryEntity.class));
-        verify(orderRepository, never()).save(any(OrderEntity.class));
+        verify(courierRepository, never())
+                .save(any(CourierEntity.class));
+        verify(deliveryRepository, never())
+                .save(any(DeliveryEntity.class));
+        verify(orderRepository, never())
+                .save(any(OrderEntity.class));
     }
 
     @Test
     void assignCourierToOrder_ShouldThrowException_WhenStatusDelivered() {
         Long orderId = 1L;
+
         OrderEntity order = new OrderEntity();
+
         order.setId(orderId);
         order.setStatus(OrderStatus.DELIVERED);
 
-        when(orderService.getOrderById(orderId)).thenReturn(order);
+        when(orderService.getOrderById(orderId))
+                .thenReturn(order);
 
         assertThrows(IllegalStateException.class,
                 () -> deliveryService.assignCourierToOrder(orderId));
 
-        verify(courierRepository, never()).save(any(CourierEntity.class));
-        verify(deliveryRepository, never()).save(any(DeliveryEntity.class));
-        verify(orderRepository, never()).save(any(OrderEntity.class));
+        verify(courierRepository, never())
+                .save(any(CourierEntity.class));
+        verify(deliveryRepository, never())
+                .save(any(DeliveryEntity.class));
+        verify(orderRepository, never())
+                .save(any(OrderEntity.class));
     }
 
     @Test
     void assignCourierToOrder_ShouldThrowException_WhenExistsByOrderId() {
         Long orderId = 1L;
+
         OrderEntity order = new OrderEntity();
+
         order.setId(orderId);
         order.setStatus(OrderStatus.READY);
 
-        when(orderService.getOrderById(orderId)).thenReturn(order);
-        when(deliveryRepository.existsByOrderId(orderId)).thenReturn(true);
+        when(orderService.getOrderById(orderId))
+                .thenReturn(order);
+        when(deliveryRepository.existsByOrderId(orderId))
+                .thenReturn(true);
 
         assertThrows(IllegalStateException.class,
                 () -> deliveryService.assignCourierToOrder(orderId));
 
-        verify(courierRepository, never()).save(any(CourierEntity.class));
-        verify(deliveryRepository, never()).save(any(DeliveryEntity.class));
-        verify(orderRepository, never()).save(any(OrderEntity.class));
+        verify(courierRepository, never())
+                .save(any(CourierEntity.class));
+        verify(deliveryRepository, never())
+                .save(any(DeliveryEntity.class));
+        verify(orderRepository, never())
+                .save(any(OrderEntity.class));
     }
 
     @Test
     void assignCourierToOrder_ShouldThrowException_WhenNotAvailableCouriers() {
         Long orderId = 1L;
+
         OrderEntity order = new OrderEntity();
+
         order.setId(orderId);
         order.setStatus(OrderStatus.READY);
 
-        when(orderService.getOrderById(orderId)).thenReturn(order);
+        when(orderService.getOrderById(orderId))
+                .thenReturn(order);
         when(courierRepository.findTopByStatus(CourierStatus.AVAILABLE))
                 .thenReturn(Optional.empty());
 
         assertThrows(IllegalStateException.class,
                 () -> deliveryService.assignCourierToOrder(orderId));
 
-        verify(courierRepository, never()).save(any(CourierEntity.class));
-        verify(deliveryRepository, never()).save(any(DeliveryEntity.class));
-        verify(orderRepository, never()).save(any(OrderEntity.class));
+        verify(courierRepository, never())
+                .save(any(CourierEntity.class));
+        verify(deliveryRepository, never())
+                .save(any(DeliveryEntity.class));
+        verify(orderRepository, never())
+                .save(any(OrderEntity.class));
     }
 
     @Test
@@ -213,20 +257,21 @@ public class DeliveryServiceTest {
         Long orderId = 1L;
 
         UserEntity user = new UserEntity();
+        OrderEntity order = new OrderEntity();
+        RestaurantEntity restaurant = new RestaurantEntity();
+        CourierEntity courier = new CourierEntity();
+        DeliveryEntity delivery = new DeliveryEntity();
+
         user.setAddress("ул. Пушкина, 25");
 
-        RestaurantEntity restaurant = new RestaurantEntity();
         restaurant.setAddress("ул. Ленина, д. 1");
 
-        OrderEntity order = new OrderEntity();
         order.setUser(user);
         order.setRestaurant(restaurant);
 
-        CourierEntity courier = new CourierEntity();
         courier.setId(1L);
         courier.setName("Михаил");
 
-        DeliveryEntity delivery = new DeliveryEntity();
         delivery.setId(deliveryId);
         delivery.setOrder(order);
         delivery.setCourier(courier);
@@ -262,7 +307,8 @@ public class DeliveryServiceTest {
 
         verify(deliveryRepository, times(1))
                 .findByIdWithOrderAndCourier(deliveryId);
-        verify(deliveryMapper, times(1)).toResponse(delivery);
+        verify(deliveryMapper, times(1))
+                .toResponse(delivery);
     }
 
     @Test
@@ -275,7 +321,8 @@ public class DeliveryServiceTest {
         assertThrows(IllegalArgumentException.class,
                 () -> deliveryService.getDeliveryById(deliveryId));
 
-        verify(deliveryMapper, never()).toResponse(any(DeliveryEntity.class));
+        verify(deliveryMapper, never())
+                .toResponse(any(DeliveryEntity.class));
     }
 
     @Test
@@ -284,21 +331,22 @@ public class DeliveryServiceTest {
         Long orderId = 1L;
 
         UserEntity user = new UserEntity();
+        OrderEntity order = new OrderEntity();
+        CourierEntity courier = new CourierEntity();
+        RestaurantEntity restaurant = new RestaurantEntity();
+        DeliveryEntity delivery = new DeliveryEntity();
+
         user.setAddress("ул. Пушкина, 25");
 
-        RestaurantEntity restaurant = new RestaurantEntity();
         restaurant.setAddress("ул. Ленина, д. 1");
 
-        OrderEntity order = new OrderEntity();
         order.setUser(user);
         order.setRestaurant(restaurant);
         order.setStatus(OrderStatus.DELIVERING);
 
-        CourierEntity courier = new CourierEntity();
         courier.setId(1L);
         courier.setName("Михаил");
 
-        DeliveryEntity delivery = new DeliveryEntity();
         delivery.setId(deliveryId);
         delivery.setOrder(order);
         delivery.setCourier(courier);
@@ -321,10 +369,14 @@ public class DeliveryServiceTest {
 
         when(deliveryRepository.findByIdWithOrderAndCourier(deliveryId))
                 .thenReturn(Optional.of(delivery));
-        when(orderRepository.save(any(OrderEntity.class))).thenReturn(order);
-        when(courierRepository.save(any(CourierEntity.class))).thenReturn(courier);
-        when(deliveryRepository.save(any(DeliveryEntity.class))).thenReturn(delivery);
-        when(deliveryMapper.toResponse(delivery)).thenReturn(deliveryResponse);
+        when(orderRepository.save(any(OrderEntity.class)))
+                .thenReturn(order);
+        when(courierRepository.save(any(CourierEntity.class)))
+                .thenReturn(courier);
+        when(deliveryRepository.save(any(DeliveryEntity.class)))
+                .thenReturn(delivery);
+        when(deliveryMapper.toResponse(delivery))
+                .thenReturn(deliveryResponse);
 
         DeliveryResponse result = deliveryService.completeDelivery(deliveryId);
 
@@ -336,10 +388,14 @@ public class DeliveryServiceTest {
 
         verify(deliveryRepository, times(1))
                 .findByIdWithOrderAndCourier(deliveryId);
-        verify(orderRepository, times(1)).save(any(OrderEntity.class));
-        verify(courierRepository, times(1)).save(any(CourierEntity.class));
-        verify(deliveryRepository, times(1)).save(any(DeliveryEntity.class));
-        verify(deliveryMapper, times(1)).toResponse(any(DeliveryEntity.class));
+        verify(orderRepository, times(1))
+                .save(any(OrderEntity.class));
+        verify(courierRepository, times(1))
+                .save(any(CourierEntity.class));
+        verify(deliveryRepository, times(1))
+                .save(any(DeliveryEntity.class));
+        verify(deliveryMapper, times(1))
+                .toResponse(any(DeliveryEntity.class));
     }
 
     @Test
@@ -352,9 +408,12 @@ public class DeliveryServiceTest {
         assertThrows(IllegalArgumentException.class,
                 () -> deliveryService.completeDelivery(deliveryId));
 
-        verify(orderRepository, never()).save(any(OrderEntity.class));
-        verify(courierRepository, never()).save(any(CourierEntity.class));
-        verify(deliveryRepository, never()).save(any(DeliveryEntity.class));
+        verify(orderRepository, never())
+                .save(any(OrderEntity.class));
+        verify(courierRepository, never())
+                .save(any(CourierEntity.class));
+        verify(deliveryRepository, never())
+                .save(any(DeliveryEntity.class));
     }
 
     @Test
@@ -362,11 +421,11 @@ public class DeliveryServiceTest {
         Long deliveryId = 1L;
 
         OrderEntity order = new OrderEntity();
+        CourierEntity courier = new CourierEntity();
+        DeliveryEntity delivery = new DeliveryEntity();
+
         order.setStatus(OrderStatus.READY);
 
-        CourierEntity courier = new CourierEntity();
-
-        DeliveryEntity delivery = new DeliveryEntity();
         delivery.setCourier(courier);
         delivery.setOrder(order);
 
@@ -376,8 +435,11 @@ public class DeliveryServiceTest {
         assertThrows(IllegalStateException.class,
                 () -> deliveryService.completeDelivery(deliveryId));
 
-        verify(orderRepository, never()).save(any(OrderEntity.class));
-        verify(courierRepository, never()).save(any(CourierEntity.class));
-        verify(deliveryRepository, never()).save(any(DeliveryEntity.class));
+        verify(orderRepository, never())
+                .save(any(OrderEntity.class));
+        verify(courierRepository, never())
+                .save(any(CourierEntity.class));
+        verify(deliveryRepository, never())
+                .save(any(DeliveryEntity.class));
     }
 }

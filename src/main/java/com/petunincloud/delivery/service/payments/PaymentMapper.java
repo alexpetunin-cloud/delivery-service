@@ -6,13 +6,24 @@ import com.petunincloud.delivery.service.payments.dto.PaymentResponse;
 import com.petunincloud.delivery.service.users.UserEntity;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+
 @Component
 public class PaymentMapper implements BaseMapper<PaymentEntity, PaymentResponse> {
 
-    public PaymentEntity toEntity(UserEntity user, OrderEntity order) {
+    public PaymentEntity toEntity(
+            UserEntity user,
+            OrderEntity order
+    ) {
         PaymentEntity payment = new PaymentEntity();
+
         payment.setUser(user);
         payment.setOrder(order);
+        payment.setAmount(order.getTotalPrice());
+        payment.setPaymentMethod("CARD");
+        payment.setStatus(PaymentStatus.PENDING);
+        payment.setCreatedAt(LocalDateTime.now().withNano(0));
+
         return payment;
     }
 

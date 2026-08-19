@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CourierRepository extends JpaRepository<CourierEntity, Long> {
+
     @Query(value = """
         SELECT * FROM couriers c
         WHERE (:name IS NULL OR c.name ILIKE COALESCE(CONCAT('%', :name, '%'), ''))
@@ -23,5 +24,6 @@ public interface CourierRepository extends JpaRepository<CourierEntity, Long> {
     );
 
     Optional<CourierEntity> findTopByStatus(CourierStatus status);
+
     Optional<CourierEntity> findByPhone(String phone);
 }

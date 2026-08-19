@@ -43,9 +43,10 @@ public class DeliveryService extends BaseService<DeliveryEntity, DeliveryRespons
     }
 
     @Override
-    protected List<DeliveryEntity> findWithFilter(DeliverySearchFilter filter, Pageable pageable) {
-        log.debug("Searching deliveries with filter: {}, pageable: {}", filter, pageable);
-
+    protected List<DeliveryEntity> findWithFilter(
+            DeliverySearchFilter filter,
+            Pageable pageable
+    ) {
         return deliveryRepository.searchAllByFilter(
                 filter.orderId(),
                 filter.courierId(),
@@ -63,23 +64,24 @@ public class DeliveryService extends BaseService<DeliveryEntity, DeliveryRespons
 
     @Transactional
     public DeliveryResponse assignCourierToOrder(Long orderId) {
-        log.info("Assigning courier to order={}", orderId);
+        log.info("Assign courier to order: {}", orderId);
         long startTime = System.currentTimeMillis();
 
         try {
             OrderEntity order = orderService.getOrderById(orderId);
 
             if (order.getStatus() == OrderStatus.DELIVERING || order.getStatus() == OrderStatus.DELIVERED) {
-                log.warn("Order is already in delivery process (status={})", order.getStatus());
+                log.warn("Order is already in delivery process (status: {})", order.getStatus());
                 throw new IllegalStateException("Order is already in delivery process");
             }
+
             if (order.getStatus() != OrderStatus.READY) {
-                log.warn("Order must be READY for delivery (status={})", order.getStatus());
+                log.warn("Order must be READY for delivery (status: {})", order.getStatus());
                 throw new IllegalStateException("Order must be READY for delivery");
             }
 
             if (deliveryRepository.existsByOrderId(orderId)) {
-                log.warn("Delivery already assigned for this order={}", orderId);
+                log.warn("Delivery already assigned for this order: {}", orderId);
                 throw new IllegalStateException("Delivery already assigned for this order");
             }
 
@@ -90,99 +92,100 @@ public class DeliveryService extends BaseService<DeliveryEntity, DeliveryRespons
                     });
 
             DeliveryEntity delivery = new DeliveryEntity();
+
             delivery.setOrder(order);
             delivery.setCourier(courier);
             delivery.setStatus(DeliveryStatus.ASSIGNED);
-            log.debug("Status delivery set of ASSIGNED (order={})", delivery.getOrder().getId());
             delivery.setAssignedAt(LocalDateTime.now().withNano(0));
             delivery.setPickupAddress(order.getRestaurant().getAddress());
             delivery.setDeliveryAddress(order.getUser().getAddress());
 
             courier.setStatus(CourierStatus.BUSY);
-            log.debug("Status courier set of BUSY (id={}, name={})",
-                    courier.getId(), courier.getName());
+            log.info("Set status of BUSY for courier: {}", courier.getId());
+
             order.setStatus(OrderStatus.DELIVERING);
-            log.debug("Status order set of DELIVERING (id={})", orderId);
+            log.info("Set status of DELIVERING for order: {}", orderId);
 
             courierRepository.save(courier);
             orderRepository.save(order);
             DeliveryEntity saved = deliveryRepository.save(delivery);
 
             long duration = System.currentTimeMillis() - startTime;
-            log.info("Success assign courier (name={}) to order={}, duration={}ms",
-                    courier.getName(), orderId, duration);
+            log.info("Success assign courier: {} to order: {}, duration={}ms",
+                    courier.getId(), orderId, duration);
 
             return deliveryMapper.toResponse(saved);
 
         } catch (Exception e) {
-            log.error("Failed assign courier to order={}. Error: {}",
-                    orderId, e.getMessage());
+            log.error("Failed assign courier to order: {}. Error: {}", orderId, e.getMessage());
             throw e;
         }
     }
 
     public DeliveryResponse getDeliveryById(Long id) {
-        log.info("Getting delivery by id={}", id);
+        log.info("Get delivery by id: {}", id);
         long startTime = System.currentTimeMillis();
 
         try {
             DeliveryEntity delivery = deliveryRepository.findByIdWithOrderAndCourier(id)
                     .orElseThrow(() -> {
-                        log.warn("Delivery not found: id={}", id);
-                        return new IllegalArgumentException("Delivery not found: " + id);
+                        log.warn("Delivery not found: {}", id);
+                        return new IllegalArgumentException("Delivery not found");
                     });
 
             long duration = System.currentTimeMillis() - startTime;
-            log.info("Successfully get delivery={}, duration={}ms", id, duration);
+            log.info("Success get delivery: {}, duration={}ms", id, duration);
 
             return deliveryMapper.toResponse(delivery);
 
         } catch (Exception e) {
-            log.error("Failed to get delivery={}. Error: {}", id, e.getMessage());
+            log.error("Failed to get delivery: {}. Error: {}", id, e.getMessage());
             throw e;
         }
     }
 
     @Transactional
     public DeliveryResponse completeDelivery(Long deliveryId) {
-        log.info("Completing delivery for id={}", deliveryId);
+        log.info("Complete delivery: {}", deliveryId);
         long startTime = System.currentTimeMillis();
 
         try {
             DeliveryEntity delivery = deliveryRepository.findByIdWithOrderAndCourier(deliveryId)
                     .orElseThrow(() -> {
-                        log.warn("Delivery not found: id={}", deliveryId);
-                        return new IllegalArgumentException("Delivery not found: " + deliveryId);
+                        log.warn("Delivery not found: {}", deliveryId);
+                        return new IllegalArgumentException("Delivery not found");
                     });
 
             OrderEntity order = delivery.getOrder();
             CourierEntity courier = delivery.getCourier();
 
             if (order.getStatus() != OrderStatus.DELIVERING) {
-                log.warn("Only DELIVERING orders can be completed (status={})", order.getStatus());
+                log.warn("Only DELIVERING orders can be completed (status: {})", order.getStatus());
                 throw new IllegalStateException("Only DELIVERING orders can be completed");
             }
 
             order.setStatus(OrderStatus.DELIVERED);
-            log.debug("Status order={} set of DELIVERED", order.getId());
+            log.info("Set status of DELIVERED for order: {}", order.getId());
+
             delivery.setStatus(DeliveryStatus.DELIVERED);
-            log.debug("Status delivery={} set of DELIVERED", delivery.getId());
+            log.info("Set status of DELIVERED for delivery: {}", delivery.getId());
+
             delivery.setDeliveredAt(LocalDateTime.now().withNano(0));
+
             courier.setStatus(CourierStatus.AVAILABLE);
-            log.debug("Status courier (id={}, name={}) set of AVAILABLE",
-                    courier.getId(), courier.getName());
+            log.info("Set status of AVAILABLE for courier: {}", courier.getId());
 
             orderRepository.save(order);
             courierRepository.save(courier);
             DeliveryEntity saved = deliveryRepository.save(delivery);
 
             long duration = System.currentTimeMillis() - startTime;
-            log.info("Success complete delivery={}, duration={}ms", deliveryId, duration);
+            log.info("Success complete delivery: {}, duration={}ms", deliveryId, duration);
 
             return deliveryMapper.toResponse(saved);
 
         } catch (Exception e) {
-            log.error("Failed complete delivery={}. Error: {}", deliveryId, e.getMessage());
+            log.error("Failed complete delivery: {}. Error: {}", deliveryId, e.getMessage());
             throw e;
         }
     }

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/deliveries")
 @SecurityRequirement(name = "bearerAuth")
 public class DeliveryController extends BaseController<DeliveryService, DeliveryEntity, DeliveryResponse, DeliverySearchFilter> {
+
     private final static Logger log = LoggerFactory.getLogger(DeliveryController.class);
 
     public DeliveryController(DeliveryService service) {
@@ -32,20 +33,18 @@ public class DeliveryController extends BaseController<DeliveryService, Delivery
             long duration = System.currentTimeMillis() - startTime;
             log.info("POST /api/deliveries/assign/{} completed: {}, duration={}ms",
                     orderId, HttpStatus.CREATED, duration);
+
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(response);
 
         } catch (IllegalArgumentException | IllegalStateException e) {
-            log.warn("POST /api/deliveries/assign/{} failed: {}",
-                    orderId, e.getMessage());
+            log.warn("POST /api/deliveries/assign/{} failed: {}", orderId, e.getMessage());
             throw e;
 
         } catch (Exception e) {
-            log.error("POST /api/deliveries/assign/{} unexpected error",
-                    orderId, e);
+            log.error("POST /api/deliveries/assign/{} unexpected error", orderId, e);
             throw e;
         }
-
     }
 
     // Курьер доставил заказ
@@ -62,16 +61,15 @@ public class DeliveryController extends BaseController<DeliveryService, Delivery
             long duration = System.currentTimeMillis() - startTime;
             log.info("PATCH /api/deliveries/{}/complete completed: {}, duration={}ms",
                     deliveryId, HttpStatus.OK, duration);
+
             return ResponseEntity.ok(response);
 
         } catch (IllegalArgumentException | IllegalStateException e) {
-            log.warn("PATCH /api/deliveries/{}/complete failed: {}",
-                    deliveryId, e.getMessage());
+            log.warn("PATCH /api/deliveries/{}/complete failed: {}", deliveryId, e.getMessage());
             throw e;
 
         } catch (Exception e) {
-            log.error("PATCH /api/deliveries/{}/complete unexpected error",
-                    deliveryId, e);
+            log.error("PATCH /api/deliveries/{}/complete unexpected error", deliveryId, e);
             throw e;
         }
     }
@@ -89,16 +87,15 @@ public class DeliveryController extends BaseController<DeliveryService, Delivery
             long duration = System.currentTimeMillis() - startTime;
             log.info("GET /api/deliveries/{} completed: {}, duration={}",
                     deliveryId, HttpStatus.OK, duration);
+
             return ResponseEntity.ok(response);
 
         } catch (IllegalArgumentException e) {
-            log.warn("GET /api/deliveries/{} failed: {}",
-                    deliveryId, e.getMessage());
+            log.warn("GET /api/deliveries/{} failed: {}", deliveryId, e.getMessage());
             throw e;
 
         } catch (Exception e) {
-            log.error("GET /api/deliveries/{} unexpected error",
-                    deliveryId, e);
+            log.error("GET /api/deliveries/{} unexpected error", deliveryId, e);
             throw e;
         }
     }

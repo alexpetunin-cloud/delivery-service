@@ -363,6 +363,7 @@ public class UserServiceTest {
     @Test
     void updateUser_ShouldThrowException_WhenNotAccess() {
         String email = "user@gmail.com";
+
         UserPatchRequest request = new UserPatchRequest(
                 null,
                 null,
@@ -385,6 +386,7 @@ public class UserServiceTest {
     @Test
     void updateUser_ShouldThrowException_WhenNotOwnProfile() {
         String email = "user@gmail.com";
+
         UserPatchRequest request = new UserPatchRequest(
                 null,
                 null,
@@ -410,6 +412,7 @@ public class UserServiceTest {
     @Test
     void updateUser_ShouldThrowException_WhenUserNotFound() {
         String email = "user@gmail.com";
+
         UserPatchRequest request = new UserPatchRequest(
                 null,
                 null,
@@ -437,6 +440,7 @@ public class UserServiceTest {
     @Test
     void updateUser_ShouldThrowException_WhenEmailExists() {
         String email = "user@gmail.com";
+
         UserPatchRequest request = new UserPatchRequest(
                 "user2@gmail.com",
                 null,
@@ -447,10 +451,11 @@ public class UserServiceTest {
         );
 
         UserEntity user = new UserEntity();
+        UserEntity user2 = new UserEntity();
+
         user.setEmail(email);
         user.setId(1L);
 
-        UserEntity user2 = new UserEntity();
         user2.setEmail(request.email());
         user2.setId(2L);
 
@@ -471,6 +476,7 @@ public class UserServiceTest {
     @Test
     void updateUser_ShouldThrowException_WhenPhoneExists() {
         String email = "user@gmail.com";
+
         UserPatchRequest request = new UserPatchRequest(
                 null,
                 "+79921002921",
@@ -481,10 +487,11 @@ public class UserServiceTest {
         );
 
         UserEntity user = new UserEntity();
+        UserEntity user2 = new UserEntity();
+
         user.setEmail(email);
         user.setId(1L);
 
-        UserEntity user2 = new UserEntity();
         user2.setPhone(request.phone());
         user2.setId(2L);
 

@@ -7,7 +7,6 @@ import java.util.Objects;
 @Entity
 @Table(name = "roles")
 public class RoleEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -42,9 +41,12 @@ public class RoleEntity {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
+
         // Проверяем, что это тот же класс, а не прокси Hibernate
         if (o == null || getClass() != o.getClass()) return false;
+
         RoleEntity that = (RoleEntity) o;
+
         return Objects.equals(name, that.name);
     }
 

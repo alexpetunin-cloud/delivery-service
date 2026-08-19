@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface DeliveryRepository extends JpaRepository<DeliveryEntity, Long> {
+
     @Query("""
         SELECT d FROM DeliveryEntity d
           WHERE d.order.id = COALESCE(:orderId, d.order.id)

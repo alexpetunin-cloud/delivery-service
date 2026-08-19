@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class CourierMapper implements BaseMapper<CourierEntity, CourierResponse> {
+
     @Override
     public CourierResponse toResponse(CourierEntity entity) {
         return new CourierResponse(
@@ -24,8 +25,10 @@ public class CourierMapper implements BaseMapper<CourierEntity, CourierResponse>
 
     public CourierEntity toEntity(CourierRequest request) {
         CourierEntity entity = new CourierEntity();
+
         entity.setName(request.name());
         entity.setPhone(request.phone());
+
         return entity;
     }
 }

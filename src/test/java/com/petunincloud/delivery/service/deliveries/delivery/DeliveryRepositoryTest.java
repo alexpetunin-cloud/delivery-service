@@ -64,8 +64,10 @@ public class DeliveryRepositoryTest {
         );
 
         restaurant = new RestaurantEntity();
+
         restaurant.setName("Додо Пицца");
         restaurant.setAddress("пр. Калинина 8");
+
         entityManager.persist(restaurant);
 
         order1 = createOrder(user1, restaurant, OrderStatus.READY, BigDecimal.valueOf(100));
@@ -127,6 +129,7 @@ public class DeliveryRepositoryTest {
             String password
     ) {
         UserEntity user = new UserEntity();
+
         user.setEmail(email);
         user.setPhone(phone);
         user.setName(name);
@@ -145,6 +148,7 @@ public class DeliveryRepositoryTest {
             BigDecimal total
     ) {
         OrderEntity order = new OrderEntity();
+
         order.setUser(user);
         order.setRestaurant(restaurant);
         order.setStatus(status);
@@ -162,6 +166,7 @@ public class DeliveryRepositoryTest {
             CourierStatus status
     ) {
         CourierEntity courier = new CourierEntity();
+
         courier.setName(name);
         courier.setPhone(phone);
         courier.setStatus(status);
@@ -181,6 +186,7 @@ public class DeliveryRepositoryTest {
             String deliveryAddress
     ) {
         DeliveryEntity delivery = new DeliveryEntity();
+
         delivery.setOrder(order);
         delivery.setCourier(courier);
         delivery.setStatus(status);
@@ -202,6 +208,7 @@ public class DeliveryRepositoryTest {
             String deliveryAddress
     ) {
         DeliveryEntity delivery = new DeliveryEntity();
+
         delivery.setOrder(order);
         delivery.setCourier(courier);
         delivery.setStatus(status);

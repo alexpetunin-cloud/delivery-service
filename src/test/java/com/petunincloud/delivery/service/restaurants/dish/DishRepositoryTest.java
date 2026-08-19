@@ -30,8 +30,10 @@ public class DishRepositoryTest {
     @BeforeEach
     void setUp() {
         restaurant = new RestaurantEntity();
+
         restaurant.setName("Додо Пицца");
         restaurant.setAddress("пр. Калинина 8");
+
         entityManager.persist(restaurant);
 
         createDish("Маргарита", BigDecimal.valueOf(400), restaurant);
@@ -48,6 +50,7 @@ public class DishRepositoryTest {
             RestaurantEntity restaurant
     ) {
         DishEntity dish = new DishEntity();
+
         dish.setName(name);
         dish.setPrice(price);
         dish.setRestaurant(restaurant);

@@ -12,7 +12,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserService extends BaseService<UserEntity, UserResponse, UserSearchFilter> {
@@ -33,8 +32,10 @@ public class UserService extends BaseService<UserEntity, UserResponse, UserSearc
     }
 
     @Override
-    protected List<UserEntity> findWithFilter(UserSearchFilter filter, Pageable pageable) {
-        log.debug("Searching users with filter: {}, pageable: {}", filter, pageable);
+    protected List<UserEntity> findWithFilter(
+            UserSearchFilter filter,
+            Pageable pageable
+    ) {
         return userRepository.searchAllByFilter(
                 filter.name(),
                 filter.email(),
@@ -51,16 +52,17 @@ public class UserService extends BaseService<UserEntity, UserResponse, UserSearc
 
         try {
             if (userRepository.findByEmail(request.email()).isPresent()) {
-                log.warn("Not possible to create a user because this email: {} already exists", request.email());
-                throw new IllegalArgumentException("Email already exists: " + request.email());
+                log.warn("Email already exists: {}", request.email());
+                throw new IllegalArgumentException("Email already exists");
             }
 
             if (userRepository.findByPhone(request.phone()).isPresent()) {
-                log.warn("Not possible to create a user because this phone: {} already exists", request.phone());
-                throw new IllegalArgumentException("Phone already exists: " + request.phone());
+                log.warn("Phone already exists: {}", request.phone());
+                throw new IllegalArgumentException("Phone already exists");
             }
 
             UserEntity entity = userMapper.toEntity(request);
+
             UserEntity saved = userRepository.save(entity);
 
             long duration = System.currentTimeMillis() - startTime;
@@ -85,15 +87,16 @@ public class UserService extends BaseService<UserEntity, UserResponse, UserSearc
 
         try {
             UserEntity currentUser = securityUtils.getCurrentUser();
+
             if (!currentUser.getEmail().equals(email)) {
-                log.info("User: {} does not have access to the operation", currentUser.getEmail());
+                log.warn("Access denied: user {} tried to access user: {}", currentUser.getEmail(), email);
                 throw new IllegalArgumentException("You can only access your own profile");
             }
 
             UserEntity user = userRepository.findByEmail(email)
                     .orElseThrow(() -> {
                         log.warn("User not found by email: {}", email);
-                        return new IllegalArgumentException("User not found by email: " + email);
+                        return new IllegalArgumentException("User not found by email");
             });
 
             long duration = System.currentTimeMillis() - startTime;
@@ -113,15 +116,16 @@ public class UserService extends BaseService<UserEntity, UserResponse, UserSearc
 
         try {
             UserEntity currentUser = securityUtils.getCurrentUser();
+
             if (!currentUser.getPhone().equals(phone)) {
-                log.info("User: {} does not have access to the operation", currentUser.getPhone());
+                log.warn("Access denied: user {} tried to access user: {}", currentUser.getPhone(), phone);
                 throw new IllegalArgumentException("You can only access your own profile");
             }
 
             UserEntity user = userRepository.findByPhone(phone)
                     .orElseThrow(() -> {
                         log.warn("User not found by phone: {}", phone);
-                        return new IllegalArgumentException("User not found by phone: " + phone);
+                        return new IllegalArgumentException("User not found by phone");
             });
 
             long duration = System.currentTimeMillis() - startTime;
@@ -136,21 +140,25 @@ public class UserService extends BaseService<UserEntity, UserResponse, UserSearc
     }
 
     @Transactional
-    public UserResponse updateUser(String email, UserPatchRequest request) {
+    public UserResponse updateUser(
+            String email,
+            UserPatchRequest request
+    ) {
         log.info("Update user: {} with request: {}", email, request);
         long startTime = System.currentTimeMillis();
 
         try {
             UserEntity currentUser = securityUtils.getCurrentUser();
+
             if (!currentUser.getEmail().equals(email)) {
-                log.info("User: {} does not have access to the operation", currentUser.getEmail());
+                log.warn("Access denied: user {} tried to access user: {}", currentUser.getEmail(), email);
                 throw new IllegalArgumentException("You can only update your own profile");
             }
 
             UserEntity user = userRepository.findByEmail(email)
                     .orElseThrow(() -> {
                         log.warn("User not found by email: {}", email);
-                        return new IllegalArgumentException("User not found by email: " + email);
+                        return new IllegalArgumentException("User not found by email");
                     });
 
             if (request.email() != null && !request.email().equals(user.getEmail())) {
@@ -158,9 +166,10 @@ public class UserService extends BaseService<UserEntity, UserResponse, UserSearc
                         .ifPresent(existingUser -> {
                             if (!existingUser.getId().equals(user.getId())) {
                                 log.warn("Email already exists: {}", request.email());
-                                throw new IllegalArgumentException("Email already exists: " + request.email());
+                                throw new IllegalArgumentException("Email already exists");
                             }
                         });
+
                 user.setEmail(request.email());
             }
 
@@ -169,21 +178,25 @@ public class UserService extends BaseService<UserEntity, UserResponse, UserSearc
                         .ifPresent(existingUser -> {
                             if (!existingUser.getId().equals(user.getId())) {
                                 log.warn("Phone already exists: {}", request.phone());
-                                throw new IllegalArgumentException("Phone already exists: " + request.phone());
+                                throw new IllegalArgumentException("Phone already exists");
                             }
                         });
+
                 user.setPhone(request.phone());
             }
 
             if (request.name() != null) {
                 user.setName(request.name());
             }
+
             if (request.address() != null) {
                 user.setAddress(request.address());
             }
+
             if (request.apartment() != null) {
                 user.setApartment(request.apartment());
             }
+
             if (request.deliveryInstructions() != null) {
                 user.setDeliveryInstructions(request.deliveryInstructions());
             }
@@ -191,14 +204,12 @@ public class UserService extends BaseService<UserEntity, UserResponse, UserSearc
             UserEntity updated = userRepository.save(user);
 
             long duration = System.currentTimeMillis() - startTime;
-            log.info("Success update user: {} with request: {}, duration={}ms",
-                    email, request, duration);
+            log.info("Success update user: {} with request: {}, duration={}ms", email, request, duration);
 
             return userMapper.toResponse(updated);
 
         } catch (Exception e) {
-            log.error("Failed update user: {} with request: {}. Error: {}",
-                    email, request, e.getMessage());
+            log.error("Failed update user: {} with request: {}. Error: {}", email, request, e.getMessage());
             throw e;
         }
     }
@@ -210,15 +221,16 @@ public class UserService extends BaseService<UserEntity, UserResponse, UserSearc
 
         try {
             UserEntity currentUser = securityUtils.getCurrentUser();
+
             if (!currentUser.getEmail().equals(email)) {
-                log.info("User: {} does not have access to the operation", currentUser.getEmail());
+                log.warn("Access denied: user {} tried to access user: {}", currentUser.getEmail(), email);
                 throw new IllegalArgumentException("You can only delete your own profile");
             }
 
             UserEntity user = userRepository.findByEmail(email)
                     .orElseThrow(() -> {
                         log.warn("User not found by email: {}", email);
-                        return new IllegalArgumentException("User not found by email: " + email);
+                        return new IllegalArgumentException("User not found by email");
                     });
 
             userRepository.delete(user);

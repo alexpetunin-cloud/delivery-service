@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DishMapper implements BaseMapper<DishEntity, DishResponse> {
+
     @Override
     public DishResponse toResponse(DishEntity entity) {
         return new DishResponse(

@@ -49,10 +49,10 @@ public class PaymentServiceTest {
         Long userId = 1L;
 
         OrderEntity order = new OrderEntity();
-        order.setTotalPrice(BigDecimal.valueOf(300));
-
         UserEntity user = new UserEntity();
         PaymentEntity payment = new PaymentEntity();
+
+        order.setTotalPrice(BigDecimal.valueOf(300));
 
         PaymentRequest paymentRequest = new PaymentRequest(
                 orderId,
@@ -106,6 +106,7 @@ public class PaymentServiceTest {
                 1L,
                 "user@gmail.com"
         );
+
         UserEntity user = new UserEntity();
 
         when(orderRepository.findById(orderId))
@@ -124,10 +125,11 @@ public class PaymentServiceTest {
         Long userId = 1L;
 
         OrderEntity order = new OrderEntity();
+        PaymentEntity payment = new PaymentEntity();
+
         order.setId(orderId);
         order.setStatus(OrderStatus.PENDING);
 
-        PaymentEntity payment = new PaymentEntity();
         payment.setStatus(PaymentStatus.PENDING);
         payment.setId(1L);
         payment.setOrder(order);

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/users")
 @SecurityRequirement(name = "bearerAuth")
 public class UserController extends BaseController<UserService, UserEntity, UserResponse, UserSearchFilter> {
+
     private final static Logger log = LoggerFactory.getLogger(UserController.class);
 
     public UserController(UserService service) {
@@ -87,8 +88,7 @@ public class UserController extends BaseController<UserService, UserEntity, User
             service.deleteUser(email);
 
             long duration = System.currentTimeMillis() - startTime;
-            log.info("DELETE /api/users/{} completed: {}, duration={}ms",
-                    email, HttpStatus.NO_CONTENT, duration);
+            log.info("DELETE /api/users/{} completed: {}, duration={}ms", email, HttpStatus.NO_CONTENT, duration);
 
             return ResponseEntity.noContent().build();
 
@@ -113,8 +113,7 @@ public class UserController extends BaseController<UserService, UserEntity, User
             UserResponse response = service.findByEmail(email);
 
             long duration = System.currentTimeMillis() - startTime;
-            log.info("GET /api/users/email/{} completed: {}, duration={}ms",
-                    email, HttpStatus.OK, duration);
+            log.info("GET /api/users/email/{} completed: {}, duration={}ms", email, HttpStatus.OK, duration);
 
             return ResponseEntity.ok(response);
 
@@ -139,8 +138,7 @@ public class UserController extends BaseController<UserService, UserEntity, User
             UserResponse response = service.findByPhone(phone);
 
             long duration = System.currentTimeMillis() - startTime;
-            log.info("GET /api/users/phone/{} completed: {}, duration={}ms",
-                    phone, HttpStatus.OK, duration);
+            log.info("GET /api/users/phone/{} completed: {}, duration={}ms", phone, HttpStatus.OK, duration);
 
             return ResponseEntity.ok(response);
 

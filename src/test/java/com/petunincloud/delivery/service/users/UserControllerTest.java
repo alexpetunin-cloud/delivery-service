@@ -69,6 +69,7 @@ public class UserControllerTest {
     @Test
     void updateUser_ShouldUpdateUser() throws Exception {
         String email = "user@gmail.com";
+
         UserPatchRequest request = new UserPatchRequest(
                 "user@gmail.com",
                 "+79001234567",

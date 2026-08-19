@@ -29,7 +29,10 @@ public class JwtUtils {
         return createToken(claims, userDetails.getUsername());
     }
 
-    private String createToken(Map<String, Object> claims, String subject) {
+    private String createToken(
+            Map<String, Object> claims,
+            String subject
+    ) {
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(subject)
@@ -52,7 +55,10 @@ public class JwtUtils {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+    public <T> T extractClaim(
+            String token,
+            Function<Claims, T> claimsResolver
+    ) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
@@ -69,7 +75,10 @@ public class JwtUtils {
         return extractExpiration(token).before(new Date());
     }
 
-    public Boolean validateToken(String token, UserDetails userDetails) {
+    public Boolean validateToken(
+            String token,
+            UserDetails userDetails
+    ) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }

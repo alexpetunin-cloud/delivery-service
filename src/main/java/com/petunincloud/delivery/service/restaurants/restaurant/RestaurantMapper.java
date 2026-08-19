@@ -11,6 +11,7 @@ import java.util.List;
 
 @Component
 public class RestaurantMapper implements BaseMapper<RestaurantEntity, RestaurantResponse> {
+
     @Override
     public RestaurantResponse toResponse(RestaurantEntity entity) {
         List<DishResponse> itemResponses = entity.getMenu().stream()
@@ -40,6 +41,7 @@ public class RestaurantMapper implements BaseMapper<RestaurantEntity, Restaurant
 
     public RestaurantEntity toEntity(RestaurantRequest request) {
         RestaurantEntity restaurant = new RestaurantEntity();
+
         restaurant.setName(request.name());
         restaurant.setAddress(request.address());
 

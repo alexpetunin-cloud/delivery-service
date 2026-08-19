@@ -31,7 +31,10 @@ public class CourierServiceTest {
 
     @Test
     void createCourier_ShouldCreateCourier() {
-        CourierRequest request = new CourierRequest("Алексей", "+77779992345");
+        CourierRequest request = new CourierRequest(
+                "Алексей",
+                "+77779992345"
+        );
 
         CourierEntity courierEntity = new CourierEntity(
                 1L,
@@ -47,25 +50,36 @@ public class CourierServiceTest {
                 CourierStatus.AVAILABLE
         );
 
-        when(courierRepository.findByPhone("+77779992345")).thenReturn(Optional.empty());
-        when(courierMapper.toEntity(request)).thenReturn(courierEntity);
-        when(courierRepository.save(any(CourierEntity.class))).thenReturn(courierEntity);
-        when(courierMapper.toResponse(courierEntity)).thenReturn(courierResponse);
+        when(courierRepository.findByPhone("+77779992345"))
+                .thenReturn(Optional.empty());
+        when(courierMapper.toEntity(request))
+                .thenReturn(courierEntity);
+        when(courierRepository.save(any(CourierEntity.class)))
+                .thenReturn(courierEntity);
+        when(courierMapper.toResponse(courierEntity))
+                .thenReturn(courierResponse);
 
         CourierResponse result = courierService.createCourier(request);
 
         assertNotNull(result);
         assertEquals(CourierStatus.AVAILABLE, result.status());
 
-        verify(courierRepository, times(1)).findByPhone("+77779992345");
-        verify(courierMapper, times(1)).toEntity(request);
-        verify(courierMapper, times(1)).toResponse(courierEntity);
-        verify(courierRepository, times(1)).save(any(CourierEntity.class));
+        verify(courierRepository, times(1))
+                .findByPhone("+77779992345");
+        verify(courierMapper, times(1))
+                .toEntity(request);
+        verify(courierMapper, times(1))
+                .toResponse(courierEntity);
+        verify(courierRepository, times(1))
+                .save(any(CourierEntity.class));
     }
 
     @Test
     void createCourier_ShouldThrowException_WithExistsPhoneNumber() {
-        CourierRequest request = new CourierRequest("Алексей", "+77779992345");
+        CourierRequest request = new CourierRequest(
+                "Алексей",
+                "+77779992345"
+        );
 
         CourierEntity courierEntity = new CourierEntity(
                 300L,
@@ -74,12 +88,14 @@ public class CourierServiceTest {
                 CourierStatus.AVAILABLE
         );
 
-        when(courierRepository.findByPhone("+77779992345")).thenReturn(Optional.of(courierEntity));
+        when(courierRepository.findByPhone("+77779992345"))
+                .thenReturn(Optional.of(courierEntity));
 
         assertThrows(IllegalArgumentException.class,
                 () -> courierService.createCourier(request));
 
-        verify(courierRepository, never()).save(any(CourierEntity.class));
+        verify(courierRepository, never())
+                .save(any(CourierEntity.class));
     }
 
     @Test
@@ -100,15 +116,18 @@ public class CourierServiceTest {
 
         when(courierRepository.findTopByStatus(CourierStatus.AVAILABLE))
                 .thenReturn(Optional.of(courierEntity));
-        when(courierMapper.toResponse(courierEntity)).thenReturn(courierResponse);
+        when(courierMapper.toResponse(courierEntity))
+                .thenReturn(courierResponse);
 
         CourierResponse result = courierService.findAvailableCourier();
 
         assertNotNull(result);
         assertEquals(CourierStatus.AVAILABLE, result.status());
 
-        verify(courierRepository, times(1)).findTopByStatus(CourierStatus.AVAILABLE);
-        verify(courierMapper, times(1)).toResponse(courierEntity);
+        verify(courierRepository, times(1))
+                .findTopByStatus(CourierStatus.AVAILABLE);
+        verify(courierMapper, times(1))
+                .toResponse(courierEntity);
     }
 
     @Test
@@ -116,6 +135,7 @@ public class CourierServiceTest {
         when(courierRepository.findTopByStatus(CourierStatus.AVAILABLE))
                 .thenReturn(Optional.empty());
 
-        assertThrows(IllegalStateException.class, () -> courierService.findAvailableCourier());
+        assertThrows(IllegalStateException.class,
+                () -> courierService.findAvailableCourier());
     }
 }

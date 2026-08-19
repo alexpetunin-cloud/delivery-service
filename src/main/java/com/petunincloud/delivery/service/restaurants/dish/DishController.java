@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/dishes")
 @SecurityRequirement(name = "bearerAuth")
 public class DishController extends BaseController<DishService, DishEntity, DishResponse, DishSearchFilter> {
+
     private final static Logger log = LoggerFactory.getLogger(DishController.class);
 
     public DishController(DishService service) {

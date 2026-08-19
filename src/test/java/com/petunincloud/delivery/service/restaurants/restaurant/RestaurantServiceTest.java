@@ -93,36 +93,36 @@ public class RestaurantServiceTest {
     @Test
     void addDishToRestaurant_ShouldAddDish() {
         Long restaurantId = 1L;
+
         DishRequest dishRequest = new DishRequest(
                 "Маргарита",
                 BigDecimal.valueOf(300)
         );
 
         RestaurantEntity restaurant = new RestaurantEntity();
+        DishEntity dish = new DishEntity();
+        DishEntity dishExample = new DishEntity();
+
         restaurant.setId(restaurantId);
 
-        DishEntity dish = new DishEntity(
-                2L,
-                "Маргарита",
-                BigDecimal.valueOf(300),
-                restaurant
-        );
+        dish.setId(2L);
+        dish.setName("Маргарита");
+        dish.setPrice(BigDecimal.valueOf(300));
+        dish.setRestaurant(restaurant);
 
-        DishEntity dishExample = new DishEntity(
-                1L,
-                "Гавайская",
-                BigDecimal.valueOf(400),
-                restaurant
-        );
+        dishExample.setId(1L);
+        dishExample.setName("Гавайская");
+        dishExample.setPrice(BigDecimal.valueOf(400));
+        dishExample.setRestaurant(restaurant);
+
+        List<DishEntity> dishEntities = new ArrayList<>(List.of(dishExample));
+        restaurant.setMenu(dishEntities);
 
         DishResponse dishResponse = new DishResponse(
                 2L,
                 "Маргарита",
                 BigDecimal.valueOf(300)
         );
-
-        List<DishEntity> dishEntities = new ArrayList<>(List.of(dishExample));
-        restaurant.setMenu(dishEntities);
 
         when(restaurantRepository.findById(restaurantId))
                 .thenReturn(Optional.of(restaurant));
@@ -155,6 +155,7 @@ public class RestaurantServiceTest {
     @Test
     void addDishToRestaurant_ShouldThrowException_WhenRestaurantNotFound() {
         Long restaurantId = 1L;
+
         DishRequest dishRequest = new DishRequest(
                 "Маргарита",
                 BigDecimal.valueOf(300)
@@ -175,7 +176,9 @@ public class RestaurantServiceTest {
     @Test
     void startCooking_ShouldStartCooking() {
         Long orderId = 1L;
+
         OrderEntity order = new OrderEntity();
+
         order.setId(orderId);
         order.setStatus(OrderStatus.CONFIRMED);
 
@@ -227,6 +230,7 @@ public class RestaurantServiceTest {
     @Test
     void startCooking_ShouldThrowException_WhenStatusNotConfirmed() {
         Long orderId = 1L;
+
         OrderEntity order = new OrderEntity();
         order.setStatus(OrderStatus.PENDING);
 
@@ -243,7 +247,9 @@ public class RestaurantServiceTest {
     @Test
     void markAsReady_ShouldMarkAsReady() {
         Long orderId = 1L;
+
         OrderEntity order = new OrderEntity();
+
         order.setId(orderId);
         order.setStatus(OrderStatus.COOKING);
 
@@ -295,6 +301,7 @@ public class RestaurantServiceTest {
     @Test
     void markAsReady_ShouldThrowException_WhenStatusNotCooking() {
         Long orderId = 1L;
+
         OrderEntity order = new OrderEntity();
         order.setStatus(OrderStatus.CONFIRMED);
 

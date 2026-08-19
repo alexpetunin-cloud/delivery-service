@@ -19,10 +19,10 @@ public class TestSecurityConfig {
     @Primary
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll()
-                );
+            .csrf(AbstractHttpConfigurer::disable)
+            .authorizeHttpRequests(auth -> auth
+                    .anyRequest().permitAll()
+            );
         return http.build();
     }
 
@@ -45,9 +45,9 @@ public class TestSecurityConfig {
     @Primary
     public DataInitializer dataInitializer() {
         return new DataInitializer(null, null, null) {
+
             @Override
-            public void run(String... args) {
-            }
+            public void run(String... args) {}
         };
     }
 }

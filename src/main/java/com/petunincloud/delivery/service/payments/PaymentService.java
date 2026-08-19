@@ -40,8 +40,10 @@ public class PaymentService extends BaseService<PaymentEntity, PaymentResponse, 
     }
 
     @Override
-    protected List<PaymentEntity> findWithFilter(PaymentSearchFilter filter, Pageable pageable) {
-        log.debug("Searching payments with filter: {}, pageable: {}", filter, pageable);
+    protected List<PaymentEntity> findWithFilter(
+            PaymentSearchFilter filter,
+            Pageable pageable
+    ) {
         return paymentRepository.searchAllByFilter(
                 filter.email(),
                 filter.orderId(),
@@ -58,30 +60,28 @@ public class PaymentService extends BaseService<PaymentEntity, PaymentResponse, 
     }
 
     @Transactional
-    public PaymentResponse initiatePayment(PaymentRequest request, UserEntity user) {
+    public PaymentResponse initiatePayment(
+            PaymentRequest request,
+            UserEntity user
+    ) {
         log.info("Initiate payment: {} for user: {}", request, user.getEmail());
         long startTime = System.currentTimeMillis();
 
         try {
             OrderEntity order = orderRepository.findById(request.orderId())
                     .orElseThrow(() -> {
-                        log.warn("Order not found: " + request.orderId());
-                        return new IllegalArgumentException("Order not found: " + request.orderId());
+                        log.warn("Order not found: {}", request.orderId());
+                        return new IllegalArgumentException("Order not found");
                     });
 
             PaymentEntity payment = paymentMapper.toEntity(user, order);
-            payment.setAmount(order.getTotalPrice());
-            payment.setPaymentMethod("CARD");
 
-            payment.setStatus(PaymentStatus.PENDING);
-            log.info("Set status of PENDING for payment: {}", payment.getId());
-
-            payment.setCreatedAt(LocalDateTime.now().withNano(0));
             PaymentEntity saved = paymentRepository.save(payment);
 
             long duration = System.currentTimeMillis() - startTime;
             log.info("Success initiate payment: {} for user: {}, duration={}ms",
                     request, user.getEmail(), duration);
+
             return paymentMapper.toResponse(saved);
 
         } catch (Exception e) {
@@ -89,7 +89,6 @@ public class PaymentService extends BaseService<PaymentEntity, PaymentResponse, 
                     request, user.getEmail(), e.getMessage());
             throw e;
         }
-
     }
 
     @Transactional
@@ -101,7 +100,7 @@ public class PaymentService extends BaseService<PaymentEntity, PaymentResponse, 
             PaymentEntity payment = paymentRepository.findById(paymentId)
                     .orElseThrow(() -> {
                         log.warn("Payment not found: {}", paymentId);
-                        return new IllegalArgumentException("Payment not found: " + paymentId);
+                        return new IllegalArgumentException("Payment not found");
                     });
 
             if (payment.getStatus() != PaymentStatus.PENDING) {
@@ -115,10 +114,11 @@ public class PaymentService extends BaseService<PaymentEntity, PaymentResponse, 
             payment.setTransactionId(UUID.randomUUID().toString());
             payment.setCompletedAt(LocalDateTime.now().withNano(0));
             confirmOrder(payment.getOrder().getId());
+
             PaymentEntity saved = paymentRepository.save(payment);
 
             long duration = System.currentTimeMillis() - startTime;
-            log.info("Success process payment: {}, duration={}ms", payment.getId(), duration);
+            log.info("Success process payment: {}, duration={}ms", paymentId, duration);
 
             return paymentMapper.toResponse(saved);
 
@@ -137,12 +137,13 @@ public class PaymentService extends BaseService<PaymentEntity, PaymentResponse, 
             OrderEntity order = orderService.getOrderById(orderId);
 
             if (order.getStatus() != OrderStatus.PENDING) {
-                log.warn("Order: {} status not equals of PENDING (status: {})", order.getId(), order.getStatus());
+                log.warn("Status order: {} not equals of PENDING (status: {})", order.getId(), order.getStatus());
                 throw new IllegalStateException("Only PENDING orders can be confirmed");
             }
 
             order.setStatus(OrderStatus.CONFIRMED);
             log.info("Set status of CONFIRMED for order: {}", order.getId());
+
             orderRepository.save(order);
 
             long duration = System.currentTimeMillis() - startTime;

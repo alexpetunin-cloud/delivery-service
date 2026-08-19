@@ -14,17 +14,16 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/orders")
 @SecurityRequirement(name = "bearerAuth")
 public class OrderController extends BaseController<OrderService, OrderEntity, OrderResponse, OrderSearchFilter> {
+
     private final static Logger log = LoggerFactory.getLogger(OrderController.class);
 
-    public OrderController(
-            OrderService service
-    ) {
+    public OrderController(OrderService service) {
         super(service);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<OrderResponse> getOrderById(
-            @PathVariable Long id
+            @PathVariable("id") Long id
     ) {
         log.info("GET /api/orders/{}", id);
         long startTime = System.currentTimeMillis();
@@ -33,7 +32,8 @@ public class OrderController extends BaseController<OrderService, OrderEntity, O
             OrderResponse order = service.getOrderResponseById(id);
 
             long duration = System.currentTimeMillis() - startTime;
-            log.info("GET /api/orders/{} completed: {}, duration={}ms", id, HttpStatus.OK.value(), duration);
+            log.info("GET /api/orders/{} completed: {}, duration={}ms", id, HttpStatus.OK, duration);
+
             return ResponseEntity.ok(order);
 
         } catch (IllegalArgumentException | IllegalStateException e) {
@@ -50,26 +50,25 @@ public class OrderController extends BaseController<OrderService, OrderEntity, O
     public ResponseEntity<OrderResponse> createOrder(
             @RequestBody OrderRequest request
     ) {
-        log.info("POST /api/orders - email: {}, restaurant: {}, items: {}",
-                request.email(),
-                request.restaurantId(),
-                request.items().size());
+        log.info("POST /api/orders with request: {}", request);
         long startTime = System.currentTimeMillis();
 
         try {
             OrderResponse response = service.createOrder(request);
 
             long duration = System.currentTimeMillis() - startTime;
-            log.info("POST /api/orders completed: id={}, status={}, duration={}ms",
-                    response.id(), HttpStatus.CREATED.value(), duration);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+            log.info("POST /api/orders with request: {} completed: {}, duration={}ms",
+                    request, HttpStatus.CREATED, duration);
+
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(response);
 
         } catch (IllegalArgumentException | IllegalStateException e) {
-            log.warn("POST /api/orders failed: {}", e.getMessage());
+            log.warn("POST /api/orders with request: {} failed: {}", request, e.getMessage());
             throw e;
 
         } catch (Exception e) {
-            log.error("POST /api/orders unexpected error", e);
+            log.error("POST /api/orders with request: {} unexpected error", request, e);
             throw e;
         }
     }
@@ -85,8 +84,9 @@ public class OrderController extends BaseController<OrderService, OrderEntity, O
             OrderResponse response = service.cancelOrder(orderId);
 
             long duration = System.currentTimeMillis() - startTime;
-            log.info("PATCH /api/orders/{}/cancel completed: status={}, duration={}ms",
-                    orderId, HttpStatus.OK.value(), duration);
+            log.info("PATCH /api/orders/{}/cancel completed: {}, duration={}ms",
+                    orderId, HttpStatus.OK, duration);
+
             return ResponseEntity.ok(response);
 
         } catch (IllegalArgumentException | IllegalStateException e) {

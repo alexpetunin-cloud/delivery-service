@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface RestaurantRepository extends JpaRepository<RestaurantEntity, Long> {
+
     @Query(value = """
         SELECT * FROM restaurants r
         WHERE (:name IS NULL OR r.name ILIKE COALESCE(CONCAT('%', :name, '%'), ''))

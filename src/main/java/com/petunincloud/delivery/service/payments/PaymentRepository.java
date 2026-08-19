@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface PaymentRepository extends JpaRepository<PaymentEntity, Long> {
+
     @Query("""
     SELECT p FROM PaymentEntity p
     WHERE (:email IS NULL OR p.user.email = :email)

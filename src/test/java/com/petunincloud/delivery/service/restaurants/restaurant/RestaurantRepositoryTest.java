@@ -40,6 +40,7 @@ public class RestaurantRepositoryTest {
             List<DishEntity> menu
     ) {
         RestaurantEntity restaurant = new RestaurantEntity();
+
         restaurant.setName(name);
         restaurant.setAddress(address);
         restaurant.setMenu(menu);

@@ -65,6 +65,7 @@ public class AuthController {
             );
 
             UserDetails userDetails = userDetailsService.loadUserByUsername(request.email());
+
             String token = jwtUtils.generateToken(userDetails);
 
             long duration = System.currentTimeMillis() - startTime;
@@ -92,19 +93,20 @@ public class AuthController {
 
         try {
             if (userRepository.findByEmail(request.email()).isPresent()) {
-                log.warn("POST /api/auth/register with request: {} failed: {}. Email already exists",
-                        request, HttpStatus.BAD_REQUEST);
+                log.warn("POST /api/auth/register with request: {} failed: Email already exists",
+                        request);
                 return ResponseEntity.badRequest().body("Email already exists");
             }
 
             RoleEntity clientRole = roleRepository.findByName("ROLE_CLIENT")
                     .orElseThrow(() -> {
-                        log.warn("POST /api/auth/register with request: {} failed: {}. Default role (ROLE_CLIENT) not found",
-                                request, HttpStatus.BAD_REQUEST);
+                        log.warn("POST /api/auth/register with request: {} failed: Default role (ROLE_CLIENT) not found",
+                                request);
                         return new IllegalArgumentException("Default role not found");
                     });
 
             UserEntity user = userMapper.toEntity(request);
+
             user.setPassword(passwordEncoder.encode(request.password()));
             user.setRoles(Set.of(clientRole));
 

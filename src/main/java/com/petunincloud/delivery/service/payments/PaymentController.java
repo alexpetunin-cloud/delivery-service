@@ -38,13 +38,15 @@ public class PaymentController extends BaseController<PaymentService, PaymentEnt
 
         try {
             UserEntity currentUser = securityUtils.getCurrentUser();
+
             PaymentResponse response = service.initiatePayment(request, currentUser);
 
             long duration = System.currentTimeMillis() - startTime;
             log.info("POST /api/payments/initiate with request: {} completed: {}, duration={}ms",
                     request, HttpStatus.CREATED, duration);
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(response);
 
         } catch (IllegalStateException | IllegalArgumentException e) {
             log.warn("POST /api/payments/initiate with request: {} failed: {}", request, e.getMessage());

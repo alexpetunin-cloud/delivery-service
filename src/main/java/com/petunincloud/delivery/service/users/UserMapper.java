@@ -11,17 +11,20 @@ public class UserMapper implements BaseMapper<UserEntity, UserResponse>{
 
     public UserEntity toEntity(UserRequest request) {
         UserEntity entity = new UserEntity();
+
         entity.setEmail(request.email());
         entity.setPhone(request.phone());
         entity.setName(request.name());
         entity.setAddress(request.address());
         entity.setApartment(request.apartment());
         entity.setDeliveryInstructions(request.deliveryInstructions());
+
         return entity;
     }
 
     public UserEntity toEntity(AuthRequest request) {
         UserEntity user = new UserEntity();
+
         user.setEmail(request.email());
         user.setName(request.name());
         user.setPhone(request.phone());

@@ -44,7 +44,7 @@ public class OrderItemService {
     }
 
     public List<OrderItemResponse> getOrderItems(Long orderId) {
-        log.info("Get items of order={}", orderId);
+        log.info("Get items of order: {}", orderId);
         long startTime = System.currentTimeMillis();
 
         try {
@@ -55,21 +55,24 @@ public class OrderItemService {
                     });
 
             long duration = System.currentTimeMillis() - startTime;
-            log.info("Success get items of order={}, duration={}ms", orderId, duration);
+            log.info("Success get items for order: {}, duration={}ms", orderId, duration);
 
             return order.getItems().stream()
                     .map(orderItemMapper::toResponse)
                     .collect(Collectors.toList());
 
         } catch (Exception e) {
-            log.error("Failed to get items of order: {}. Error: {}", orderId, e.getMessage());
+            log.error("Failed to get items for order: {}. Error: {}", orderId, e.getMessage());
             throw e;
         }
     }
 
     @Transactional
-    public OrderItemResponse addItemToOrder(Long orderId, @Valid OrderItemRequest request) {
-        log.info("Add item to order: {}, request: {}", orderId, request);
+    public OrderItemResponse addItemToOrder(
+            Long orderId,
+            @Valid OrderItemRequest request
+    ) {
+        log.info("Add item: {} to order: {}", request, orderId);
         long startTime = System.currentTimeMillis();
 
         try {
@@ -85,32 +88,29 @@ public class OrderItemService {
             }
 
             UserEntity currentUser = securityUtils.getCurrentUser();
+
             if (!order.getUser().getId().equals(currentUser.getId())) {
-                log.warn("Cannot modify order: {}, user: {}", orderId, currentUser.getEmail());
+                log.warn("Access denied: user {} tried to access order {}", currentUser.getEmail(), orderId);
                 throw new IllegalArgumentException("You can only modify your own orders");
             }
 
             DishResponse dish = dishService.getDishById(request.dishId());
 
-            OrderItemEntity entity = orderItemMapper.toEntity(request, order);
-            entity.setDishName(dish.name());
-            entity.setPrice(dish.price());
+            OrderItemEntity entity = orderItemMapper.toEntity(request, order, dish);
 
             OrderItemEntity saved = orderItemRepository.save(entity);
+
             order.getItems().add(saved);
 
             BigDecimal newTotal = order.getTotalPrice()
                     .add(dish.price()
                             .multiply(BigDecimal.valueOf(request.quantity())));
-
             order.setTotalPrice(newTotal);
-            log.info("Set total price: {} to order: {}", newTotal, orderId);
 
             orderRepository.save(order);
 
             long duration = System.currentTimeMillis() - startTime;
-            log.info("Success add item: {} to order: {}, user: {}, duration={}ms",
-                    request, orderId, currentUser.getEmail(), duration);
+            log.info("Success add item: {} to order: {}, duration={}ms", request, orderId, duration);
 
             return orderItemMapper.toResponse(saved);
 
@@ -121,7 +121,10 @@ public class OrderItemService {
     }
 
     @Transactional
-    public void removeItemFromOrder(Long orderId, Long itemId) {
+    public void removeItemFromOrder(
+            Long orderId,
+            Long itemId
+    ) {
         log.info("Remove item: {} from order: {}", itemId, orderId);
         long startTime = System.currentTimeMillis();
 
@@ -138,8 +141,9 @@ public class OrderItemService {
             }
 
             UserEntity currentUser = securityUtils.getCurrentUser();
+
             if (!order.getUser().getId().equals(currentUser.getId())) {
-                log.warn("Cannot modify order: {}, user: {}", orderId, currentUser.getEmail());
+                log.warn("Access denied: user {} tried to access order {}", currentUser.getEmail(), orderId);
                 throw new IllegalArgumentException("You can only modify your own orders");
             }
 
@@ -154,21 +158,15 @@ public class OrderItemService {
                 throw new IllegalArgumentException("Item does not belong to this order");
             }
 
-            BigDecimal itemTotal = item.getPrice()
-                    .multiply(BigDecimal.valueOf(item.getQuantity()));
-
-            order.setTotalPrice(
-                    order.getTotalPrice()
-                            .subtract(itemTotal));
-
-            log.info("Set new total price: {} to order: {}", order.getTotalPrice(), orderId);
+            BigDecimal itemTotal = item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
+            order.setTotalPrice(order.getTotalPrice().subtract(itemTotal));
 
             order.getItems().remove(item);
+
             orderRepository.save(order);
 
             long duration = System.currentTimeMillis() - startTime;
-            log.info("Success remove item: {} from order: {}, user: {}, duration={}ms",
-                    itemId, orderId, currentUser.getEmail(), duration);
+            log.info("Success remove item: {} from order: {}, duration={}ms", itemId, orderId, duration);
 
         } catch (Exception e) {
             log.error("Failed remove item: {} from order: {}. Error: {}", itemId, orderId, e.getMessage());

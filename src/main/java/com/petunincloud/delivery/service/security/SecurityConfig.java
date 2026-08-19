@@ -26,22 +26,23 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/api/auth/**",  // регистрация и логин открыты
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**",
-                                "/swagger-ui.html").permitAll()
-                        .requestMatchers("/api/restaurants/**").hasAnyRole("ADMIN", "RESTAURANT")
-                        .requestMatchers("/api/couriers/**").hasAnyRole("ADMIN", "COURIER")
-                        .requestMatchers("/api/orders/**").authenticated()
-                        .requestMatchers("/api/payments/**").authenticated()
-                        .requestMatchers("/api/deliveries/**").hasAnyRole("ADMIN", "COURIER")
-                        .anyRequest().authenticated()
-                )
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+            .csrf(AbstractHttpConfigurer::disable)
+            .sessionManagement(
+                    session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+                    .requestMatchers(
+                            "/api/auth/**",  // регистрация и логин открыты
+                            "/swagger-ui/**",
+                            "/v3/api-docs/**",
+                            "/swagger-ui.html").permitAll()
+                    .requestMatchers("/api/restaurants/**").hasAnyRole("ADMIN", "RESTAURANT")
+                    .requestMatchers("/api/couriers/**").hasAnyRole("ADMIN", "COURIER")
+                    .requestMatchers("/api/orders/**").authenticated()
+                    .requestMatchers("/api/payments/**").authenticated()
+                    .requestMatchers("/api/deliveries/**").hasAnyRole("ADMIN", "COURIER")
+                    .anyRequest().authenticated()
+            )
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

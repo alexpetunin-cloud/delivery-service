@@ -10,14 +10,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
-import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
-    private static final Logger securityLog = LoggerFactory.getLogger("security");
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(
@@ -25,7 +23,6 @@ public class GlobalExceptionHandler {
             WebRequest request,
             @AuthenticationPrincipal UserEntity user
     ) {
-
         log.warn("Business error: {} | Path: {} | User: {}",
                 ex.getMessage(),
                 request.getDescription(false),
@@ -48,7 +45,6 @@ public class GlobalExceptionHandler {
             WebRequest request,
             @AuthenticationPrincipal UserEntity user
     ) {
-
         log.warn("Business error: {} | Path: {} | User: {}",
                 ex.getMessage(),
                 request.getDescription(false),
@@ -71,7 +67,6 @@ public class GlobalExceptionHandler {
             WebRequest request,
             @AuthenticationPrincipal UserEntity user
     ) {
-
         log.error("Unexpected error | Path: {} | User: {}",
                 request.getDescription(false),
                 user != null ? user.getId() : "anonymous");

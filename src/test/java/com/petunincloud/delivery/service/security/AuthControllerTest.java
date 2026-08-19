@@ -103,12 +103,12 @@ public class AuthControllerTest {
                 "ул. Пушкина, 25"
         );
 
-        RoleEntity clientRole = new RoleEntity(
-                1L,
-                "ROLE_CLIENT"
-        );
-
+        RoleEntity clientRole = new RoleEntity();
         UserEntity user = new UserEntity();
+
+        clientRole.setId(1L);
+        clientRole.setName("ROLE_CLIENT");
+
         user.setEmail(request.email());
         user.setName(request.name());
         user.setPhone(request.phone());

@@ -4,7 +4,6 @@ import com.petunincloud.delivery.service.orders.order.OrderEntity;
 import com.petunincloud.delivery.service.orders.order.OrderStatus;
 import com.petunincloud.delivery.service.restaurants.restaurant.RestaurantEntity;
 import com.petunincloud.delivery.service.users.UserEntity;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,8 +60,10 @@ public class PaymentRepositoryTest {
         );
 
         restaurant = new RestaurantEntity();
+
         restaurant.setName("Додо Пицца");
         restaurant.setAddress("пр. Калинина 8");
+
         entityManager.persist(restaurant);
 
         order1 = createOrder(user1, restaurant, OrderStatus.READY, BigDecimal.valueOf(100));
@@ -79,6 +80,7 @@ public class PaymentRepositoryTest {
                 LocalDateTime.now().withNano(0).minusHours(2),
                 LocalDateTime.now().withNano(0).minusHours(1).minusMinutes(59)
         );
+
         createPayment(
                 order2,
                 user2,
@@ -89,6 +91,7 @@ public class PaymentRepositoryTest {
                 LocalDateTime.now().withNano(0).minusHours(1).minusMinutes(40),
                 LocalDateTime.now().withNano(0).minusHours(1).minusMinutes(39)
         );
+
         createPayment(
                 order3,
                 user3,
@@ -112,6 +115,7 @@ public class PaymentRepositoryTest {
             String password
     ) {
         UserEntity user = new UserEntity();
+
         user.setEmail(email);
         user.setPhone(phone);
         user.setName(name);
@@ -130,6 +134,7 @@ public class PaymentRepositoryTest {
             BigDecimal total
     ) {
         OrderEntity order = new OrderEntity();
+
         order.setUser(user);
         order.setRestaurant(restaurant);
         order.setStatus(status);
@@ -152,6 +157,7 @@ public class PaymentRepositoryTest {
             LocalDateTime completedAt
     ) {
         PaymentEntity payment = new PaymentEntity();
+
         payment.setOrder(order);
         payment.setUser(user);
         payment.setAmount(amount);
@@ -185,6 +191,7 @@ public class PaymentRepositoryTest {
     @Test
     void searchAllByFilter_ShouldReturnPaymentByOrderId() {
         Pageable pageable = PageRequest.of(0, 5);
+
         Long orderId = order1.getId();
 
         List<PaymentEntity> payments = paymentRepository.searchAllByFilter(

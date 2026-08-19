@@ -35,20 +35,16 @@ public class OrderItemController {
             List<OrderItemResponse> response = orderItemService.getOrderItems(orderId);
 
             long duration = System.currentTimeMillis() - startTime;
-            log.info("GET /api/orders/{}/items completed: {}, duration={}ms",
-                    orderId, HttpStatus.OK, duration);
+            log.info("GET /api/orders/{}/items completed: {}, duration={}ms", orderId, HttpStatus.OK, duration);
 
-            return ResponseEntity.ok()
-                    .body(response);
+            return ResponseEntity.ok(response);
 
         } catch (IllegalArgumentException e) {
-            log.warn("GET /api/orders/{}/items failed: {}",
-                    orderId, e.getMessage());
+            log.warn("GET /api/orders/{}/items failed: {}", orderId, e.getMessage());
             throw e;
 
         } catch (Exception e) {
-            log.error("GET /api/orders/{}/items unexpected error",
-                    orderId, e);
+            log.error("GET /api/orders/{}/items unexpected error", orderId, e);
             throw e;
         }
     }
@@ -58,27 +54,25 @@ public class OrderItemController {
             @PathVariable("orderId") Long orderId,
             @RequestBody @Valid OrderItemRequest request
     ) {
-        log.info("POST /api/orders/{}/items", orderId);
+        log.info("POST /api/orders/{}/items with request: {}", orderId, request);
         long startTime = System.currentTimeMillis();
 
         try {
             OrderItemResponse response = orderItemService.addItemToOrder(orderId, request);
 
             long duration = System.currentTimeMillis() - startTime;
-            log.info("POST /api/orders/{}/items completed: {}, duration={}ms",
-                    orderId, HttpStatus.CREATED, duration);
+            log.info("POST /api/orders/{}/items with request: {} completed: {}, duration={}ms",
+                    orderId, request, HttpStatus.CREATED, duration);
 
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(response);
 
         } catch (IllegalArgumentException | IllegalStateException e) {
-            log.warn("POST /api/orders/{}/items failed: {}",
-                    orderId, e.getMessage());
+            log.warn("POST /api/orders/{}/items with request: {} failed: {}", orderId, request, e.getMessage());
             throw e;
 
         } catch (Exception e) {
-            log.error("POST /api/orders/{}/items unexpected error",
-                    orderId, e);
+            log.error("POST /api/orders/{}/items with request: {} unexpected error", orderId, request, e);
             throw e;
         }
     }
@@ -98,17 +92,14 @@ public class OrderItemController {
             log.info("DELETE /api/orders/{}/items/{} completed: {}, duration={}ms",
                     orderId, itemId, HttpStatus.NO_CONTENT, duration);
 
-            return ResponseEntity.noContent()
-                    .build();
+            return ResponseEntity.noContent().build();
 
         } catch (IllegalArgumentException | IllegalStateException e) {
-            log.warn("DELETE /api/orders/{}/items/{} failed: {}",
-                    orderId, itemId, e.getMessage());
+            log.warn("DELETE /api/orders/{}/items/{} failed: {}", orderId, itemId, e.getMessage());
             throw e;
 
         } catch (Exception e) {
-            log.error("DELETE /api/orders/{}/items/{} unexpected error",
-                    orderId, itemId, e);
+            log.error("DELETE /api/orders/{}/items/{} unexpected error", orderId, itemId, e);
             throw e;
         }
     }

@@ -11,6 +11,7 @@ import java.util.List;
 
 @Service
 public class DishService extends BaseService<DishEntity, DishResponse, DishSearchFilter> {
+
     private final DishRepository dishRepository;
     private final DishMapper dishMapper;
     private final static Logger log = LoggerFactory.getLogger(DishService.class);
@@ -31,7 +32,7 @@ public class DishService extends BaseService<DishEntity, DishResponse, DishSearc
             DishEntity entity = dishRepository.findById(dishId)
                     .orElseThrow(() -> {
                         log.warn("Dish not found: {}", dishId);
-                        return new IllegalArgumentException("Dish not found: " + dishId);
+                        return new IllegalArgumentException("Dish not found");
                     });
 
             long duration = System.currentTimeMillis() - startTime;
@@ -46,8 +47,10 @@ public class DishService extends BaseService<DishEntity, DishResponse, DishSearc
     }
 
     @Override
-    protected List<DishEntity> findWithFilter(DishSearchFilter filter, Pageable pageable) {
-        log.debug("Searching dishes with filter: {}, pageable: {}", filter, pageable);
+    protected List<DishEntity> findWithFilter(
+            DishSearchFilter filter,
+            Pageable pageable
+    ) {
         return dishRepository.searchAllByFilter(
                 filter.name(),
                 filter.restaurantId(),

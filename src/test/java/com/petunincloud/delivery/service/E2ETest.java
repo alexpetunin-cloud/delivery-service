@@ -87,30 +87,33 @@ class E2ETest {
                 });
 
         UserEntity user = new UserEntity();
+        RestaurantEntity restaurant = new RestaurantEntity();
+        DishEntity dish = new DishEntity();
+        CourierEntity courier = new CourierEntity();
+
         user.setEmail("user@gmail.com");
         user.setPassword(passwordEncoder.encode("password123"));
         user.setPhone("+79231001040");
         user.setName("Александр");
         user.setAddress("ул. Стахановская 1");
         user.setRoles(Set.of(clientRole));
-        when(securityUtils.getCurrentUser()).thenReturn(user);
-        userEmail = userRepository.save(user).getEmail();
 
-        RestaurantEntity restaurant = new RestaurantEntity();
         restaurant.setName("Бургер Кинг");
         restaurant.setAddress("ул. Советская 207/2");
-        restaurantId = restaurantRepository.save(restaurant).getId();
 
-        DishEntity dish = new DishEntity();
         dish.setName("Воппер");
         dish.setPrice(BigDecimal.valueOf(300));
         dish.setRestaurant(restaurant);
-        dishId = dishRepository.save(dish).getId();
 
-        CourierEntity courier = new CourierEntity();
         courier.setName("Иван");
         courier.setPhone("+79923050201");
         courier.setStatus(CourierStatus.AVAILABLE);
+
+        when(securityUtils.getCurrentUser()).thenReturn(user);
+
+        userEmail = userRepository.save(user).getEmail();
+        restaurantId = restaurantRepository.save(restaurant).getId();
+        dishId = dishRepository.save(dish).getId();
         courierRepository.save(courier);
     }
 

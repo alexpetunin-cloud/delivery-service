@@ -18,11 +18,10 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/restaurants")
 @SecurityRequirement(name = "bearerAuth")
 public class RestaurantController extends BaseController<RestaurantService, RestaurantEntity, RestaurantResponse, RestaurantSearchFilter> {
+
     private final static Logger log = LoggerFactory.getLogger(RestaurantController.class);
 
-    public RestaurantController(
-            RestaurantService service
-    ) {
+    public RestaurantController(RestaurantService service) {
         super(service);
     }
 
@@ -96,13 +95,11 @@ public class RestaurantController extends BaseController<RestaurantService, Rest
             return ResponseEntity.ok(response);
 
         } catch (IllegalStateException e) {
-            log.warn("PATCH /api/restaurants/orders/{}/cook failed: {}",
-                    orderId, e.getMessage());
+            log.warn("PATCH /api/restaurants/orders/{}/cook failed: {}", orderId, e.getMessage());
             throw e;
 
         } catch (Exception e) {
-            log.error("PATCH /api/restaurants/orders/{}/cook unexpected error",
-                    orderId, e);
+            log.error("PATCH /api/restaurants/orders/{}/cook unexpected error", orderId, e);
             throw e;
         }
     }
@@ -124,13 +121,11 @@ public class RestaurantController extends BaseController<RestaurantService, Rest
             return ResponseEntity.ok(response);
 
         } catch (IllegalStateException e) {
-            log.warn("PATCH /api/restaurants/orders/{}/ready failed: {}",
-                    orderId, e.getMessage());
+            log.warn("PATCH /api/restaurants/orders/{}/ready failed: {}", orderId, e.getMessage());
             throw e;
 
         } catch (Exception e) {
-            log.error("PATCH /api/restaurants/orders/{}/ready unexpected error",
-                    orderId, e);
+            log.error("PATCH /api/restaurants/orders/{}/ready unexpected error", orderId, e);
             throw e;
         }
     }

@@ -53,19 +53,24 @@ class OrderServiceTest {
         Long restaurantId = 10L;
         Long dishId = 100L;
 
+        OrderItemRequest itemRequest = new OrderItemRequest(
+                dishId,
+                2
+        );
+        OrderRequest request = new OrderRequest("user@gmail.com",
+                restaurantId,
+                List.of(itemRequest)
+        );
+
         UserEntity user = new UserEntity();
+        RestaurantEntity restaurant = new RestaurantEntity();
+        OrderEntity entity = new OrderEntity();
+
         user.setId(1L);
 
-        when(securityUtils.getCurrentUser()).thenReturn(user);
-
-        RestaurantEntity restaurant = new RestaurantEntity();
         restaurant.setId(restaurantId);
         restaurant.setAddress("ул. Ленина, д. 1");
 
-        OrderItemRequest itemRequest = new OrderItemRequest(dishId, 2);
-        OrderRequest request = new OrderRequest("user@gmail.com", restaurantId, List.of(itemRequest));
-
-        OrderEntity entity = new OrderEntity();
         entity.setId(1L);
         entity.setUser(user);
         entity.setRestaurant(restaurant);
@@ -83,14 +88,24 @@ class OrderServiceTest {
                 List.of()
         );
 
-        when(restaurantRepository.findById(restaurantId)).thenReturn(Optional.of(restaurant));
+        DishResponse dishMock = new DishResponse(
+                dishId,
+                "Пицца",
+                BigDecimal.valueOf(150)
+        );
 
-        DishResponse dishMock = new DishResponse(dishId, "Пицца", BigDecimal.valueOf(150));
-        when(dishService.getDishById(dishId)).thenReturn(dishMock);
-
-        when(orderMapper.toEntity(user)).thenReturn(entity);
-        when(orderRepository.save(any(OrderEntity.class))).thenReturn(entity);
-        when(orderMapper.toResponse(entity)).thenReturn(response);
+        when(securityUtils.getCurrentUser())
+                .thenReturn(user);
+        when(restaurantRepository.findById(restaurantId))
+                .thenReturn(Optional.of(restaurant));
+        when(orderMapper.toEntity(user, restaurant))
+                .thenReturn(entity);
+        when(dishService.getDishById(dishId))
+                .thenReturn(dishMock);
+        when(orderRepository.save(any(OrderEntity.class)))
+                .thenReturn(entity);
+        when(orderMapper.toResponse(entity))
+                .thenReturn(response);
 
         OrderResponse result = orderService.createOrder(request);
 
@@ -98,26 +113,32 @@ class OrderServiceTest {
         assertEquals(OrderStatus.PENDING, result.status());
         assertEquals(0, BigDecimal.valueOf(300).compareTo(result.totalPrice()));
 
-        verify(orderRepository, times(1)).save(any(OrderEntity.class));
-        verify(orderMapper, times(1)).toEntity(user);
-        verify(orderMapper, times(1)).toResponse(entity);
+        verify(orderRepository, times(1))
+                .save(any(OrderEntity.class));
+        verify(orderMapper, times(1))
+                .toResponse(entity);
     }
 
     @Test
     void createOrder_ShouldThrowException_WhenRestaurantNotFound() {
         Long restaurantId = 999L;
 
+        OrderRequest request = new OrderRequest(
+                "user@gmail.com",
+                restaurantId,
+                List.of()
+        );
+
         UserEntity user = new UserEntity();
         user.setId(1L);
-        when(securityUtils.getCurrentUser()).thenReturn(user);
 
-        OrderRequest request = new OrderRequest("user@gmail.com", restaurantId, List.of());
+        when(securityUtils.getCurrentUser())
+                .thenReturn(user);
+        when(restaurantRepository.findById(restaurantId))
+                .thenReturn(Optional.empty());
 
-        when(restaurantRepository.findById(restaurantId)).thenReturn(Optional.empty());
-
-        assertThrows(IllegalArgumentException.class, () ->
-                orderService.createOrder(request)
-        );
+        assertThrows(IllegalArgumentException.class,
+                () -> orderService.createOrder(request));
     }
 
     @Test
@@ -125,10 +146,10 @@ class OrderServiceTest {
         Long orderId = 1L;
 
         UserEntity user = new UserEntity();
-        user.setId(1L);
-        when(securityUtils.getCurrentUser()).thenReturn(user);
-
         OrderEntity order = new OrderEntity();
+
+        user.setId(1L);
+
         order.setId(orderId);
         order.setUser(user);
         order.setStatus(OrderStatus.PENDING);
@@ -144,14 +165,20 @@ class OrderServiceTest {
                 List.of()
         );
 
-        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
-        when(orderRepository.save(order)).thenReturn(order);
-        when(orderMapper.toResponse(order)).thenReturn(response);
+        when(securityUtils.getCurrentUser())
+                .thenReturn(user);
+        when(orderRepository.findById(orderId))
+                .thenReturn(Optional.of(order));
+        when(orderRepository.save(order))
+                .thenReturn(order);
+        when(orderMapper.toResponse(order))
+                .thenReturn(response);
 
         OrderResponse result = orderService.cancelOrder(orderId);
 
         assertEquals(OrderStatus.CANCELED, result.status());
-        verify(orderRepository, times(1)).save(order);
+        verify(orderRepository, times(1))
+                .save(order);
     }
 
     @Test
@@ -159,17 +186,21 @@ class OrderServiceTest {
         Long orderId = 1L;
 
         UserEntity user = new UserEntity();
-        user.setId(1L);
-        when(securityUtils.getCurrentUser()).thenReturn(user);
-
         OrderEntity order = new OrderEntity();
+
+        user.setId(1L);
+
         order.setId(orderId);
         order.setUser(user);
         order.setStatus(OrderStatus.DELIVERED);
 
-        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(securityUtils.getCurrentUser())
+                .thenReturn(user);
+        when(orderRepository.findById(orderId))
+                .thenReturn(Optional.of(order));
 
-        assertThrows(IllegalStateException.class, () -> orderService.cancelOrder(orderId));
+        assertThrows(IllegalStateException.class,
+                () -> orderService.cancelOrder(orderId));
     }
 
     @Test
@@ -177,11 +208,10 @@ class OrderServiceTest {
         Long orderId = 1L;
 
         UserEntity user = new UserEntity();
-        user.setId(1L);
-        when(securityUtils.getCurrentUser())
-                .thenReturn(user);
-
         OrderEntity order = new OrderEntity();
+
+        user.setId(1L);
+
         order.setId(orderId);
         order.setUser(user);
         order.setStatus(OrderStatus.PENDING);
@@ -197,6 +227,8 @@ class OrderServiceTest {
                 List.of()
         );
 
+        when(securityUtils.getCurrentUser())
+                .thenReturn(user);
         when(orderRepository.findById(orderId))
                 .thenReturn(Optional.of(order));
         when(orderMapper.toResponse(order))

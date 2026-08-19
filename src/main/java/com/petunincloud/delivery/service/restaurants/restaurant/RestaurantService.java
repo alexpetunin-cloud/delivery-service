@@ -24,6 +24,7 @@ import java.util.List;
 
 @Service
 public class RestaurantService extends BaseService<RestaurantEntity, RestaurantResponse, RestaurantSearchFilter> {
+
     private final RestaurantRepository restaurantRepository;
     private final RestaurantMapper restaurantMapper;
     private final DishRepository dishRepository;
@@ -52,8 +53,10 @@ public class RestaurantService extends BaseService<RestaurantEntity, RestaurantR
     }
 
     @Override
-    protected List<RestaurantEntity> findWithFilter(RestaurantSearchFilter filter, Pageable pageable) {
-        log.debug("Searching restaurants with filter: {}, pageable: {}", filter, pageable);
+    protected List<RestaurantEntity> findWithFilter(
+            RestaurantSearchFilter filter,
+            Pageable pageable
+    ) {
         return restaurantRepository.searchAllByFilter(
                 filter.name(),
                 pageable
@@ -72,6 +75,7 @@ public class RestaurantService extends BaseService<RestaurantEntity, RestaurantR
 
         try {
             RestaurantEntity entity = restaurantMapper.toEntity(request);
+
             RestaurantEntity saved = restaurantRepository.save(entity);
 
             long duration = System.currentTimeMillis() - startTime;
@@ -86,7 +90,10 @@ public class RestaurantService extends BaseService<RestaurantEntity, RestaurantR
     }
 
     @Transactional
-    public DishResponse addDishToRestaurant(Long restaurantId, DishRequest request) {
+    public DishResponse addDishToRestaurant(
+            Long restaurantId,
+            DishRequest request
+    ) {
         log.info("Add dish: {} to restaurant: {}", request, restaurantId);
         long startTime = System.currentTimeMillis();
 
@@ -94,10 +101,11 @@ public class RestaurantService extends BaseService<RestaurantEntity, RestaurantR
             RestaurantEntity restaurant = restaurantRepository.findById(restaurantId)
                     .orElseThrow(() -> {
                         log.warn("Restaurant not found: {}", restaurantId);
-                        return new IllegalArgumentException("Restaurant not found: " + restaurantId);
+                        return new IllegalArgumentException("Restaurant not found");
                     });
 
             DishEntity dish = new DishEntity();
+
             dish.setName(request.name());
             dish.setPrice(request.price());
             dish.setRestaurant(restaurant);
@@ -105,17 +113,16 @@ public class RestaurantService extends BaseService<RestaurantEntity, RestaurantR
             DishEntity savedDish = dishRepository.save(dish);
 
             restaurant.getMenu().add(savedDish);
+
             restaurantRepository.save(restaurant);
 
             long duration = System.currentTimeMillis() - startTime;
-            log.info("Success add dish: {} to restaurant: {}, duration={}ms",
-                    request, restaurantId, duration);
+            log.info("Success add dish: {} to restaurant: {}, duration={}ms", request, restaurantId, duration);
 
             return dishMapper.toResponse(savedDish);
 
         } catch (Exception e) {
-            log.error("Failed add dish: {} to restaurant: {}. Error: {}",
-                    request, restaurantId, e.getMessage());
+            log.error("Failed add dish: {} to restaurant: {}. Error: {}", request, restaurantId, e.getMessage());
             throw e;
         }
     }
@@ -144,8 +151,7 @@ public class RestaurantService extends BaseService<RestaurantEntity, RestaurantR
             return orderMapper.toResponse(saved);
 
         } catch (Exception e) {
-            log.error("Failed start cooking for order: {}. Error: {}",
-                    orderId, e.getMessage());
+            log.error("Failed start cooking for order: {}. Error: {}", orderId, e.getMessage());
             throw e;
         }
     }
@@ -174,8 +180,7 @@ public class RestaurantService extends BaseService<RestaurantEntity, RestaurantR
             return orderMapper.toResponse(saved);
 
         } catch (Exception e) {
-            log.error("Failed mark as ready for order: {}. Error: {}",
-                    orderId, e.getMessage());
+            log.error("Failed mark as ready for order: {}. Error: {}", orderId, e.getMessage());
             throw e;
         }
     }

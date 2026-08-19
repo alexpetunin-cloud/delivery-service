@@ -40,6 +40,7 @@ public class CourierRepositoryTest {
             CourierStatus status
     ) {
         CourierEntity courier = new CourierEntity();
+
         courier.setName(name);
         courier.setPhone(phone);
         courier.setStatus(status);
@@ -60,7 +61,8 @@ public class CourierRepositoryTest {
 
         assertThat(couriers).hasSize(1);
         assertThat(couriers).allMatch(
-                courier -> courier.getName().equals("Михаил"));    }
+                courier -> courier.getName().equals("Михаил"));
+    }
 
     @Test
     void searchAllByFilter_ShouldReturnCourierByPhone() {

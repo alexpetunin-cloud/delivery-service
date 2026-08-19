@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DeliveryMapper implements BaseMapper<DeliveryEntity, DeliveryResponse> {
+
     @Override
     public DeliveryResponse toResponse(DeliveryEntity entity) {
         return new DeliveryResponse(

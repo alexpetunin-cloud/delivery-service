@@ -26,26 +26,25 @@ public class CourierController extends BaseController<CourierService, CourierEnt
     public ResponseEntity<CourierResponse> createCourier(
             @RequestBody @Valid CourierRequest request
     ) {
-        log.info("POST /api/couriers - name: {}, phone: {}",
-                request.name(),
-                request.phone());
+        log.info("POST /api/couriers with request: {}", request);
         long startTime = System.currentTimeMillis();
 
         try {
             CourierResponse response = service.createCourier(request);
 
             long duration = System.currentTimeMillis() - startTime;
-            log.info("POST /api/couriers completed: id={}, status={}, duration={}ms",
-                    response.id(), HttpStatus.CREATED.value(), duration);
+            log.info("POST /api/couriers with request: {} completed: {}, duration={}ms",
+                    request, HttpStatus.CREATED, duration);
+
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(response);
 
         } catch (IllegalArgumentException e) {
-            log.warn("POST /api/couriers failed: {}", e.getMessage());
+            log.warn("POST /api/couriers with request: {} failed: {}", request, e.getMessage());
             throw e;
 
         } catch (Exception e) {
-            log.error("POST /api/couriers unexpected error", e);
+            log.error("POST /api/couriers with request: {} unexpected error", request, e);
             throw e;
         }
     }
@@ -59,8 +58,8 @@ public class CourierController extends BaseController<CourierService, CourierEnt
             CourierResponse response = service.findAvailableCourier();
 
             long duration = System.currentTimeMillis() - startTime;
-            log.info("GET /api/couriers/available completed: id={}, name={}, status={}, httpStatus={}, duration={}ms",
-                    response.id(), response.name(), response.status(), HttpStatus.OK, duration);
+            log.info("GET /api/couriers/available completed: {}, duration={}ms", HttpStatus.OK, duration);
+
             return ResponseEntity.ok(response);
 
         } catch (IllegalStateException e) {

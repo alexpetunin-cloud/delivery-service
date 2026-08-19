@@ -73,6 +73,7 @@ public class OrderItemControllerTest {
     @Test
     void addItemToOrder_ShouldAddItemToOrder() throws Exception {
         Long orderId = 1L;
+
         OrderItemRequest request = new OrderItemRequest(
                 1L,
                 1
@@ -104,6 +105,7 @@ public class OrderItemControllerTest {
         mockMvc.perform(delete("/api/orders/{orderId}/items/{itemId}", orderId, itemId))
                 .andExpect(status().isNoContent());
 
-        verify(orderItemService, times(1)).removeItemFromOrder(orderId, itemId);
+        verify(orderItemService, times(1))
+                .removeItemFromOrder(orderId, itemId);
     }
 }

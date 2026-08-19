@@ -27,9 +27,10 @@ public class CourierService extends BaseService<CourierEntity, CourierResponse, 
     }
 
     @Override
-    protected List<CourierEntity> findWithFilter(CourierSearchFilter filter, Pageable pageable) {
-        log.debug("Searching couriers with filter: {}, pageable: {}", filter, pageable);
-
+    protected List<CourierEntity> findWithFilter(
+            CourierSearchFilter filter,
+            Pageable pageable
+    ) {
         return courierRepository.searchAllByFilter(
                 filter.name(),
                 filter.phone(),
@@ -44,7 +45,7 @@ public class CourierService extends BaseService<CourierEntity, CourierResponse, 
     }
 
     public CourierResponse findAvailableCourier() {
-        log.info("Searching available courier");
+        log.info("Find available courier");
         long startTime = System.currentTimeMillis();
 
         try {
@@ -55,7 +56,8 @@ public class CourierService extends BaseService<CourierEntity, CourierResponse, 
                     });
 
             long duration = System.currentTimeMillis() - startTime;
-            log.info("Success find available courier: name={}, duration={}ms", courier.getName(), duration);
+            log.info("Success find available courier, duration={}ms", duration);
+
             return courierMapper.toResponse(courier);
 
         } catch (Exception e) {
@@ -71,24 +73,23 @@ public class CourierService extends BaseService<CourierEntity, CourierResponse, 
 
         try {
             if (courierRepository.findByPhone(request.phone()).isPresent()) {
-                log.warn("Courier with this phone={} already exists", request.phone());
+                log.warn("Courier with this phone: {} already exists", request.phone());
                 throw new IllegalArgumentException("Courier with this phone already exists");
             }
 
             CourierEntity courier = courierMapper.toEntity(request);
+
             courier.setStatus(CourierStatus.AVAILABLE);
-            log.debug("Set status of AVAILABLE for courier: name={}", courier.getName());
 
             CourierEntity saved = courierRepository.save(courier);
 
             long duration = System.currentTimeMillis() - startTime;
-            log.info("Courier created successfully: id={}, name={}, phone={}, duration={}ms",
-                    saved.getId(), saved.getName(), saved.getPhone(), duration);
+            log.info("Success create courier with request: {}, duration={}ms", request, duration);
+
             return courierMapper.toResponse(saved);
 
         } catch (Exception e) {
-            log.error("Failed to create courier: name={}, phone={}. Error: {}",
-                    request.name(), request.phone(), e.getMessage());
+            log.error("Failed to create courier with request {}. Error: {}", request, e.getMessage());
             throw e;
         }
     }

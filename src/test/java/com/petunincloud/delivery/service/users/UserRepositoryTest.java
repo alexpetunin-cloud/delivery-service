@@ -57,6 +57,7 @@ public class UserRepositoryTest {
             String password
     ) {
         UserEntity user = new UserEntity();
+
         user.setEmail(email);
         user.setPhone(phone);
         user.setName(name);

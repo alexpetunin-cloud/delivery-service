@@ -80,6 +80,7 @@ public class RestaurantControllerTest {
     @Test
     void addDishToRestaurant_ShouldAddDish() throws Exception {
         Long restaurantId = 1L;
+
         DishRequest request = new DishRequest(
                 "Маргарита",
                 BigDecimal.valueOf(360)
