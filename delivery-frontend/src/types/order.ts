@@ -7,6 +7,24 @@ export type OrderStatus =
     | "DELIVERED"
     | "CANCELED";
 
+export interface OrderItemRequest {
+    dishId: number;
+    quantity: number;
+}
+
+export interface OrderRequest {
+    email: string;
+    restaurantId: number;
+    items: OrderItemRequest[];
+}
+
+export interface OrderItemResponse {
+    dishId: number;
+    dishName: string;
+    quantity: number;
+    price: number;
+}
+
 export interface OrderResponse {
     id: number;
     userId: number;
@@ -16,8 +34,4 @@ export interface OrderResponse {
     status: OrderStatus;
     totalPrice: number;
     items: OrderItemResponse[];
-}
-
-export interface OrderItemResponse {
-    [key: string]: unknown;
 }

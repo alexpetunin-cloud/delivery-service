@@ -25,6 +25,17 @@ public class RestaurantController extends BaseController<RestaurantService, Rest
         super(service);
     }
 
+    @GetMapping("/{restaurantId}")
+    public ResponseEntity<RestaurantResponse> getRestaurantById(
+            @PathVariable("restaurantId") Long restaurantId
+    ) {
+        log.info("GET /api/restaurants/{}", restaurantId);
+
+        RestaurantResponse response = service.getRestaurantById(restaurantId);
+
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping
     public ResponseEntity<RestaurantResponse> createRestaurant (
             @RequestBody @Valid RestaurantRequest request

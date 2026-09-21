@@ -184,4 +184,11 @@ public class RestaurantService extends BaseService<RestaurantEntity, RestaurantR
             throw e;
         }
     }
+
+    public RestaurantResponse getRestaurantById(Long restaurantId) {
+        RestaurantEntity restaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new IllegalArgumentException("Restaurant not found"));
+
+        return restaurantMapper.toResponse(restaurant);
+    }
 }

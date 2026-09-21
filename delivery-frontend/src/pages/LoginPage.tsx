@@ -1,7 +1,7 @@
 import { FormEvent, useState } from "react";
 import { login } from "../api/authApi";
-import { saveToken } from "../services/authService";
 import { getOrderById } from "../api/orderApi";
+import { saveToken, saveEmail } from "../services/authService";
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");
@@ -27,6 +27,7 @@ export default function LoginPage() {
             });
 
             saveToken(response.token);
+            saveEmail(email);
 
             console.log("LOGIN SUCCESS");
             console.log("TOKEN SAVED");
@@ -59,10 +60,6 @@ export default function LoginPage() {
                     Login
                 </button>
             </form>
-
-            <button type="button" onClick={handleGetOrder}>
-                Get Order #1
-            </button>
         </div>
     );
 }
