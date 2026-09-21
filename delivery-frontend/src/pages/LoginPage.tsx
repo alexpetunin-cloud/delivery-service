@@ -1,9 +1,12 @@
 import { FormEvent, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { login } from "../api/authApi";
 import { getOrderById } from "../api/orderApi";
 import { saveToken, saveEmail } from "../services/authService";
 
 export default function LoginPage() {
+    const navigate = useNavigate();
+
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
@@ -31,6 +34,8 @@ export default function LoginPage() {
 
             console.log("LOGIN SUCCESS");
             console.log("TOKEN SAVED");
+
+            navigate("/restaurants");
 
         } catch (error) {
             console.error("LOGIN ERROR:", error);

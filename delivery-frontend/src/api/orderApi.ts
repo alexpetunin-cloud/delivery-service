@@ -24,3 +24,11 @@ export const createOrder = async (
 
     return response.data;
 };
+
+export const getOrders = async (): Promise<OrderResponse[]> => {
+    const response = await api.get<OrderResponse[]>(
+        "/api/orders"
+    );
+
+    return response.data;
+};
