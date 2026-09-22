@@ -1,5 +1,6 @@
 package com.petunincloud.delivery.service.deliveries.courier;
 
+import com.petunincloud.delivery.service.users.UserEntity;
 import jakarta.persistence.*;
 
 @Entity
@@ -14,6 +15,10 @@ public class CourierEntity {
 
     @Enumerated(EnumType.STRING)
     private CourierStatus status;
+
+    @OneToOne
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    private UserEntity user;
 
     public CourierEntity() {
     }
@@ -39,6 +44,14 @@ public class CourierEntity {
 
     public CourierStatus getStatus() {
         return status;
+    }
+
+    public UserEntity getUser() {
+        return user;
+    }
+
+    public void setUser(UserEntity user) {
+        this.user = user;
     }
 
     public void setId(Long id) {

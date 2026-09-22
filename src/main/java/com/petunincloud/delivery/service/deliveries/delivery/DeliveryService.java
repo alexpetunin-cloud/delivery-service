@@ -14,6 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import com.petunincloud.delivery.service.security.SecurityUtils;
+import com.petunincloud.delivery.service.users.UserEntity;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,19 +30,22 @@ public class DeliveryService extends BaseService<DeliveryEntity, DeliveryRespons
     private final OrderRepository orderRepository;
     private final OrderService orderService;
     private final DeliveryMapper deliveryMapper;
+    private final SecurityUtils securityUtils;
 
     public DeliveryService(
             DeliveryRepository deliveryRepository,
             CourierRepository courierRepository,
             OrderRepository orderRepository,
             OrderService orderService,
-            DeliveryMapper deliveryMapper
+            DeliveryMapper deliveryMapper,
+            SecurityUtils securityUtils
     ) {
         this.deliveryRepository = deliveryRepository;
         this.courierRepository = courierRepository;
         this.orderRepository = orderRepository;
         this.orderService = orderService;
         this.deliveryMapper = deliveryMapper;
+        this.securityUtils = securityUtils;
     }
 
     @Override
@@ -47,9 +53,24 @@ public class DeliveryService extends BaseService<DeliveryEntity, DeliveryRespons
             DeliverySearchFilter filter,
             Pageable pageable
     ) {
+        UserEntity currentUser = securityUtils.getCurrentUser();
+
+        boolean isAdmin = currentUser.getRoles().stream()
+                .anyMatch(role -> role.getName().equals("ROLE_ADMIN"));
+
+        Long courierId = filter.courierId();
+
+        if (!isAdmin) {
+            CourierEntity currentCourier = courierRepository.findByUserId(currentUser.getId())
+                    .orElseThrow(() ->
+                            new AccessDeniedException("Courier not found"));
+
+            courierId = currentCourier.getId();
+        }
+
         return deliveryRepository.searchAllByFilter(
                 filter.orderId(),
-                filter.courierId(),
+                courierId,
                 filter.status(),
                 filter.assignedAt(),
                 filter.deliveredAt(),
@@ -123,25 +144,20 @@ public class DeliveryService extends BaseService<DeliveryEntity, DeliveryRespons
     }
 
     public DeliveryResponse getDeliveryById(Long id) {
-        log.info("Get delivery by id: {}", id);
-        long startTime = System.currentTimeMillis();
+        DeliveryEntity delivery = deliveryRepository.findByIdWithOrderAndCourier(id)
+                .orElseThrow(() -> new IllegalArgumentException("Delivery not found"));
 
-        try {
-            DeliveryEntity delivery = deliveryRepository.findByIdWithOrderAndCourier(id)
-                    .orElseThrow(() -> {
-                        log.warn("Delivery not found: {}", id);
-                        return new IllegalArgumentException("Delivery not found");
-                    });
+        UserEntity currentUser = securityUtils.getCurrentUser();
 
-            long duration = System.currentTimeMillis() - startTime;
-            log.info("Success get delivery: {}, duration={}ms", id, duration);
+        boolean isAdmin = currentUser.getRoles().stream()
+                .anyMatch(role -> role.getName().equals("ROLE_ADMIN"));
 
-            return deliveryMapper.toResponse(delivery);
-
-        } catch (Exception e) {
-            log.error("Failed to get delivery: {}. Error: {}", id, e.getMessage());
-            throw e;
+        if (!isAdmin &&
+                !delivery.getCourier().getUser().getId().equals(currentUser.getId())) {
+            throw new AccessDeniedException("You can only access your own delivery");
         }
+
+        return deliveryMapper.toResponse(delivery);
     }
 
     @Transactional
@@ -158,6 +174,17 @@ public class DeliveryService extends BaseService<DeliveryEntity, DeliveryRespons
 
             OrderEntity order = delivery.getOrder();
             CourierEntity courier = delivery.getCourier();
+            UserEntity currentUser = securityUtils.getCurrentUser();
+
+            boolean isAdmin = currentUser.getRoles().stream()
+                    .anyMatch(role -> role.getName().equals("ROLE_ADMIN"));
+
+            if (!isAdmin &&
+                    !courier.getUser().getId().equals(currentUser.getId())) {
+                throw new AccessDeniedException(
+                        "You can only complete your own delivery"
+                );
+            }
 
             if (order.getStatus() != OrderStatus.DELIVERING) {
                 log.warn("Only DELIVERING orders can be completed (status: {})", order.getStatus());

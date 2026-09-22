@@ -15,6 +15,7 @@ import {
 import HomeRedirect from "./components/HomeRedirect";
 import OrderSuccessPage from "./pages/OrderSuccessPage";
 import OrderPage from "./pages/OrderPage";
+import RegisterPage from "./pages/RegisterPage";
 
 function App() {
     return (
@@ -31,6 +32,11 @@ function App() {
                     <Route
                         path="/login"
                         element={<LoginPage />}
+                    />
+
+                    <Route
+                        path="/register"
+                        element={<RegisterPage />}
                     />
 
                     <Route

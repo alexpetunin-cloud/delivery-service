@@ -15,8 +15,17 @@ public abstract class BaseService<E, D, F extends BaseFilter> {
     public List<D> search(F filter) {
         Logger log = LoggerFactory.getLogger(getClass());
 
-        int pageSize = filter.pageSize() != null ? filter.pageSize() : 10;
-        int pageNumber = filter.pageNumber() != null ? filter.pageNumber() : 0;
+        int pageSize = filter.pageSize() != null
+                ? Math.min(filter.pageSize(), 100)
+                : 10;
+
+        if (pageSize < 1) {
+            throw new IllegalArgumentException("Page size must be greater than 0");
+        }
+
+        int pageNumber = filter.pageNumber() != null
+                ? Math.max(filter.pageNumber(), 0)
+                : 0;
         Pageable pageable = Pageable.ofSize(pageSize).withPage(pageNumber);
 
         log.debug("Search {} with filter: {}, page: {}, size: {}",

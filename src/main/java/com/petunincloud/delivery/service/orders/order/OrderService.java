@@ -50,8 +50,10 @@ public class OrderService extends BaseService<OrderEntity, OrderResponse, OrderS
             OrderSearchFilter filter,
             Pageable pageable
     ) {
+        UserEntity currentUser = securityUtils.getCurrentUser();
+
         return orderRepository.searchAllByFilter(
-                filter.userId(),
+                currentUser.getId(),
                 filter.restaurantId(),
                 pageable
         );

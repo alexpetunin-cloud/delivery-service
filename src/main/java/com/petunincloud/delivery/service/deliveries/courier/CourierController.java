@@ -3,6 +3,7 @@ package com.petunincloud.delivery.service.deliveries.courier;
 import com.petunincloud.delivery.service.common.BaseController;
 import com.petunincloud.delivery.service.deliveries.courier.dto.CourierRequest;
 import com.petunincloud.delivery.service.deliveries.courier.dto.CourierResponse;
+import com.petunincloud.delivery.service.deliveries.courier.dto.CreateCourierRequest;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -24,7 +25,7 @@ public class CourierController extends BaseController<CourierService, CourierEnt
 
     @PostMapping
     public ResponseEntity<CourierResponse> createCourier(
-            @RequestBody @Valid CourierRequest request
+            @RequestBody @Valid CreateCourierRequest request
     ) {
         log.info("POST /api/couriers with request: {}", request);
         long startTime = System.currentTimeMillis();

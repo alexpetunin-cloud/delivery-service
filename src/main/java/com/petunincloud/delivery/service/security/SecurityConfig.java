@@ -40,9 +40,9 @@ public class SecurityConfig {
                             "/api/auth/**",  // регистрация и логин открыты
                             "/swagger-ui/**",
                             "/v3/api-docs/**",
-                            "/swagger-ui.html").permitAll()
-                    .requestMatchers("/api/restaurants/**").hasAnyRole("ADMIN", "RESTAURANT")
-                    .requestMatchers("/api/couriers/**").hasAnyRole("ADMIN", "COURIER")
+                            "/swagger-ui.html",
+                            "/api/restaurants/**").permitAll()
+                    .requestMatchers("/api/couriers/**").hasAnyRole("ADMIN")
                     .requestMatchers("/api/orders/**").authenticated()
                     .requestMatchers("/api/payments/**").authenticated()
                     .requestMatchers("/api/deliveries/**").hasAnyRole("ADMIN", "COURIER")

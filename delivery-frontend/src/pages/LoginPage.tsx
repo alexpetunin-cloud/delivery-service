@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { login } from "../api/authApi";
 import {
     saveEmail,
@@ -114,6 +114,12 @@ export default function LoginPage() {
                             : "Войти"}
                     </button>
                 </form>
+                <p className="auth-switch">
+                    Нет аккаунта?{" "}
+                    <Link to="/register">
+                        Зарегистрироваться
+                    </Link>
+                </p>
             </div>
         </main>
     );

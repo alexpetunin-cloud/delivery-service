@@ -1471,3 +1471,99 @@ p {
     font-size: 14px;
     white-space: nowrap;
 }
+
+.auth-card h1 {
+    margin: 0 0 8px;
+    color: #222;
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.auth-subtitle {
+    margin: 0 0 28px;
+    color: #777;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+.auth-form label {
+    display: block;
+    margin-bottom: 7px;
+    color: #333;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.auth-form input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background: #fff;
+    color: #222;
+    font: inherit;
+    font-size: 15px;
+    outline: none;
+    transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.auth-form input:focus {
+    border-color: #222;
+    box-shadow: 0 0 0 3px rgba(255, 204, 0, 0.25);
+}
+
+.auth-button {
+    width: 100%;
+    padding: 13px 18px;
+    border: none;
+    border-radius: 11px;
+    background: #ffcc00;
+    color: #222;
+    font: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    transition:
+        background 0.15s ease,
+        transform 0.15s ease;
+}
+
+.auth-button:hover:not(:disabled) {
+    background: #f2c000;
+}
+
+.auth-button:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.auth-switch {
+    margin: 22px 0 0;
+    color: #777;
+    text-align: center;
+    font-size: 14px;
+}
+
+.auth-switch a {
+    color: #222;
+    font-weight: 700;
+    text-decoration: underline;
+    text-decoration-color: #ffcc00;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+}
+
+.auth-switch a:hover {
+    color: #000;
+}
+
+.auth-error {
+    padding: 10px 12px;
+    border-radius: 9px;
+    background: #fff3f3;
+    color: #c62828;
+    font-size: 14px;
+    font-weight: 500;
+}

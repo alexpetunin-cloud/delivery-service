@@ -26,4 +26,6 @@ public interface CourierRepository extends JpaRepository<CourierEntity, Long> {
     Optional<CourierEntity> findTopByStatus(CourierStatus status);
 
     Optional<CourierEntity> findByPhone(String phone);
+
+    Optional<CourierEntity> findByUserId(Long userId);
 }

@@ -22,10 +22,10 @@ public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
     );
 
     @Query("""
-        SELECT o FROM OrderEntity o
-        JOIN FETCH o.items
-        WHERE o.id = :orderId
-        """)
+    SELECT o FROM OrderEntity o
+    LEFT JOIN FETCH o.items
+    WHERE o.id = :orderId
+    """)
     Optional<OrderEntity> findByIdWithItems(
             @Param("orderId") Long orderId
     );
