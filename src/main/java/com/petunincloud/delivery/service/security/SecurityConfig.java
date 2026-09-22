@@ -61,9 +61,14 @@ public class SecurityConfig {
                 List.of("http://localhost:5173")
         );
 
-        configuration.setAllowedMethods(
-                List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")
-        );
+        configuration.setAllowedMethods(List.of(
+                "GET",
+                "POST",
+                "PUT",
+                "PATCH",
+                "DELETE",
+                "OPTIONS"
+        ));
 
         configuration.setAllowedHeaders(
                 List.of("*")

@@ -1,34 +1,30 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { getOrders } from "../api/orderApi";
 import type { OrderResponse } from "../types/order";
 
-const getStatusText = (status: OrderResponse["status"]): string => {
-        switch (status) {
-            case "PENDING":
-                return "Ожидает подтверждения";
-
-            case "CONFIRMED":
-                return "Подтверждён";
-
-            case "COOKING":
-                return "Готовится";
-
-            case "READY":
-                return "Готов к доставке";
-
-            case "DELIVERING":
-                return "Доставляется";
-
-            case "DELIVERED":
-                return "Доставлен";
-
-            case "CANCELED":
-                return "Отменён";
-
-            default:
-                return status;
-        }
-    };
+const getStatusText = (
+    status: OrderResponse["status"]
+): string => {
+    switch (status) {
+        case "PENDING":
+            return "Ожидает подтверждения";
+        case "CONFIRMED":
+            return "Подтверждён";
+        case "COOKING":
+            return "Готовится";
+        case "READY":
+            return "Готов к доставке";
+        case "DELIVERING":
+            return "Доставляется";
+        case "DELIVERED":
+            return "Доставлен";
+        case "CANCELED":
+            return "Отменён";
+        default:
+            return status;
+    }
+};
 
 export default function OrdersPage() {
     const [orders, setOrders] = useState<OrderResponse[]>([]);
@@ -43,7 +39,7 @@ export default function OrdersPage() {
                 setOrders(data);
             } catch (error) {
                 console.error(error);
-                setError("Failed to load orders");
+                setError("Не удалось загрузить заказы");
             } finally {
                 setLoading(false);
             }
@@ -53,60 +49,122 @@ export default function OrdersPage() {
     }, []);
 
     if (loading) {
-        return <h1>Loading...</h1>;
+        return (
+            <main className="page">
+                <p>Загрузка...</p>
+            </main>
+        );
     }
 
     if (error) {
-        return <h1>{error}</h1>;
+        return (
+            <main className="page">
+                <p>{error}</p>
+            </main>
+        );
+    }
+
+    if (orders.length === 0) {
+        return (
+            <main className="page">
+                <div className="empty-state">
+                    <div className="empty-icon">
+                        📦
+                    </div>
+
+                    <h1>Заказов пока нет</h1>
+
+                    <p>
+                        Здесь появятся ваши заказы
+                    </p>
+                </div>
+            </main>
+        );
     }
 
     return (
-        <div>
-            <h1>My Orders</h1>
+        <main className="page">
+            <section className="page-header">
+                <h1>Мои заказы</h1>
 
-            {orders.length === 0 ? (
-                <p>No orders yet</p>
-            ) : (
-                orders.map((order) => (
-                    <div key={order.id}>
-                        <h2>
-                            Order #{order.id}
-                        </h2>
+                <p>
+                    История ваших заказов
+                </p>
+            </section>
 
-                        <p>
-                            Restaurant: {order.restaurantName}
-                        </p>
+            <section className="orders-list">
+                {orders.map((order) => (
+                    <Link
+                        to={`/orders/${order.id}`}
+                        className="order-card"
+                        key={order.id}
+                    >
+                        <div className="order-header">
+                            <div>
+                                <span className="order-number">
+                                    Заказ #{order.id}
+                                </span>
 
-                        <p>
-                            Status: {getStatusText(order.status)}
-                        </p>
-
-                        <p>
-                            Total: {order.totalPrice} ₽
-                        </p>
-
-                        <p>
-                            Date: {order.dateTime}
-                        </p>
-
-                        <h3>Items</h3>
-
-                        {order.items.map((item) => (
-                            <div key={item.dishId}>
-                                <p>
-                                    {item.dishName} — {item.quantity} × {item.price} ₽
-                                </p>
+                                <h2>
+                                    {order.restaurantName}
+                                </h2>
 
                                 <p>
-                                    Сумма: {item.quantity * item.price} ₽
+                                    {new Date(
+                                        order.dateTime
+                                    ).toLocaleString("ru-RU")}
                                 </p>
                             </div>
-                        ))}
 
-                        <hr />
-                    </div>
-                ))
-            )}
-        </div>
+                            <span
+                                className={`status-badge status-${order.status.toLowerCase()}`}
+                            >
+                                {getStatusText(
+                                    order.status
+                                )}
+                            </span>
+                        </div>
+
+                        <div className="order-items">
+                            {order.items.map((item) => (
+                                <div
+                                    className="order-item"
+                                    key={item.dishId}
+                                >
+                                    <div className="order-item-icon">
+                                        🍕
+                                    </div>
+
+                                    <div className="order-item-info">
+                                        <strong>
+                                            {item.dishName}
+                                        </strong>
+
+                                        <span>
+                                            {item.quantity} ×{" "}
+                                            {item.price} ₽
+                                        </span>
+                                    </div>
+
+                                    <strong>
+                                        {item.quantity *
+                                            item.price}{" "}
+                                        ₽
+                                    </strong>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="order-footer">
+                            <span>Итого</span>
+
+                            <strong>
+                                {order.totalPrice} ₽
+                            </strong>
+                        </div>
+                    </Link>
+                ))}
+            </section>
+        </main>
     );
 }

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { getRestaurants } from "../api/restaurantApi";
 import type { RestaurantResponse } from "../types/restaurant";
-import { Link } from "react-router-dom";
 
 export default function RestaurantsPage() {
     const [restaurants, setRestaurants] = useState<RestaurantResponse[]>([]);
@@ -16,7 +16,7 @@ export default function RestaurantsPage() {
                 setRestaurants(data);
             } catch (error) {
                 console.error(error);
-                setError("Failed to load restaurants");
+                setError("Не удалось загрузить рестораны");
             } finally {
                 setLoading(false);
             }
@@ -26,28 +26,58 @@ export default function RestaurantsPage() {
     }, []);
 
     if (loading) {
-        return <h1>Loading...</h1>;
+        return (
+            <main className="page">
+                <p>Загрузка...</p>
+            </main>
+        );
     }
 
     if (error) {
-        return <h1>{error}</h1>;
+        return (
+            <main className="page">
+                <p>{error}</p>
+            </main>
+        );
     }
 
     return (
-        <div>
-            <h1>Restaurants</h1>
+        <main className="page">
+            <section className="page-header">
+                <h1>Рестораны</h1>
+                <p>
+                    Выберите ресторан и закажите любимые блюда
+                </p>
+            </section>
 
-            {restaurants.map((restaurant) => (
-                <div key={restaurant.id}>
-                    <h2>
-                        <Link to={`/restaurants/${restaurant.id}`}>
-                            {restaurant.name}
-                        </Link>
-                    </h2>
+            <section className="restaurant-grid">
+                {restaurants.map((restaurant) => (
+                    <article
+                        className="restaurant-card"
+                        key={restaurant.id}
+                    >
+                        <div className="restaurant-card-content">
+                            <div className="restaurant-icon">
+                                🍴
+                            </div>
 
-                    <p>{restaurant.address}</p>
-                </div>
-            ))}
-        </div>
+                            <h2>{restaurant.name}</h2>
+
+                            <p className="restaurant-address">
+                                {restaurant.address}
+                            </p>
+
+                            <Link
+                                className="restaurant-link"
+                                to={`/restaurants/${restaurant.id}`}
+                            >
+                                Посмотреть меню
+                                <span>→</span>
+                            </Link>
+                        </div>
+                    </article>
+                ))}
+            </section>
+        </main>
     );
 }

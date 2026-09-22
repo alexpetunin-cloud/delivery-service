@@ -24,11 +24,10 @@ export default function RestaurantPage() {
 
             try {
                 const data = await getRestaurantById(Number(id));
-
                 setRestaurant(data);
             } catch (error) {
                 console.error(error);
-                setError("Failed to load restaurant");
+                setError("Не удалось загрузить ресторан");
             } finally {
                 setLoading(false);
             }
@@ -38,49 +37,91 @@ export default function RestaurantPage() {
     }, [id]);
 
     if (loading) {
-        return <h1>Loading...</h1>;
+        return (
+            <main className="page">
+                <p>Загрузка...</p>
+            </main>
+        );
     }
 
     if (error) {
-        return <h1>{error}</h1>;
+        return (
+            <main className="page">
+                <p>{error}</p>
+            </main>
+        );
     }
 
     if (!restaurant) {
-        return <h1>Restaurant not found</h1>;
+        return (
+            <main className="page">
+                <p>Ресторан не найден</p>
+            </main>
+        );
     }
 
     return (
-        <div>
-            <h1>{restaurant.name}</h1>
+        <main className="page">
+            <section className="restaurant-header">
+                <div>
+                    <h1>{restaurant.name}</h1>
 
-            <p>{restaurant.address}</p>
-
-            <h2>Menu</h2>
-
-            {restaurant.menu.map((dish) => (
-                <div key={dish.id}>
-                    <h3>{dish.name}</h3>
-
-                    <p>{dish.price} ₽</p>
-
-                    <button
-                        onClick={() =>
-                            addItem(
-                                restaurant.id,
-                                restaurant.name,
-                                {
-                                    dishId: dish.id,
-                                    dishName: dish.name,
-                                    price: dish.price,
-                                    quantity: 1,
-                                }
-                            )
-                        }
-                    >
-                        В корзину
-                    </button>
+                    <p className="restaurant-address">
+                        {restaurant.address}
+                    </p>
                 </div>
-            ))}
-        </div>
+            </section>
+
+            <section className="menu-section">
+                <div className="section-header">
+                    <h2>Меню</h2>
+
+                    <span>
+                        {restaurant.menu.length} блюд
+                    </span>
+                </div>
+
+                <div className="menu-grid">
+                    {restaurant.menu.map((dish) => (
+                        <article
+                            className="dish-card"
+                            key={dish.id}
+                        >
+                            <div className="dish-image">
+                                🍕
+                            </div>
+
+                            <div className="dish-content">
+                                <h3>{dish.name}</h3>
+
+                                <div className="dish-footer">
+                                    <strong>
+                                        {dish.price} ₽
+                                    </strong>
+
+                                    <button
+                                        className="add-button"
+                                        onClick={() =>
+                                            addItem(
+                                                restaurant.id,
+                                                restaurant.name,
+                                                {
+                                                    dishId: dish.id,
+                                                    dishName: dish.name,
+                                                    price: dish.price,
+                                                    quantity: 1,
+                                                }
+                                            )
+                                        }
+                                    >
+                                        +
+                                    </button>
+                                </div>
+                            </div>
+                        </article>
+                    ))}
+                </div>
+            </section>
+        </main>
     );
 }

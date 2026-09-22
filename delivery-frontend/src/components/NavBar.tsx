@@ -29,28 +29,36 @@ export default function Navbar() {
     }
 
     return (
-        <nav>
-            <Link to="/restaurants">
-                Restaurants
-            </Link>
+        <header className="navbar">
+            <div className="navbar-content">
+                <Link
+                    to="/restaurants"
+                    className="navbar-logo"
+                >
+                    🚚 Delivery
+                </Link>
 
-            {" | "}
+                <nav className="navbar-links">
+                    <Link to="/restaurants">
+                        Рестораны
+                    </Link>
 
-            <Link to="/cart">
-                Cart ({cartItemsCount})
-            </Link>
+                    <Link to="/cart">
+                        Корзина ({cartItemsCount})
+                    </Link>
 
-            {" | "}
+                    <Link to="/orders">
+                        Заказы
+                    </Link>
 
-            <Link to="/orders">
-                Orders
-            </Link>
-
-            {" | "}
-
-            <button onClick={handleLogout}>
-                Logout
-            </button>
-        </nav>
+                    <button
+                        className="logout-button"
+                        onClick={handleLogout}
+                    >
+                        Выйти
+                    </button>
+                </nav>
+            </div>
+        </header>
     );
 }

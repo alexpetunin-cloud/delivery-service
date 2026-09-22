@@ -1,104 +1,148 @@
-import { Link } from "react-router-dom";
-import { useCart } from "../context/CartContext";
 import { createOrder } from "../api/orderApi";
 import { getEmail } from "../services/authService";
+import { Link, useNavigate } from "react-router-dom";
+import { useCart } from "../context/CartContext";
 
 export default function CartPage() {
+    const navigate = useNavigate();
+
     const { cart, removeItem, clearCart } = useCart();
-
-    const handleCreateOrder = async () => {
-        if (!cart) {
-            return;
-        }
-
-        const email = getEmail();
-
-        if (!email) {
-            console.error("User email not found");
-            return;
-        }
-
-        try {
-            const order = await createOrder({
-                email,
-                restaurantId: cart.restaurantId,
-                items: cart.items.map((item) => ({
-                    dishId: item.dishId,
-                    quantity: item.quantity,
-                })),
-            });
-
-            console.log("ORDER CREATED:", order);
-
-            clearCart();
-        } catch (error) {
-            console.error("ORDER CREATION ERROR:", error);
-        }
-    };
 
     if (!cart || cart.items.length === 0) {
         return (
-            <div>
-                <h1>Корзина</h1>
-                <p>Корзина пуста</p>
+            <main className="page">
+                <div className="empty-state">
+                    <div className="empty-icon">🛒</div>
 
-                <Link to="/restaurants">
-                    Вернуться к ресторанам
-                </Link>
-            </div>
+                    <h1>Корзина пуста</h1>
+
+                    <p>
+                        Добавьте блюда из ресторана,
+                        чтобы оформить заказ
+                    </p>
+
+                    <Link
+                        to="/restaurants"
+                        className="primary-button"
+                    >
+                        Выбрать ресторан
+                    </Link>
+                </div>
+            </main>
         );
     }
 
     const total = cart.items.reduce(
-        (sum, item) => sum + item.price * item.quantity,
+        (sum, item) =>
+            sum + item.price * item.quantity,
         0
     );
 
+    const handleCreateOrder = async () => {
+       const email = getEmail();
+
+       if (!email) {
+           console.error("User email not found");
+           return;
+       }
+
+       try {
+           await createOrder({
+               email,
+               restaurantId: cart.restaurantId,
+               items: cart.items.map((item) => ({
+                   dishId: item.dishId,
+                   quantity: item.quantity,
+               })),
+           });
+
+           clearCart();
+
+           navigate("/order-success");
+       } catch (error) {
+           console.error(
+               "ORDER CREATION ERROR:",
+               error
+           );
+       }
+   };
+
     return (
-        <div>
-            <h1>Корзина</h1>
+        <main className="page">
+            <div className="page-header">
+                <h1>Корзина</h1>
 
-            <h2>{cart.restaurantName}</h2>
+                <p>{cart.restaurantName}</p>
+            </div>
 
-            {cart.items.map((item) => (
-                <div key={item.dishId}>
-                    <h3>{item.dishName}</h3>
+            <div className="cart-layout">
+                <section className="cart-items">
+                    {cart.items.map((item) => (
+                        <article
+                            className="cart-item"
+                            key={item.dishId}
+                        >
+                            <div className="cart-item-icon">
+                                🍕
+                            </div>
 
-                    <p>
-                        {item.price} ₽ × {item.quantity}
-                    </p>
+                            <div className="cart-item-info">
+                                <h3>{item.dishName}</h3>
 
-                    <p>
-                        Сумма:{" "}
-                        {item.price * item.quantity} ₽
-                    </p>
+                                <p>
+                                    {item.quantity} ×{" "}
+                                    {item.price} ₽
+                                </p>
+                            </div>
+
+                            <strong className="cart-item-price">
+                                {item.quantity *
+                                    item.price}{" "}
+                                ₽
+                            </strong>
+
+                            <button
+                                className="remove-button"
+                                onClick={() =>
+                                    removeItem(
+                                        item.dishId
+                                    )
+                                }
+                            >
+                                ×
+                            </button>
+                        </article>
+                    ))}
+                </section>
+
+                <aside className="cart-summary">
+                    <h2>Ваш заказ</h2>
+
+                    <div className="summary-row">
+                        <span>Блюда</span>
+                        <span>{total} ₽</span>
+                    </div>
+
+                    <div className="summary-row">
+                        <span>Доставка</span>
+                        <span>Бесплатно</span>
+                    </div>
+
+                    <div className="summary-divider" />
+
+                    <div className="summary-total">
+                        <span>Итого</span>
+                        <strong>{total} ₽</strong>
+                    </div>
 
                     <button
-                        onClick={() => removeItem(item.dishId)}
+                        className="checkout-button"
+                        onClick={handleCreateOrder}
                     >
-                        Удалить
+                        Оформить заказ
                     </button>
-                </div>
-            ))}
-
-            <hr />
-
-            <h2>Итого: {total} ₽</h2>
-
-            <button onClick={handleCreateOrder}>
-                Оформить заказ
-            </button>
-
-            <button onClick={clearCart}>
-                Очистить корзину
-            </button>
-
-            <br />
-            <br />
-
-            <Link to="/restaurants">
-                Вернуться к ресторанам
-            </Link>
-        </div>
+                </aside>
+            </div>
+        </main>
     );
 }
