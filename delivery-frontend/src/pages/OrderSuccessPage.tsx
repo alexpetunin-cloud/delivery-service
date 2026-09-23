@@ -3,35 +3,43 @@ import { Link } from "react-router-dom";
 export default function OrderSuccessPage() {
     return (
         <main className="page">
-            <div className="success-state">
-                <div className="success-icon">
+            <section className="order-success">
+                <div className="order-success-icon">
                     ✓
                 </div>
 
-                <h1>Заказ оформлен!</h1>
+                <div className="order-success-content">
+                    <div className="order-success-text">
+                        <h1>Заказ оформлен</h1>
 
-                <p>
-                    Спасибо за заказ.
-                    <br />
-                    Ресторан уже получил информацию.
-                </p>
+                        <p>
+                            Ресторан получил ваш заказ и скоро
+                            начнёт его готовить.
+                        </p>
 
-                <div className="success-actions">
-                    <Link
-                        to="/orders"
-                        className="primary-button"
-                    >
-                        Посмотреть заказы
-                    </Link>
+                        <div className="order-success-status">
+                            <span className="order-success-dot" />
+                            <span>Заказ принят</span>
+                        </div>
+                    </div>
 
-                    <Link
-                        to="/restaurants"
-                        className="secondary-button"
-                    >
-                        Вернуться к ресторанам
-                    </Link>
+                    <div className="order-success-actions">
+                        <Link
+                            to="/orders"
+                            className="primary-button"
+                        >
+                            Мои заказы
+                        </Link>
+
+                        <Link
+                            to="/restaurants"
+                            className="secondary-button"
+                        >
+                            Рестораны
+                        </Link>
+                    </div>
                 </div>
-            </div>
+            </section>
         </main>
     );
 }

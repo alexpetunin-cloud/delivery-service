@@ -113,9 +113,7 @@ export default function RestaurantPage() {
                                                 }
                                             )
                                         }
-                                    >
-                                        +
-                                    </button>
+                                    />
                                 </div>
                             </div>
                         </article>

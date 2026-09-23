@@ -16,6 +16,7 @@ import HomeRedirect from "./components/HomeRedirect";
 import OrderSuccessPage from "./pages/OrderSuccessPage";
 import OrderPage from "./pages/OrderPage";
 import RegisterPage from "./pages/RegisterPage";
+import PublicRoute from "./components/PublicRoute";
 
 function App() {
     return (
@@ -31,12 +32,20 @@ function App() {
 
                     <Route
                         path="/login"
-                        element={<LoginPage />}
+                        element={
+                            <PublicRoute>
+                                <LoginPage />
+                            </PublicRoute>
+                        }
                     />
 
                     <Route
                         path="/register"
-                        element={<RegisterPage />}
+                        element={
+                            <PublicRoute>
+                                <RegisterPage />
+                            </PublicRoute>
+                        }
                     />
 
                     <Route

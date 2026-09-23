@@ -164,137 +164,112 @@ export default function OrderPage() {
         );
     }
 
-    return (
-        <main className="page">
-            <div className="order-details">
-                <div className="order-details-header">
-                    <div className="order-heading">
-                        <Link
-                            to="/orders"
-                            className="back-link"
-                        >
-                            ← Все заказы
-                        </Link>
+return (
+    <main className="page">
+        <div className="order-page">
+            <Link
+                to="/orders"
+                className="back-link"
+            >
+                ← Все заказы
+            </Link>
 
-                        <div className="order-title">
-                            <span>Заказ</span>
-                            <strong>#{order.id}</strong>
-                        </div>
+            <div className="order-page-header">
+                <div>
+                    <h1>{order.restaurantName}</h1>
 
-                        <p className="order-date">
-                            {new Date(order.dateTime).toLocaleDateString(
-                                "ru-RU"
-                            )}{" "}
-                            {new Date(order.dateTime).toLocaleTimeString(
-                                "ru-RU",
-                                {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                    hour12: false,
-                                }
-                            )}
-                        </p>
-                    </div>
-
-                    <div className="order-details-actions">
-                        <span
-                            className={`status-badge status-${order.status.toLowerCase()}`}
-                        >
-                            {getStatusText(order.status)}
-                        </span>
-
-                        {order.status === "PENDING" && (
-                            <button
-                                className="primary-button"
-                                onClick={handlePayment}
-                                disabled={paying}
-                            >
-                                {paying ? "Оплачиваем..." : "Оплатить"}
-                            </button>
+                    <p>
+                        {new Date(order.dateTime).toLocaleDateString(
+                            "ru-RU"
+                        )}{" "}
+                        {new Date(order.dateTime).toLocaleTimeString(
+                            "ru-RU",
+                            {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: false,
+                            }
                         )}
-
-                        {order.status !== "CANCELED" &&
-                            order.status !== "DELIVERED" && (
-                                <button
-                                    className="cancel-order-button"
-                                    onClick={handleCancelOrder}
-                                    disabled={canceling}
-                                >
-                                    {canceling
-                                        ? "Отменяем..."
-                                        : "Отменить заказ"}
-                                </button>
-                            )}
-                    </div>
+                    </p>
                 </div>
 
-                <section className="order-info-card">
-                    <div className="restaurant-info">
-                        <div className="restaurant-info-icon">
-                            🍴
-                        </div>
+                <span
+                    className={`status-badge status-${order.status.toLowerCase()}`}
+                >
+                    {getStatusText(order.status)}
+                </span>
+            </div>
 
-                        <div>
-                            <span className="info-label">
-                                Ресторан
-                            </span>
+            <section className="order-restaurant">
+                <div className="order-restaurant-icon">
+                    🍴
+                </div>
 
-                            <strong>
-                                {order.restaurantName}
+                <div>
+                    <span>Ресторан</span>
+                    <strong>{order.restaurantName}</strong>
+                </div>
+            </section>
+
+            <section className="order-items-card">
+                <h2>Состав заказа</h2>
+
+                <div className="order-items">
+                    {order.items.map((item) => (
+                        <div
+                            className="order-item"
+                            key={item.dishId}
+                        >
+                            <div className="order-item-image">
+                                🍕
+                            </div>
+
+                            <div className="order-item-main">
+                                <strong>{item.dishName}</strong>
+
+                                <span>
+                                    {item.quantity} × {item.price} ₽
+                                </span>
+                            </div>
+
+                            <strong className="order-item-price">
+                                {item.quantity * item.price} ₽
                             </strong>
                         </div>
-                    </div>
+                    ))}
+                </div>
 
-                    <div className="order-number-info">
-                        <span className="info-label">
-                            Номер заказа
-                        </span>
+                <div className="order-total">
+                    <span>Итого</span>
+                    <strong>{order.totalPrice} ₽</strong>
+                </div>
+            </section>
 
-                        <strong>
-                            #{order.id}
-                        </strong>
-                    </div>
-                </section>
+            <div className="order-actions">
+                {order.status === "PENDING" && (
+                    <button
+                        className="primary-button"
+                        onClick={handlePayment}
+                        disabled={paying}
+                    >
+                        {paying ? "Оплачиваем..." : "Оплатить"}
+                    </button>
+                )}
 
-                <section className="order-details-card">
-                    <h2>Состав заказа</h2>
-
-                    <div className="order-details-items">
-                        {order.items.map((item) => (
-                            <div
-                                className="order-details-item"
-                                key={item.dishId}
-                            >
-                                <div className="order-item-icon">
-                                    🍕
-                                </div>
-
-                                <div className="order-item-info">
-                                    <strong>
-                                        {item.dishName}
-                                    </strong>
-
-                                    <span>
-                                        {item.quantity} × {item.price} ₽
-                                    </span>
-                                </div>
-
-                                <strong className="order-item-total">
-                                    {item.quantity * item.price} ₽
-                                </strong>
-                            </div>
-                        ))}
-                    </div>
-
-                    <div className="order-details-total">
-                        <span>Итого</span>
-
-                        <strong>
-                            {order.totalPrice} ₽
-                        </strong>
-                    </div>
-                </section>
+                {order.status !== "CANCELED" &&
+                    order.status !== "DELIVERED" && (
+                        <button
+                            className="cancel-order-button"
+                            onClick={handleCancelOrder}
+                            disabled={canceling}
+                        >
+                            {canceling
+                                ? "Отменяем..."
+                                : "Отменить заказ"}
+                        </button>
+                    )}
             </div>
-        </main>
+        </div>
+    </main>
     );
 }
