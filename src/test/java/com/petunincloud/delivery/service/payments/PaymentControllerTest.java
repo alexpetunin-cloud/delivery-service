@@ -44,10 +44,7 @@ public class PaymentControllerTest {
 
     @Test
     void initiatePayment_ShouldInitiatePayment() throws Exception{
-        PaymentRequest request = new PaymentRequest(
-                1L,
-                "user@gmail.com"
-        );
+        PaymentRequest request = new PaymentRequest(1L);
 
         PaymentResponse response = new PaymentResponse(
                 1L,

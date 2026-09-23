@@ -3,10 +3,10 @@ package com.petunincloud.delivery.service.security;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -40,8 +40,11 @@ public class SecurityConfig {
                             "/api/auth/**",  // регистрация и логин открыты
                             "/swagger-ui/**",
                             "/v3/api-docs/**",
-                            "/swagger-ui.html",
-                            "/api/restaurants/**").permitAll()
+                            "/swagger-ui.html").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/restaurants/**").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/restaurants").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.POST, "/api/restaurants/*/dishes").hasRole("RESTAURANT")
+                    .requestMatchers(HttpMethod.PATCH, "/api/restaurants/**").hasRole("RESTAURANT")
                     .requestMatchers("/api/couriers/**").hasAnyRole("ADMIN")
                     .requestMatchers("/api/orders/**").authenticated()
                     .requestMatchers("/api/payments/**").authenticated()

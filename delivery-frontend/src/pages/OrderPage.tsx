@@ -5,6 +5,10 @@ import {
     cancelOrder,
 } from "../api/orderApi";
 import type { OrderResponse } from "../types/order";
+import {
+    initiatePayment,
+    processPayment,
+} from "../api/paymentApi";
 
 const getStatusText = (
     status: OrderResponse["status"]
@@ -36,6 +40,7 @@ export default function OrderPage() {
         useState<OrderResponse | null>(null);
 
     const [canceling, setCanceling] = useState(false);
+    const [paying, setPaying] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -85,6 +90,33 @@ export default function OrderPage() {
             setError("Не удалось отменить заказ");
         } finally {
             setCanceling(false);
+        }
+    };
+
+    const handlePayment = async () => {
+        if (!order) {
+            return;
+        }
+
+        try {
+            setPaying(true);
+            setError(null);
+
+            const payment = await initiatePayment({
+                orderId: order.id,
+            });
+
+            const processedPayment = await processPayment(payment.id);
+
+            if (processedPayment.status === "SUCCESS") {
+                const updatedOrder = await getOrderById(order.id);
+                setOrder(updatedOrder);
+            }
+        } catch (error) {
+            console.error(error);
+            setError("Не удалось выполнить оплату");
+        } finally {
+            setPaying(false);
         }
     };
 
@@ -170,6 +202,16 @@ export default function OrderPage() {
                         >
                             {getStatusText(order.status)}
                         </span>
+
+                        {order.status === "PENDING" && (
+                            <button
+                                className="primary-button"
+                                onClick={handlePayment}
+                                disabled={paying}
+                            >
+                                {paying ? "Оплачиваем..." : "Оплатить"}
+                            </button>
+                        )}
 
                         {order.status !== "CANCELED" &&
                             order.status !== "DELIVERED" && (

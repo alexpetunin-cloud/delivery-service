@@ -7,6 +7,7 @@ import com.petunincloud.delivery.service.orders.order.dto.OrderResponse;
 import com.petunincloud.delivery.service.orders.orderItem.dto.OrderItemResponse;
 import com.petunincloud.delivery.service.restaurants.dish.dto.DishRequest;
 import com.petunincloud.delivery.service.restaurants.dish.dto.DishResponse;
+import com.petunincloud.delivery.service.restaurants.restaurant.dto.CreateRestaurantRequest;
 import com.petunincloud.delivery.service.restaurants.restaurant.dto.RestaurantRequest;
 import com.petunincloud.delivery.service.restaurants.restaurant.dto.RestaurantResponse;
 import org.junit.jupiter.api.Test;
@@ -46,9 +47,12 @@ public class RestaurantControllerTest {
 
     @Test
     void createRestaurant_ShouldCreateRestaurant() throws Exception {
-        RestaurantRequest request = new RestaurantRequest(
-            "Шаурма Кинг",
-            "ул. Полевая, 34"
+        CreateRestaurantRequest request = new CreateRestaurantRequest(
+                "restaurant@test.com",
+                "password123",
+                "Test Restaurant",
+                "+79991234567",
+                "Test address"
         );
 
         DishResponse dishResponse = new DishResponse(

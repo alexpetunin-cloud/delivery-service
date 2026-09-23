@@ -8,14 +8,21 @@ import com.petunincloud.delivery.service.restaurants.dish.DishMapper;
 import com.petunincloud.delivery.service.restaurants.dish.DishRepository;
 import com.petunincloud.delivery.service.restaurants.dish.dto.DishRequest;
 import com.petunincloud.delivery.service.restaurants.dish.dto.DishResponse;
+import com.petunincloud.delivery.service.restaurants.restaurant.dto.CreateRestaurantRequest;
 import com.petunincloud.delivery.service.restaurants.restaurant.dto.RestaurantRequest;
 import com.petunincloud.delivery.service.restaurants.restaurant.dto.RestaurantResponse;
+import com.petunincloud.delivery.service.security.SecurityUtils;
+import com.petunincloud.delivery.service.users.RoleEntity;
+import com.petunincloud.delivery.service.users.RoleRepository;
+import com.petunincloud.delivery.service.users.UserEntity;
+import com.petunincloud.delivery.service.users.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -52,42 +59,83 @@ public class RestaurantServiceTest {
     @Mock
     private OrderMapper orderMapper;
 
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private RoleRepository roleRepository;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private SecurityUtils securityUtils;
+
     @InjectMocks
     private RestaurantService restaurantService;
 
     @Test
     void createRestaurant_ShouldCreateRestaurant() {
-        RestaurantRequest request = new RestaurantRequest(
-                "Додо",
-                "ул. Пушинка, 25"
+        CreateRestaurantRequest request = new CreateRestaurantRequest(
+                "restaurant@test.com",
+                "password123",
+                "Test Restaurant",
+                "+79991234567",
+                "Test address"
         );
 
+        RoleEntity role = new RoleEntity();
+        role.setName("ROLE_RESTAURANT");
+
+        UserEntity user = new UserEntity();
+
         RestaurantEntity restaurant = new RestaurantEntity();
+        restaurant.setId(1L);
+        restaurant.setName(request.name());
+        restaurant.setAddress(request.address());
+        restaurant.setUser(user);
 
         RestaurantResponse restaurantResponse = new RestaurantResponse(
                 1L,
-                "Додо",
-                "ул. Пушинка, 25",
+                "Test Restaurant",
+                "Test address",
                 List.of()
         );
 
-        when(restaurantMapper.toEntity(request))
-                .thenReturn(restaurant);
+        when(userRepository.findByEmail(request.email()))
+                .thenReturn(Optional.empty());
+
+        when(restaurantRepository.findByName(request.name()))
+                .thenReturn(Optional.empty());
+
+        when(roleRepository.findByName("ROLE_RESTAURANT"))
+                .thenReturn(Optional.of(role));
+
+        when(passwordEncoder.encode(request.password()))
+                .thenReturn("encoded-password");
+
+        when(userRepository.save(any(UserEntity.class)))
+                .thenReturn(user);
+
         when(restaurantRepository.save(any(RestaurantEntity.class)))
                 .thenReturn(restaurant);
+
         when(restaurantMapper.toResponse(restaurant))
                 .thenReturn(restaurantResponse);
 
-        RestaurantResponse result = restaurantService.createRestaurant(request);
+        RestaurantResponse result =
+                restaurantService.createRestaurant(request);
 
         assertNotNull(result);
+        assertEquals("Test Restaurant", result.name());
+        assertEquals("Test address", result.address());
 
-        verify(restaurantMapper, times(1))
-                .toEntity(request);
-        verify(restaurantRepository, times(1))
-                .save(any(RestaurantEntity.class));
-        verify(restaurantMapper, times(1))
-                .toResponse(restaurant);
+        verify(userRepository).findByEmail(request.email());
+        verify(roleRepository).findByName("ROLE_RESTAURANT");
+        verify(passwordEncoder).encode(request.password());
+        verify(userRepository).save(any(UserEntity.class));
+        verify(restaurantRepository).save(any(RestaurantEntity.class));
+        verify(restaurantMapper).toResponse(restaurant);
     }
 
     @Test

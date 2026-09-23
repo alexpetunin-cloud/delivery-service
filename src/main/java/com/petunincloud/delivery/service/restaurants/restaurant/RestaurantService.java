@@ -12,15 +12,24 @@ import com.petunincloud.delivery.service.restaurants.dish.DishMapper;
 import com.petunincloud.delivery.service.restaurants.dish.DishRepository;
 import com.petunincloud.delivery.service.restaurants.dish.dto.DishRequest;
 import com.petunincloud.delivery.service.restaurants.dish.dto.DishResponse;
-import com.petunincloud.delivery.service.restaurants.restaurant.dto.RestaurantRequest;
+import com.petunincloud.delivery.service.restaurants.restaurant.dto.CreateRestaurantRequest;
 import com.petunincloud.delivery.service.restaurants.restaurant.dto.RestaurantResponse;
+import com.petunincloud.delivery.service.security.SecurityUtils;
+import com.petunincloud.delivery.service.users.RoleEntity;
+import com.petunincloud.delivery.service.users.RoleRepository;
+import com.petunincloud.delivery.service.users.UserEntity;
+import com.petunincloud.delivery.service.users.UserRepository;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class RestaurantService extends BaseService<RestaurantEntity, RestaurantResponse, RestaurantSearchFilter> {
@@ -33,6 +42,10 @@ public class RestaurantService extends BaseService<RestaurantEntity, RestaurantR
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
     private final static Logger log = LoggerFactory.getLogger(RestaurantService.class);
+    private final SecurityUtils securityUtils;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public RestaurantService(
             RestaurantRepository restaurantRepository,
@@ -41,7 +54,11 @@ public class RestaurantService extends BaseService<RestaurantEntity, RestaurantR
             DishMapper dishMapper,
             OrderService orderService,
             OrderRepository orderRepository,
-            OrderMapper orderMapper
+            OrderMapper orderMapper,
+            SecurityUtils securityUtils,
+            UserRepository userRepository,
+            RoleRepository roleRepository,
+            PasswordEncoder passwordEncoder
     ) {
         this.restaurantRepository = restaurantRepository;
         this.restaurantMapper = restaurantMapper;
@@ -50,6 +67,10 @@ public class RestaurantService extends BaseService<RestaurantEntity, RestaurantR
         this.orderService = orderService;
         this.orderRepository = orderRepository;
         this.orderMapper = orderMapper;
+        this.securityUtils = securityUtils;
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -69,24 +90,43 @@ public class RestaurantService extends BaseService<RestaurantEntity, RestaurantR
     }
 
     @Transactional
-    public RestaurantResponse createRestaurant(RestaurantRequest request) {
-        log.info("Create restaurant with request: {}", request);
-        long startTime = System.currentTimeMillis();
+    public RestaurantResponse createRestaurant(CreateRestaurantRequest request) {
 
-        try {
-            RestaurantEntity entity = restaurantMapper.toEntity(request);
-
-            RestaurantEntity saved = restaurantRepository.save(entity);
-
-            long duration = System.currentTimeMillis() - startTime;
-            log.info("Success create restaurant with request: {}, duration={}ms", request, duration);
-
-            return restaurantMapper.toResponse(saved);
-
-        } catch (Exception e) {
-            log.error("Failed create restaurant with request: {}. Error: {}", request, e.getMessage());
-            throw e;
+        if (userRepository.findByEmail(request.email()).isPresent()) {
+            throw new IllegalArgumentException(
+                    "User with this email already exists"
+            );
         }
+
+        if (restaurantRepository.findByName(request.name()).isPresent()) {
+            throw new IllegalArgumentException(
+                    "Restaurant with this name already exists"
+            );
+        }
+
+        RoleEntity restaurantRole = roleRepository.findByName("ROLE_RESTAURANT")
+                .orElseThrow(() ->
+                        new IllegalStateException("ROLE_RESTAURANT not found"));
+
+        UserEntity user = new UserEntity();
+        user.setEmail(request.email());
+        user.setPassword(passwordEncoder.encode(request.password()));
+        user.setPhone(request.phone());
+        user.setName(request.name());
+        user.setAddress(request.address());
+        user.setRoles(Set.of(restaurantRole));
+
+        UserEntity savedUser = userRepository.save(user);
+
+        RestaurantEntity restaurant = new RestaurantEntity();
+        restaurant.setUser(savedUser);
+        restaurant.setName(request.name());
+        restaurant.setAddress(request.address());
+
+        RestaurantEntity savedRestaurant =
+                restaurantRepository.save(restaurant);
+
+        return restaurantMapper.toResponse(savedRestaurant);
     }
 
     @Transactional
@@ -94,37 +134,29 @@ public class RestaurantService extends BaseService<RestaurantEntity, RestaurantR
             Long restaurantId,
             DishRequest request
     ) {
-        log.info("Add dish: {} to restaurant: {}", request, restaurantId);
-        long startTime = System.currentTimeMillis();
+        RestaurantEntity restaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Restaurant not found"));
 
-        try {
-            RestaurantEntity restaurant = restaurantRepository.findById(restaurantId)
-                    .orElseThrow(() -> {
-                        log.warn("Restaurant not found: {}", restaurantId);
-                        return new IllegalArgumentException("Restaurant not found");
-                    });
+        UserEntity currentUser = securityUtils.getCurrentUser();
 
-            DishEntity dish = new DishEntity();
-
-            dish.setName(request.name());
-            dish.setPrice(request.price());
-            dish.setRestaurant(restaurant);
-
-            DishEntity savedDish = dishRepository.save(dish);
-
-            restaurant.getMenu().add(savedDish);
-
-            restaurantRepository.save(restaurant);
-
-            long duration = System.currentTimeMillis() - startTime;
-            log.info("Success add dish: {} to restaurant: {}, duration={}ms", request, restaurantId, duration);
-
-            return dishMapper.toResponse(savedDish);
-
-        } catch (Exception e) {
-            log.error("Failed add dish: {} to restaurant: {}. Error: {}", request, restaurantId, e.getMessage());
-            throw e;
+        if (!restaurant.getUser().getId().equals(currentUser.getId())) {
+            throw new AccessDeniedException(
+                    "You can only modify your own restaurant"
+            );
         }
+
+        DishEntity dish = new DishEntity();
+        dish.setName(request.name());
+        dish.setPrice(request.price());
+        dish.setRestaurant(restaurant);
+
+        DishEntity savedDish = dishRepository.save(dish);
+
+        restaurant.getMenu().add(savedDish);
+        restaurantRepository.save(restaurant);
+
+        return dishMapper.toResponse(savedDish);
     }
 
     @Transactional
@@ -134,6 +166,11 @@ public class RestaurantService extends BaseService<RestaurantEntity, RestaurantR
 
         try {
             OrderEntity order = orderService.getOrderById(orderId);
+            UserEntity user = securityUtils.getCurrentUser();
+
+            if (!order.getRestaurant().getUser().getId().equals(user.getId())) {
+                throw new AccessDeniedException("You can only manage orders of your own restaurant");
+            }
 
             if (order.getStatus() != OrderStatus.CONFIRMED) {
                 log.warn("Сan`t start cooking until the order is not CONFIRMED (status: {})", order.getStatus());
@@ -163,6 +200,11 @@ public class RestaurantService extends BaseService<RestaurantEntity, RestaurantR
 
         try {
             OrderEntity order = orderService.getOrderById(orderId);
+            UserEntity user = securityUtils.getCurrentUser();
+
+            if (!order.getRestaurant().getUser().getId().equals(user.getId())) {
+                throw new AccessDeniedException("You can only manage orders of your own restaurant");
+            }
 
             if (order.getStatus() != OrderStatus.COOKING) {
                 log.warn("Сan`t start cooking until the order is not COOKING (status: {})", order.getStatus());

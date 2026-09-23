@@ -7,11 +7,13 @@ import com.petunincloud.delivery.service.orders.order.OrderStatus;
 import com.petunincloud.delivery.service.orders.order.OrderEntity;
 import com.petunincloud.delivery.service.payments.dto.PaymentRequest;
 import com.petunincloud.delivery.service.payments.dto.PaymentResponse;
+import com.petunincloud.delivery.service.security.SecurityUtils;
 import com.petunincloud.delivery.service.users.UserEntity;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -26,17 +28,20 @@ public class PaymentService extends BaseService<PaymentEntity, PaymentResponse, 
     private final PaymentMapper paymentMapper;
     private final OrderRepository orderRepository;
     private final OrderService orderService;
+    private final SecurityUtils securityUtils;
 
     public PaymentService(
             PaymentRepository paymentRepository,
             PaymentMapper paymentMapper,
             OrderRepository orderRepository,
-            OrderService orderService
+            OrderService orderService,
+            SecurityUtils securityUtils
     ) {
         this.paymentRepository = paymentRepository;
         this.paymentMapper = paymentMapper;
         this.orderRepository = orderRepository;
         this.orderService = orderService;
+        this.securityUtils = securityUtils;
     }
 
     @Override
@@ -74,6 +79,12 @@ public class PaymentService extends BaseService<PaymentEntity, PaymentResponse, 
                         return new IllegalArgumentException("Order not found");
                     });
 
+            if (!order.getUser().getId().equals(user.getId())) {
+                throw new AccessDeniedException(
+                        "You can only pay for your own orders"
+                );
+            }
+
             PaymentEntity payment = paymentMapper.toEntity(user, order);
 
             PaymentEntity saved = paymentRepository.save(payment);
@@ -102,6 +113,14 @@ public class PaymentService extends BaseService<PaymentEntity, PaymentResponse, 
                         log.warn("Payment not found: {}", paymentId);
                         return new IllegalArgumentException("Payment not found");
                     });
+
+            UserEntity user = securityUtils.getCurrentUser();
+
+            if (!payment.getUser().getId().equals(user.getId())) {
+                throw new AccessDeniedException(
+                        "You can only pay for your own orders"
+                );
+            }
 
             if (payment.getStatus() != PaymentStatus.PENDING) {
                 log.warn("Payment already processed: {} (status: {})", payment.getId(), payment.getStatus());

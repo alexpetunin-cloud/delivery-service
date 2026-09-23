@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface RestaurantRepository extends JpaRepository<RestaurantEntity, Long> {
 
@@ -17,4 +18,6 @@ public interface RestaurantRepository extends JpaRepository<RestaurantEntity, Lo
             @Param("name") String name,
             Pageable pageable
     );
+
+    Optional<RestaurantEntity> findByName(String name);
 }

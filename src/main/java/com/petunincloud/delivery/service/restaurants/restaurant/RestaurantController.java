@@ -4,6 +4,7 @@ import com.petunincloud.delivery.service.common.BaseController;
 import com.petunincloud.delivery.service.orders.order.dto.OrderResponse;
 import com.petunincloud.delivery.service.restaurants.dish.dto.DishRequest;
 import com.petunincloud.delivery.service.restaurants.dish.dto.DishResponse;
+import com.petunincloud.delivery.service.restaurants.restaurant.dto.CreateRestaurantRequest;
 import com.petunincloud.delivery.service.restaurants.restaurant.dto.RestaurantRequest;
 import com.petunincloud.delivery.service.restaurants.restaurant.dto.RestaurantResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -38,7 +39,7 @@ public class RestaurantController extends BaseController<RestaurantService, Rest
 
     @PostMapping
     public ResponseEntity<RestaurantResponse> createRestaurant (
-            @RequestBody @Valid RestaurantRequest request
+            @RequestBody @Valid CreateRestaurantRequest request
     ) {
         log.info("POST /api/restaurants with request: {}", request);
         long startTime = System.currentTimeMillis();

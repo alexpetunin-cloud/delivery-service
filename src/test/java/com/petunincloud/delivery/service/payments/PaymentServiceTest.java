@@ -54,10 +54,7 @@ public class PaymentServiceTest {
 
         order.setTotalPrice(BigDecimal.valueOf(300));
 
-        PaymentRequest paymentRequest = new PaymentRequest(
-                orderId,
-                "user@gmail.com"
-        );
+        PaymentRequest paymentRequest = new PaymentRequest(orderId);
 
         PaymentResponse paymentResponse = new PaymentResponse(
                 1L,
@@ -102,10 +99,7 @@ public class PaymentServiceTest {
     void initiatePayment_ShouldThrowException_WhenOrderNotFound() {
         Long orderId = 1L;
 
-        PaymentRequest paymentRequest = new PaymentRequest(
-                1L,
-                "user@gmail.com"
-        );
+        PaymentRequest paymentRequest = new PaymentRequest(1L);
 
         UserEntity user = new UserEntity();
 

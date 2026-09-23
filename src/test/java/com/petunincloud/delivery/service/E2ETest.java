@@ -131,7 +131,7 @@ class E2ETest {
 
         Long orderId = objectMapper.readTree(orderResponse).get("id").asLong();
 
-        PaymentRequest paymentRequest = new PaymentRequest(orderId, userEmail);
+        PaymentRequest paymentRequest = new PaymentRequest(orderId);
 
         String paymentResponse = mockMvc.perform(post("/api/payments/initiate")
                         .contentType(MediaType.APPLICATION_JSON)

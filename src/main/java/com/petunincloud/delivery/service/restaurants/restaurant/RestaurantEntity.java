@@ -1,6 +1,7 @@
 package com.petunincloud.delivery.service.restaurants.restaurant;
 
 import com.petunincloud.delivery.service.restaurants.dish.DishEntity;
+import com.petunincloud.delivery.service.users.UserEntity;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +22,10 @@ public class RestaurantEntity {
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DishEntity> menu = new ArrayList<>();
+
+    @OneToOne
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    private UserEntity user;
 
     public RestaurantEntity() {
     }
@@ -62,5 +67,13 @@ public class RestaurantEntity {
 
     public void setMenu(List<DishEntity> menu) {
         this.menu = menu;
+    }
+
+    public UserEntity getUser() {
+        return user;
+    }
+
+    public void setUser(UserEntity user) {
+        this.user = user;
     }
 }
