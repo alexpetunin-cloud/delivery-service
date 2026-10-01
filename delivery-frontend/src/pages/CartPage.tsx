@@ -2,6 +2,7 @@ import { createOrder } from "../api/orderApi";
 import { getEmail } from "../services/authService";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import { getDishImage } from "../utils/imageUtils";
 
 export default function CartPage() {
     const navigate = useNavigate();
@@ -82,9 +83,15 @@ export default function CartPage() {
                             className="cart-item"
                             key={item.dishId}
                         >
-                            <div className="cart-item-icon">
-                                🍕
-                            </div>
+                            <img
+                                src={getDishImage(
+                                    item.dishName,
+                                    cart.restaurantName
+                                )}
+                                alt={item.dishName}
+                                className="cart-item-image"
+                                loading="lazy"
+                            />
 
                             <div className="cart-item-info">
                                 <h3>{item.dishName}</h3>

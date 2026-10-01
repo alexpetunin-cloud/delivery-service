@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getRestaurants } from "../api/restaurantApi";
 import type { RestaurantResponse } from "../types/restaurant";
+import { getRestaurantImage } from "../utils/imageUtils";
 
 export default function RestaurantsPage() {
     const [restaurants, setRestaurants] = useState<RestaurantResponse[]>([]);
@@ -12,7 +13,6 @@ export default function RestaurantsPage() {
         const loadRestaurants = async () => {
             try {
                 const data = await getRestaurants();
-
                 setRestaurants(data);
             } catch (error) {
                 console.error(error);
@@ -56,11 +56,14 @@ export default function RestaurantsPage() {
                         className="restaurant-card"
                         key={restaurant.id}
                     >
-                        <div className="restaurant-card-content">
-                            <div className="restaurant-icon">
-                                🍴
-                            </div>
+                        <img
+                            src={getRestaurantImage(restaurant.name)}
+                            alt={restaurant.name}
+                            className="restaurant-image"
+                            loading="lazy"
+                        />
 
+                        <div className="restaurant-card-content">
                             <h2>{restaurant.name}</h2>
 
                             <p className="restaurant-address">

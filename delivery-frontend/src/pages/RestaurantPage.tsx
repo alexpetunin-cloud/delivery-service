@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { getRestaurantById } from "../api/restaurantApi";
 import type { RestaurantResponse } from "../types/restaurant";
 import { useCart } from "../context/CartContext";
+import { getDishImage } from "../utils/imageUtils";
 
 export default function RestaurantPage() {
     const { id } = useParams<{ id: string }>();
@@ -65,7 +66,6 @@ export default function RestaurantPage() {
             <section className="restaurant-header">
                 <div>
                     <h1>{restaurant.name}</h1>
-
                     <p className="restaurant-address">
                         {restaurant.address}
                     </p>
@@ -75,10 +75,7 @@ export default function RestaurantPage() {
             <section className="menu-section">
                 <div className="section-header">
                     <h2>Меню</h2>
-
-                    <span>
-                        {restaurant.menu.length} блюд
-                    </span>
+                    <span>{restaurant.menu.length} блюд</span>
                 </div>
 
                 <div className="menu-grid">
@@ -87,9 +84,18 @@ export default function RestaurantPage() {
                             className="dish-card"
                             key={dish.id}
                         >
-                            <div className="dish-image">
-                                🍕
-                            </div>
+                            <img
+                                src={getDishImage(
+                                    dish.name,
+                                    restaurant.name
+                                )}
+                                alt={dish.name}
+                                className="dish-image"
+                                loading="lazy"
+                                onError={(e) => {
+                                    (e.target as HTMLImageElement).style.display = "none";
+                                }}
+                            />
 
                             <div className="dish-content">
                                 <h3>{dish.name}</h3>

@@ -9,6 +9,7 @@ import {
     initiatePayment,
     processPayment,
 } from "../api/paymentApi";
+import { getDishImage, getRestaurantImage } from "../utils/imageUtils";
 
 const getStatusText = (
     status: OrderResponse["status"]
@@ -202,7 +203,11 @@ return (
 
             <section className="order-restaurant">
                 <div className="order-restaurant-icon">
-                    🍴
+                    <img
+                        src={getRestaurantImage(order.restaurantName)}
+                        alt={order.restaurantName}
+                        className="order-restaurant-image"
+                    />
                 </div>
 
                 <div>
@@ -220,9 +225,15 @@ return (
                             className="order-item"
                             key={item.dishId}
                         >
-                            <div className="order-item-image">
-                                🍕
-                            </div>
+                            <img
+                                src={getDishImage(
+                                    item.dishName,
+                                    order.restaurantName
+                                )}
+                                alt={item.dishName}
+                                className="order-item-image"
+                                loading="lazy"
+                            />
 
                             <div className="order-item-main">
                                 <strong>{item.dishName}</strong>

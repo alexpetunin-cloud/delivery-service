@@ -2165,3 +2165,388 @@ p {
         padding: 24px 20px 22px;
     }
 }
+
+.restaurant-hero {
+    position: relative;
+    margin-bottom: 32px;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    height: 260px;
+}
+
+.restaurant-hero-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.restaurant-hero-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 24px;
+    background: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0.65) 0%,
+        rgba(0, 0, 0, 0.1) 60%,
+        transparent 100%
+    );
+}
+
+.restaurant-hero-overlay h1 {
+    margin: 0 0 6px;
+    color: #fff;
+    font-size: 32px;
+    letter-spacing: -0.5px;
+}
+
+.restaurant-hero-overlay .restaurant-address {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 14px;
+}
+
+.restaurant-image-wrapper {
+    width: 100%;
+    height: 160px;
+    overflow: hidden;
+    border-radius: 14px 14px 0 0;
+    background: var(--surface-soft);
+}
+
+.restaurant-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.dish-image-wrapper {
+    width: 100%;
+    height: 125px;
+    overflow: hidden;
+    border-radius: 12px;
+    background: #f3f3f1;
+}
+
+.dish-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Контейнер для картинки ресторана в заказе */
+.order-restaurant-icon {
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: var(--accent-soft);
+    border-radius: 12px;
+
+    overflow: hidden;   /* ← важно, чтобы картинка обрезалась */
+}
+
+/* Картинка ресторана */
+.order-restaurant-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Картинка блюда в списке */
+.order-item-image {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+
+    object-fit: cover;
+    display: block;
+
+    border-radius: 10px;
+    background: var(--surface-soft);
+}
+
+.order-card {
+    display: flex;              /* ← было block */
+    align-items: center;
+    gap: 14px;
+
+    width: 100%;
+    padding: 14px 18px;
+
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+
+    color: var(--text);
+    box-shadow: var(--shadow-sm);
+
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease;
+}
+
+.order-card-image {
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
+
+    object-fit: contain;
+    display: block;
+
+    border-radius: 12px;
+    background: var(--surface-soft);
+    padding: 6px;
+    box-sizing: border-box;
+}
+
+/* Текстовый блок внутри карточки */
+.order-card-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.order-card-content h3 {
+    margin: 0 0 4px;
+    font-size: 17px;
+}
+
+.order-card-content p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.order-card-content .order-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.order-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    width: 100%;
+    padding: 14px 18px;
+
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+
+    color: var(--text);
+    box-shadow: var(--shadow-sm);
+
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease;
+}
+
+.order-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.order-card-active {
+    border: 2px solid var(--accent);
+    padding: 13px 17px;
+}
+
+/* Картинка ресторана */
+.order-card-image {
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
+
+    object-fit: contain;
+    display: block;
+
+    border-radius: 12px;
+    background: var(--surface-soft);
+    padding: 6px;
+    box-sizing: border-box;
+}
+
+/* Контентная часть */
+.order-card-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.order-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.order-card-header h3 {
+    margin: 0 0 4px;
+    font-size: 17px;
+}
+
+.order-card-header p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 13px;
+    /* чтобы длинный список блюд не ломал карточку */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.order-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.order-card-footer strong {
+    font-size: 16px;
+}
+
+.order-date {
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.order-arrow {
+    color: var(--text-secondary);
+    font-size: 20px;
+    transition: transform 0.15s ease;
+    flex-shrink: 0;
+}
+
+.order-card:hover .order-arrow {
+    transform: translateX(3px);
+}
+
+/* Раскладка корзины */
+.cart-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 330px;
+    gap: 20px;
+    align-items: start;
+}
+
+.cart-items {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    min-width: 0;   /* ← важно: чтобы flex-контейнер не растягивался */
+}
+
+/* Карточка одной позиции */
+.cart-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    padding: 15px;
+
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+
+    overflow: hidden;   /* ← чтобы картинка не вылезала */
+}
+
+/* Картинка блюда в корзине */
+.cart-item-image {
+    width: 54px;
+    height: 54px;
+    min-width: 54px;
+    flex-shrink: 0;
+
+    object-fit: cover;
+    display: block;
+
+    border-radius: 13px;
+    background: #f3f3f1;
+}
+
+/* Текстовый блок */
+.cart-item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.cart-item-info h3 {
+    margin: 0 0 4px;
+    font-size: 16px;
+    line-height: 1.3;
+}
+
+.cart-item-info p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.cart-item-price {
+    white-space: nowrap;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.remove-button {
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+
+    border: none;
+    border-radius: 50%;
+
+    background: #f1f1f1;
+    color: #777;
+
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.remove-button:hover {
+    background: #e7e7e7;
+    color: #333;
+}
+
+/* Блок с итогом справа */
+.cart-summary {
+    position: sticky;
+    top: 84px;
+
+    padding: 20px;
+
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+/* На узких экранах — колонкой */
+@media (max-width: 800px) {
+    .cart-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .cart-summary {
+        position: static;
+    }
+}

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getOrders } from "../api/orderApi";
 import type { OrderResponse } from "../types/order";
+import { getRestaurantImage } from "../utils/imageUtils";
 
 const activeStatuses = [
     "PENDING",
@@ -97,33 +98,40 @@ export default function OrdersPage() {
                                 to={`/orders/${order.id}`}
                                 className="order-card order-card-active"
                             >
-                                <div className="order-card-header">
-                                    <div>
-                                        <h3>{order.restaurantName}</h3>
+                                <img
+                                    src={getRestaurantImage(order.restaurantName)}
+                                    alt={order.restaurantName}
+                                    className="order-card-image"
+                                />
+                                <div className="order-card-content">
 
-                                        <p>
-                                            {order.items
-                                                .map(
-                                                    (item) =>
-                                                        `${item.dishName} × ${item.quantity}`
-                                                )
-                                                .join(", ")}
-                                        </p>
+                                    <div className="order-card-header">
+                                        <div>
+                                            <h3>{order.restaurantName}</h3>
+
+                                            <p>
+                                                {order.items
+                                                    .map(
+                                                        (item) =>
+                                                            `${item.dishName} × ${item.quantity}`
+                                                    )
+                                                    .join(", ")}
+                                            </p>
+                                        </div>
+                                        <span
+                                            className={`order-status status-${order.status.toLowerCase()}`}
+                                        >
+                                            {getStatusText(order.status)}
+                                        </span>
                                     </div>
 
-                                    <span
-                                        className={`order-status status-${order.status.toLowerCase()}`}
-                                    >
-                                        {getStatusText(order.status)}
-                                    </span>
-                                </div>
+                                    <div className="order-card-footer">
+                                        <strong>{order.totalPrice} ₽</strong>
 
-                                <div className="order-card-footer">
-                                    <strong>{order.totalPrice} ₽</strong>
-
-                                    <span className="order-arrow">
-                                        →
-                                    </span>
+                                        <span className="order-arrow">
+                                            →
+                                        </span>
+                                    </div>
                                 </div>
                             </Link>
                         ))}
@@ -144,35 +152,41 @@ export default function OrdersPage() {
                                 to={`/orders/${order.id}`}
                                 className="order-card"
                             >
-                                <div className="order-card-header">
-                                    <div>
-                                        <h3>{order.restaurantName}</h3>
+                                <img
+                                    src={getRestaurantImage(order.restaurantName)}
+                                    alt={order.restaurantName}
+                                    className="order-card-image"
+                                    loading="lazy"
+                                />
 
-                                        <p>
-                                            {order.items
-                                                .map(
-                                                    (item) =>
-                                                        `${item.dishName} × ${item.quantity}`
-                                                )
-                                                .join(", ")}
-                                        </p>
+                                <div className="order-card-content">
+                                    <div className="order-card-header">
+                                        <div>
+                                            <h3>{order.restaurantName}</h3>
+                                            <p>
+                                                {order.items
+                                                    .map(
+                                                        (item) =>
+                                                            `${item.dishName} × ${item.quantity}`
+                                                    )
+                                                    .join(", ")}
+                                            </p>
+                                        </div>
+
+                                        <span
+                                            className={`order-status status-${order.status.toLowerCase()}`}
+                                        >
+                                            {getStatusText(order.status)}
+                                        </span>
                                     </div>
 
-                                    <span
-                                        className={`order-status status-${order.status.toLowerCase()}`}
-                                    >
-                                        {getStatusText(order.status)}
-                                    </span>
-                                </div>
+                                    <div className="order-card-footer">
+                                        <span className="order-date">
+                                            {new Date(order.dateTime).toLocaleDateString("ru-RU")}
+                                        </span>
 
-                                <div className="order-card-footer">
-                                    <span className="order-date">
-                                        {new Date(
-                                            order.dateTime
-                                        ).toLocaleDateString("ru-RU")}
-                                    </span>
-
-                                    <strong>{order.totalPrice} ₽</strong>
+                                        <strong>{order.totalPrice} ₽</strong>
+                                    </div>
                                 </div>
                             </Link>
                         ))}
