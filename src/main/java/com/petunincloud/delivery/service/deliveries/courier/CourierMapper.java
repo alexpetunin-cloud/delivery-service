@@ -3,6 +3,8 @@ package com.petunincloud.delivery.service.deliveries.courier;
 import com.petunincloud.delivery.service.common.BaseMapper;
 import com.petunincloud.delivery.service.deliveries.courier.dto.CourierRequest;
 import com.petunincloud.delivery.service.deliveries.courier.dto.CourierResponse;
+import com.petunincloud.delivery.service.deliveries.courier.dto.CreateCourierRequest;
+import com.petunincloud.delivery.service.users.UserEntity;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -23,12 +25,14 @@ public class CourierMapper implements BaseMapper<CourierEntity, CourierResponse>
         throw new UnsupportedOperationException("Not implemented");
     }
 
-    public CourierEntity toEntity(CourierRequest request) {
-        CourierEntity entity = new CourierEntity();
+    public CourierEntity toEntity(CreateCourierRequest request, UserEntity user) {
+        CourierEntity courier = new CourierEntity();
 
-        entity.setName(request.name());
-        entity.setPhone(request.phone());
+        courier.setUser(user);
+        courier.setName(request.name());
+        courier.setPhone(request.phone());
+        courier.setStatus(CourierStatus.AVAILABLE);
 
-        return entity;
+        return courier;
     }
 }

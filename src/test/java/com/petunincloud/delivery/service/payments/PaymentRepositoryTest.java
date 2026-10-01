@@ -59,10 +59,19 @@ public class PaymentRepositoryTest {
                 "password12345"
         );
 
+        UserEntity dodo = createUser(
+                "dodo@gmail.com",
+                "+79001234567",
+                "Додо",
+                "ул. Третья, 3",
+                "dodo123"
+        );
+
         restaurant = new RestaurantEntity();
 
         restaurant.setName("Додо Пицца");
         restaurant.setAddress("пр. Калинина 8");
+        restaurant.setUser(dodo);
 
         entityManager.persist(restaurant);
 

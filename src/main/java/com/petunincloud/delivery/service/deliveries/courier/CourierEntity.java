@@ -23,11 +23,18 @@ public class CourierEntity {
     public CourierEntity() {
     }
 
-    public CourierEntity(Long id, String name, String phone, CourierStatus status) {
+    public CourierEntity(
+            Long id,
+            String name,
+            String phone,
+            CourierStatus status,
+            UserEntity user
+    ) {
         this.id = id;
         this.name = name;
         this.phone = phone;
         this.status = status;
+        this.user = user;
     }
 
     public Long getId() {

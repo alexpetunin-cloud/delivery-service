@@ -29,11 +29,15 @@ class OrderRepositoryTest {
 
     private UserEntity user1;
     private UserEntity user2;
+    private UserEntity dodo;
     private RestaurantEntity restaurant;
 
     @BeforeEach
     void setUp() {
         user1 = new UserEntity();
+        user2 = new UserEntity();
+        dodo = new UserEntity();
+        restaurant = new RestaurantEntity();
 
         user1.setEmail("user1@test.com");
         user1.setPhone("+79990000001");
@@ -41,23 +45,25 @@ class OrderRepositoryTest {
         user1.setAddress("Address 1");
         user1.setPassword("password123");
 
-        entityManager.persist(user1); // Сохраняет объект в БД
-
-        user2 = new UserEntity();
-
         user2.setEmail("user2@test.com");
         user2.setPhone("+79990000002");
         user2.setName("User Two");
         user2.setAddress("Address 2");
         user2.setPassword("password123");
 
-        entityManager.persist(user2);
-
-        restaurant = new RestaurantEntity();
+        dodo.setEmail("dodo@test.com");
+        dodo.setPhone("+79001230002");
+        dodo.setName("Додо");
+        dodo.setAddress("ул. Вторая, 3");
+        dodo.setPassword("dodo123");
 
         restaurant.setName("Додо Пицца");
         restaurant.setAddress("пр. Калинина 8");
+        restaurant.setUser(dodo);
 
+        entityManager.persist(user1); // Сохраняет объект в БД
+        entityManager.persist(user2);
+        entityManager.persist(dodo); // Сохраняет объект в БД
         entityManager.persist(restaurant);
 
         createOrder(user1, restaurant, OrderStatus.PENDING, BigDecimal.valueOf(100));

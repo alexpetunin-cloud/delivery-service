@@ -1,6 +1,7 @@
 package com.petunincloud.delivery.service.restaurants.dish;
 
 import com.petunincloud.delivery.service.restaurants.restaurant.RestaurantEntity;
+import com.petunincloud.delivery.service.users.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,13 +27,24 @@ public class DishRepositoryTest {
     private DishRepository dishRepository;
 
     private RestaurantEntity restaurant;
+    private UserEntity dodo;
 
     @BeforeEach
     void setUp() {
+        dodo = new UserEntity();
         restaurant = new RestaurantEntity();
 
-        restaurant.setName("Додо Пицца");
+        dodo.setName("Додо");
+        dodo.setPhone("+79001234567");
+        dodo.setPassword("dodo123");
+        dodo.setAddress("пр. Калинина 8");
+        dodo.setEmail("dodo@gmail.com");
+
+        entityManager.persist(dodo);
+
+        restaurant.setName("Додо");
         restaurant.setAddress("пр. Калинина 8");
+        restaurant.setUser(dodo);
 
         entityManager.persist(restaurant);
 

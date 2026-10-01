@@ -70,9 +70,11 @@ class E2ETest {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    private String userEmail;
     private Long restaurantId;
     private Long dishId;
+    private UserEntity dodo;
+    private UserEntity ivan;
+    private UserEntity user;
 
     @MockitoBean
     private SecurityUtils securityUtils;
@@ -85,8 +87,22 @@ class E2ETest {
                     role.setName("ROLE_CLIENT");
                     return roleRepository.save(role);
                 });
+        RoleEntity courierRole = roleRepository.findByName("ROLE_COURIER")
+                .orElseGet(() -> {
+                    RoleEntity role = new RoleEntity();
+                    role.setName("ROLE_COURIER");
+                    return roleRepository.save(role);
+                });
+        RoleEntity restaurantRole = roleRepository.findByName("ROLE_RESTAURANT")
+                .orElseGet(() -> {
+                    RoleEntity role = new RoleEntity();
+                    role.setName("ROLE_RESTAURANT");
+                    return roleRepository.save(role);
+                });
 
-        UserEntity user = new UserEntity();
+        user = new UserEntity();
+        dodo = new UserEntity();
+        ivan = new UserEntity();
         RestaurantEntity restaurant = new RestaurantEntity();
         DishEntity dish = new DishEntity();
         CourierEntity courier = new CourierEntity();
@@ -98,8 +114,23 @@ class E2ETest {
         user.setAddress("ул. Стахановская 1");
         user.setRoles(Set.of(clientRole));
 
-        restaurant.setName("Бургер Кинг");
+        dodo.setEmail("dodo@gmail.com");
+        dodo.setPassword(passwordEncoder.encode("dodo123"));
+        dodo.setPhone("+79001231040");
+        dodo.setName("Додо");
+        dodo.setAddress("ул. Стахановская 10");
+        dodo.setRoles(Set.of(restaurantRole));
+
+        ivan.setEmail("ivan@gmail.com");
+        ivan.setPassword(passwordEncoder.encode("ivan123"));
+        ivan.setPhone("+79923050201");
+        ivan.setName("Иван");
+        ivan.setAddress("ул. Стахановская 13");
+        ivan.setRoles(Set.of(courierRole));
+
+        restaurant.setName("Додо");
         restaurant.setAddress("ул. Советская 207/2");
+        restaurant.setUser(dodo);
 
         dish.setName("Воппер");
         dish.setPrice(BigDecimal.valueOf(300));
@@ -108,10 +139,13 @@ class E2ETest {
         courier.setName("Иван");
         courier.setPhone("+79923050201");
         courier.setStatus(CourierStatus.AVAILABLE);
+        courier.setUser(ivan);
 
         when(securityUtils.getCurrentUser()).thenReturn(user);
 
-        userEmail = userRepository.save(user).getEmail();
+        dodo = userRepository.save(dodo);
+        ivan = userRepository.save(ivan);
+        user = userRepository.save(user);
         restaurantId = restaurantRepository.save(restaurant).getId();
         dishId = dishRepository.save(dish).getId();
         courierRepository.save(courier);
@@ -120,7 +154,7 @@ class E2ETest {
     @Test
     void fullDeliveryFlow_ShouldCompleteSuccessfully() throws Exception {
         OrderItemRequest item = new OrderItemRequest(dishId, 2);
-        OrderRequest orderRequest = new OrderRequest(userEmail, restaurantId, java.util.List.of(item));
+        OrderRequest orderRequest = new OrderRequest(user.getEmail(), restaurantId, java.util.List.of(item));
 
         String orderResponse = mockMvc.perform(post("/api/orders")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -149,6 +183,8 @@ class E2ETest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("CONFIRMED"));
 
+        when(securityUtils.getCurrentUser()).thenReturn(dodo);
+
         mockMvc.perform(patch("/api/restaurants/orders/{orderId}/cook", orderId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("COOKING"));
@@ -164,9 +200,13 @@ class E2ETest {
 
         Long deliveryId = objectMapper.readTree(deliveryResponse).get("id").asLong();
 
+        when(securityUtils.getCurrentUser()).thenReturn(ivan);
+
         mockMvc.perform(patch("/api/deliveries/{deliveryId}/complete", deliveryId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("DELIVERED"));
+
+        when(securityUtils.getCurrentUser()).thenReturn(user);
 
         mockMvc.perform(get("/api/orders/{orderId}", orderId))
                 .andExpect(status().isOk())

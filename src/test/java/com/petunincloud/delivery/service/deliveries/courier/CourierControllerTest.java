@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petunincloud.delivery.service.TestSecurityConfig;
 import com.petunincloud.delivery.service.deliveries.courier.dto.CourierRequest;
 import com.petunincloud.delivery.service.deliveries.courier.dto.CourierResponse;
+import com.petunincloud.delivery.service.deliveries.courier.dto.CreateCourierRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -36,9 +37,12 @@ public class CourierControllerTest {
 
     @Test
     void createCourier_ShouldCreateCourier() throws Exception {
-        CourierRequest request = new CourierRequest(
+        CreateCourierRequest request = new CreateCourierRequest(
+                "michail@gmail.com",
+                "michail123",
                 "Михаил",
-                "+70001234567"
+                "+70001234567",
+                "ул. Преображенского, 5"
         );
 
         CourierResponse courierResponse = new CourierResponse(

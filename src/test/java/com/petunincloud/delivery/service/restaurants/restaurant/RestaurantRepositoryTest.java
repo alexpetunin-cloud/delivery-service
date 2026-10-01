@@ -1,6 +1,7 @@
 package com.petunincloud.delivery.service.restaurants.restaurant;
 
 import com.petunincloud.delivery.service.restaurants.dish.DishEntity;
+import com.petunincloud.delivery.service.users.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +27,33 @@ public class RestaurantRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        createRestaurant("Лоло", "ул. Щадрина, 5", List.of());
-        createRestaurant("МятаЧай", "ул. Зеленая, 15", List.of());
-        createRestaurant("Рустик", "ул. Димитрова, 25", List.of());
+        UserEntity lolo = createUser(
+                "Лоло",
+                "lolo@gmail.com",
+                "ул. Щадрина, 5",
+                "lolo123",
+                "+78009001234"
+        );
+
+        UserEntity myta = createUser(
+                "МятаЧай",
+                "myta@gmail.com",
+                "ул. Зеленая, 15",
+                "myta123",
+                "+78009001234"
+        );
+
+        UserEntity rustik = createUser(
+                "Рустик",
+                "rustik@gmail.com",
+                "ул. Димитрова, 25",
+                "rustik123",
+                "+78009001234"
+        );
+
+        createRestaurant("Лоло", "ул. Щадрина, 5", List.of(), lolo);
+        createRestaurant("МятаЧай", "ул. Зеленая, 15", List.of(), myta);
+        createRestaurant("Рустик", "ул. Димитрова, 25", List.of(), rustik);
 
         entityManager.flush();
         entityManager.clear();
@@ -37,15 +62,37 @@ public class RestaurantRepositoryTest {
     private void createRestaurant(
             String name,
             String address,
-            List<DishEntity> menu
+            List<DishEntity> menu,
+            UserEntity user
     ) {
         RestaurantEntity restaurant = new RestaurantEntity();
 
         restaurant.setName(name);
         restaurant.setAddress(address);
         restaurant.setMenu(menu);
+        restaurant.setUser(user);
 
         entityManager.persist(restaurant);
+    }
+
+    private UserEntity createUser(
+            String name,
+            String email,
+            String address,
+            String password,
+            String phone
+    ) {
+        UserEntity user = new UserEntity();
+
+        user.setName(name);
+        user.setAddress(address);
+        user.setEmail(email);
+        user.setPhone(phone);
+        user.setPassword(password);
+
+        entityManager.persist(user);
+
+        return user;
     }
 
     @Test

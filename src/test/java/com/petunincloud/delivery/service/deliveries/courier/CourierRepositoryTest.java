@@ -1,5 +1,6 @@
 package com.petunincloud.delivery.service.deliveries.courier;
 
+import com.petunincloud.delivery.service.users.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +27,31 @@ public class CourierRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        createCourier("Михаил", "+79001234567", CourierStatus.AVAILABLE);
-        createCourier("Леонид", "+79231454567", CourierStatus.BUSY);
-        createCourier("Андрей", "+79131634923", CourierStatus.AVAILABLE);
+        UserEntity user1 = createUser(
+                "Михаил",
+                "user1@gmail.com",
+                "+79001234567",
+                "ул. Проспектная, 5",
+                "01234"
+        );
+        UserEntity user2 = createUser(
+                "Леонид",
+                "user2@gmail.com",
+                "+79231454567",
+                "ул. Древесная, 25",
+                "012345"
+        );
+        UserEntity user3 = createUser(
+                "Андрей",
+                "user3@gmail.com",
+                "+79131634923",
+                "ул. Рожнина, 55",
+                "1234567"
+        );
+
+        createCourier("Михаил", "+79001234567", CourierStatus.AVAILABLE, user1);
+        createCourier("Леонид", "+79231454567", CourierStatus.BUSY, user2);
+        createCourier("Андрей", "+79131634923", CourierStatus.AVAILABLE, user3);
 
         entityManager.flush();
         entityManager.clear();
@@ -37,15 +60,37 @@ public class CourierRepositoryTest {
     private void createCourier(
             String name,
             String phone,
-            CourierStatus status
+            CourierStatus status,
+            UserEntity user
     ) {
         CourierEntity courier = new CourierEntity();
 
         courier.setName(name);
         courier.setPhone(phone);
         courier.setStatus(status);
+        courier.setUser(user);
 
         entityManager.persist(courier);
+    }
+
+    private UserEntity createUser(
+            String name,
+            String email,
+            String phone,
+            String address,
+            String password
+    ) {
+        UserEntity user = new UserEntity();
+
+        user.setEmail(email);
+        user.setPhone(phone);
+        user.setName(name);
+        user.setAddress(address);
+        user.setPassword(password);
+
+        entityManager.persist(user);
+
+        return user;
     }
 
     @Test

@@ -7,6 +7,7 @@ import com.petunincloud.delivery.service.orders.order.OrderService;
 import com.petunincloud.delivery.service.orders.order.OrderStatus;
 import com.petunincloud.delivery.service.payments.dto.PaymentRequest;
 import com.petunincloud.delivery.service.payments.dto.PaymentResponse;
+import com.petunincloud.delivery.service.security.SecurityUtils;
 import com.petunincloud.delivery.service.users.UserEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,6 +41,9 @@ public class PaymentServiceTest {
     @Mock
     private OrderService orderService;
 
+    @Mock
+    private SecurityUtils securityUtils;
+
     @InjectMocks
     private PaymentService paymentService;
 
@@ -52,7 +56,10 @@ public class PaymentServiceTest {
         UserEntity user = new UserEntity();
         PaymentEntity payment = new PaymentEntity();
 
+        user.setId(userId);
+
         order.setTotalPrice(BigDecimal.valueOf(300));
+        order.setUser(user);
 
         PaymentRequest paymentRequest = new PaymentRequest(orderId);
 
@@ -120,13 +127,18 @@ public class PaymentServiceTest {
 
         OrderEntity order = new OrderEntity();
         PaymentEntity payment = new PaymentEntity();
+        UserEntity user = new UserEntity();
+
+        user.setId(userId);
 
         order.setId(orderId);
         order.setStatus(OrderStatus.PENDING);
+        order.setUser(user);
 
         payment.setStatus(PaymentStatus.PENDING);
         payment.setId(1L);
         payment.setOrder(order);
+        payment.setUser(user);
 
         PaymentResponse paymentResponse = new PaymentResponse(
                 1L,
@@ -142,6 +154,8 @@ public class PaymentServiceTest {
 
         when(paymentRepository.findById(payment.getId()))
                 .thenReturn(Optional.of(payment));
+        when(securityUtils.getCurrentUser())
+                .thenReturn(user);
         when(orderService.getOrderById(orderId))
                 .thenReturn(order);
         when(orderRepository.save(any(OrderEntity.class)))
@@ -161,6 +175,8 @@ public class PaymentServiceTest {
 
         verify(paymentRepository, times(1))
                 .findById(orderId);
+        verify(securityUtils, times(1))
+                .getCurrentUser();
         verify(orderService, times(1))
                 .getOrderById(orderId);
         verify(orderRepository, times(1))
@@ -192,10 +208,17 @@ public class PaymentServiceTest {
         Long paymentId = 1L;
 
         PaymentEntity payment = new PaymentEntity();
+        UserEntity user = new UserEntity();
+
+        user.setId(1L);
+
+        payment.setUser(user);
         payment.setStatus(PaymentStatus.FAILED);
 
         when(paymentRepository.findById(paymentId))
                 .thenReturn(Optional.of(payment));
+        when(securityUtils.getCurrentUser())
+                .thenReturn(user);
 
         assertThrows(IllegalStateException.class,
                 () -> paymentService.processPayment(paymentId));

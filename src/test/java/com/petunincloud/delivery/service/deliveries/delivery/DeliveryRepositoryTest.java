@@ -63,10 +63,51 @@ public class DeliveryRepositoryTest {
                 "password12345"
         );
 
+        UserEntity michail = createUser(
+                "michail@gmail.com",
+                "+79001234567",
+                "Михаил",
+                "ул. Димитрова, 13",
+                "michail123"
+        );
+
+        UserEntity leon = createUser(
+                "leon@gmail.com",
+                "+79231454567",
+                "Леонид",
+                "ул. Димитрова, 13",
+                "leon123"
+        );
+
+        UserEntity andrey = createUser(
+                "andrey@gmail.com",
+                "+79131634923",
+                "Андрей",
+                "ул. Димитрова, 13",
+                "andrey123"
+        );
+
+        UserEntity dmitriy = createUser(
+                "dmitriy@gmail.com",
+                "+79921234923",
+                "Дмитрий",
+                "ул. Димитрова, 13",
+                "dmitriy123"
+        );
+
+        UserEntity dodo = createUser(
+                "dodo@gmail.com",
+                "+79001002345",
+                "Додо",
+                "ул. Классная, 21",
+                "dodo123"
+        );
+
         restaurant = new RestaurantEntity();
 
         restaurant.setName("Додо Пицца");
         restaurant.setAddress("пр. Калинина 8");
+        restaurant.setUser(dodo);
 
         entityManager.persist(restaurant);
 
@@ -75,10 +116,10 @@ public class DeliveryRepositoryTest {
         OrderEntity order3 = createOrder(user3, restaurant, OrderStatus.DELIVERED, BigDecimal.valueOf(300));
         OrderEntity order4 = createOrder(user2, restaurant, OrderStatus.DELIVERING, BigDecimal.valueOf(400));
 
-        courier1 = createCourier("Михаил", "+79001234567", CourierStatus.AVAILABLE);
-        CourierEntity courier2 = createCourier("Леонид", "+79231454567", CourierStatus.AVAILABLE);
-        CourierEntity courier3 = createCourier("Андрей", "+79131634923", CourierStatus.AVAILABLE);
-        CourierEntity courier4 = createCourier("Дмитрий", "+79921234923", CourierStatus.BUSY);
+        courier1 = createCourier("Михаил", "+79001234567", michail, CourierStatus.AVAILABLE);
+        CourierEntity courier2 = createCourier("Леонид", "+79231454567", leon, CourierStatus.AVAILABLE);
+        CourierEntity courier3 = createCourier("Андрей", "+79131634923", andrey,  CourierStatus.AVAILABLE);
+        CourierEntity courier4 = createCourier("Дмитрий", "+79921234923", dmitriy, CourierStatus.BUSY);
 
         delivery = createDeliveryWithReturn(
                 order1,
@@ -163,6 +204,7 @@ public class DeliveryRepositoryTest {
     private CourierEntity createCourier(
             String name,
             String phone,
+            UserEntity user,
             CourierStatus status
     ) {
         CourierEntity courier = new CourierEntity();
@@ -170,6 +212,7 @@ public class DeliveryRepositoryTest {
         courier.setName(name);
         courier.setPhone(phone);
         courier.setStatus(status);
+        courier.setUser(user);
 
         entityManager.persist(courier);
 

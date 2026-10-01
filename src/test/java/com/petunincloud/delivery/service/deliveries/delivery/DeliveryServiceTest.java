@@ -10,6 +10,7 @@ import com.petunincloud.delivery.service.orders.order.OrderRepository;
 import com.petunincloud.delivery.service.orders.order.OrderService;
 import com.petunincloud.delivery.service.orders.order.OrderStatus;
 import com.petunincloud.delivery.service.restaurants.restaurant.RestaurantEntity;
+import com.petunincloud.delivery.service.security.SecurityUtils;
 import com.petunincloud.delivery.service.users.UserEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,6 +44,9 @@ public class DeliveryServiceTest {
 
     @Mock
     private DeliveryMapper deliveryMapper;
+
+    @Mock
+    private SecurityUtils securityUtils;
 
     @InjectMocks
     private DeliveryService deliveryService;
@@ -257,6 +261,7 @@ public class DeliveryServiceTest {
         Long orderId = 1L;
 
         UserEntity user = new UserEntity();
+        UserEntity michail = new UserEntity();
         OrderEntity order = new OrderEntity();
         RestaurantEntity restaurant = new RestaurantEntity();
         CourierEntity courier = new CourierEntity();
@@ -269,8 +274,11 @@ public class DeliveryServiceTest {
         order.setUser(user);
         order.setRestaurant(restaurant);
 
+        michail.setId(100L);
+
         courier.setId(1L);
         courier.setName("Михаил");
+        courier.setUser(michail);
 
         delivery.setId(deliveryId);
         delivery.setOrder(order);
@@ -294,6 +302,8 @@ public class DeliveryServiceTest {
 
         when(deliveryRepository.findByIdWithOrderAndCourier(deliveryId))
                 .thenReturn(Optional.of(delivery));
+        when(securityUtils.getCurrentUser())
+                .thenReturn(michail);
         when(deliveryMapper.toResponse(delivery))
                 .thenReturn(deliveryResponse);
 
@@ -307,6 +317,8 @@ public class DeliveryServiceTest {
 
         verify(deliveryRepository, times(1))
                 .findByIdWithOrderAndCourier(deliveryId);
+        verify(securityUtils, times(1))
+                .getCurrentUser();
         verify(deliveryMapper, times(1))
                 .toResponse(delivery);
     }
@@ -331,6 +343,7 @@ public class DeliveryServiceTest {
         Long orderId = 1L;
 
         UserEntity user = new UserEntity();
+        UserEntity michail = new UserEntity();
         OrderEntity order = new OrderEntity();
         CourierEntity courier = new CourierEntity();
         RestaurantEntity restaurant = new RestaurantEntity();
@@ -344,8 +357,11 @@ public class DeliveryServiceTest {
         order.setRestaurant(restaurant);
         order.setStatus(OrderStatus.DELIVERING);
 
+        michail.setId(100L);
+
         courier.setId(1L);
         courier.setName("Михаил");
+        courier.setUser(michail);
 
         delivery.setId(deliveryId);
         delivery.setOrder(order);
@@ -369,6 +385,8 @@ public class DeliveryServiceTest {
 
         when(deliveryRepository.findByIdWithOrderAndCourier(deliveryId))
                 .thenReturn(Optional.of(delivery));
+        when(securityUtils.getCurrentUser())
+                .thenReturn(michail);
         when(orderRepository.save(any(OrderEntity.class)))
                 .thenReturn(order);
         when(courierRepository.save(any(CourierEntity.class)))
@@ -388,6 +406,8 @@ public class DeliveryServiceTest {
 
         verify(deliveryRepository, times(1))
                 .findByIdWithOrderAndCourier(deliveryId);
+        verify(securityUtils, times(1))
+                .getCurrentUser();
         verify(orderRepository, times(1))
                 .save(any(OrderEntity.class));
         verify(courierRepository, times(1))
@@ -423,6 +443,11 @@ public class DeliveryServiceTest {
         OrderEntity order = new OrderEntity();
         CourierEntity courier = new CourierEntity();
         DeliveryEntity delivery = new DeliveryEntity();
+        UserEntity michail = new UserEntity();
+
+        michail.setId(100L);
+
+        courier.setUser(michail);
 
         order.setStatus(OrderStatus.READY);
 
@@ -431,6 +456,8 @@ public class DeliveryServiceTest {
 
         when(deliveryRepository.findByIdWithOrderAndCourier(deliveryId))
                 .thenReturn(Optional.of(delivery));
+        when(securityUtils.getCurrentUser())
+                .thenReturn(michail);
 
         assertThrows(IllegalStateException.class,
                 () -> deliveryService.completeDelivery(deliveryId));

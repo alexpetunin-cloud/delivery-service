@@ -9,7 +9,6 @@ import com.petunincloud.delivery.service.restaurants.dish.DishRepository;
 import com.petunincloud.delivery.service.restaurants.dish.dto.DishRequest;
 import com.petunincloud.delivery.service.restaurants.dish.dto.DishResponse;
 import com.petunincloud.delivery.service.restaurants.restaurant.dto.CreateRestaurantRequest;
-import com.petunincloud.delivery.service.restaurants.restaurant.dto.RestaurantRequest;
 import com.petunincloud.delivery.service.restaurants.restaurant.dto.RestaurantResponse;
 import com.petunincloud.delivery.service.security.SecurityUtils;
 import com.petunincloud.delivery.service.users.RoleEntity;
@@ -147,11 +146,15 @@ public class RestaurantServiceTest {
                 BigDecimal.valueOf(300)
         );
 
+        UserEntity user = new UserEntity();
         RestaurantEntity restaurant = new RestaurantEntity();
         DishEntity dish = new DishEntity();
         DishEntity dishExample = new DishEntity();
 
+        user.setId(1L);
+
         restaurant.setId(restaurantId);
+        restaurant.setUser(user);
 
         dish.setId(2L);
         dish.setName("Маргарита");
@@ -174,6 +177,8 @@ public class RestaurantServiceTest {
 
         when(restaurantRepository.findById(restaurantId))
                 .thenReturn(Optional.of(restaurant));
+        when(securityUtils.getCurrentUser())
+                .thenReturn(user);
         when(dishRepository.save(any(DishEntity.class)))
                 .thenReturn(dish);
         when(restaurantRepository.save(any(RestaurantEntity.class)))
@@ -192,6 +197,8 @@ public class RestaurantServiceTest {
 
         verify(restaurantRepository, times(1))
                 .findById(restaurantId);
+        verify(securityUtils, times(1))
+                .getCurrentUser();
         verify(dishRepository, times(1))
                 .save(any(DishEntity.class));
         verify(restaurantRepository, times(1))
@@ -226,9 +233,20 @@ public class RestaurantServiceTest {
         Long orderId = 1L;
 
         OrderEntity order = new OrderEntity();
+        UserEntity user = new UserEntity();
+        UserEntity dodo = new UserEntity();
+        RestaurantEntity restaurant = new RestaurantEntity();
 
+        user.setId(1L);
+
+        dodo.setId(2L);
+
+        restaurant.setUser(dodo);
+
+        order.setRestaurant(restaurant);
         order.setId(orderId);
         order.setStatus(OrderStatus.CONFIRMED);
+        order.setUser(user);
 
         OrderResponse orderResponse = new OrderResponse(
                 orderId,
@@ -243,6 +261,8 @@ public class RestaurantServiceTest {
 
         when(orderService.getOrderById(orderId))
                 .thenReturn(order);
+        when(securityUtils.getCurrentUser())
+                .thenReturn(dodo);
         when(orderRepository.save(any(OrderEntity.class)))
                 .thenReturn(order);
         when(orderMapper.toResponse(order))
@@ -255,6 +275,8 @@ public class RestaurantServiceTest {
 
         verify(orderService, times(1))
                 .getOrderById(orderId);
+        verify(securityUtils, times(1))
+                .getCurrentUser();
         verify(orderRepository, times(1))
                 .save(any(OrderEntity.class));
         verify(orderMapper, times(1))
@@ -280,10 +302,26 @@ public class RestaurantServiceTest {
         Long orderId = 1L;
 
         OrderEntity order = new OrderEntity();
+        UserEntity user = new UserEntity();
+        UserEntity dodo = new UserEntity();
+        RestaurantEntity restaurant = new RestaurantEntity();
+
+        dodo.setId(2L);
+
+        restaurant.setUser(dodo);
+
+        order.setRestaurant(restaurant);
+
+        user.setId(1L);
+
+        order.setUser(user);
         order.setStatus(OrderStatus.PENDING);
+        order.setRestaurant(restaurant);
 
         when(orderService.getOrderById(orderId))
                 .thenReturn(order);
+        when(securityUtils.getCurrentUser())
+                .thenReturn(dodo);
 
         assertThrows(IllegalStateException.class,
                 () -> restaurantService.startCooking(orderId));
@@ -297,9 +335,20 @@ public class RestaurantServiceTest {
         Long orderId = 1L;
 
         OrderEntity order = new OrderEntity();
+        UserEntity user = new UserEntity();
+        UserEntity dodo = new UserEntity();
+        RestaurantEntity restaurant = new RestaurantEntity();
 
+        dodo.setId(2L);
+
+        restaurant.setUser(dodo);
+
+        user.setId(1L);
+
+        order.setUser(user);
         order.setId(orderId);
         order.setStatus(OrderStatus.COOKING);
+        order.setRestaurant(restaurant);
 
         OrderResponse orderResponse = new OrderResponse(
                 orderId,
@@ -314,6 +363,8 @@ public class RestaurantServiceTest {
 
         when(orderService.getOrderById(orderId))
                 .thenReturn(order);
+        when(securityUtils.getCurrentUser())
+                .thenReturn(dodo);
         when(orderRepository.save(any(OrderEntity.class)))
                 .thenReturn(order);
         when(orderMapper.toResponse(order))
@@ -326,6 +377,8 @@ public class RestaurantServiceTest {
 
         verify(orderService, times(1))
                 .getOrderById(orderId);
+        verify(securityUtils, times(1))
+                .getCurrentUser();
         verify(orderRepository, times(1))
                 .save(any(OrderEntity.class));
         verify(orderMapper, times(1))
@@ -351,10 +404,24 @@ public class RestaurantServiceTest {
         Long orderId = 1L;
 
         OrderEntity order = new OrderEntity();
+        UserEntity user = new UserEntity();
+        UserEntity dodo = new UserEntity();
+        RestaurantEntity restaurant = new RestaurantEntity();
+
+        dodo.setId(2L);
+
+        restaurant.setUser(dodo);
+
+        user.setId(1L);
+
+        order.setUser(user);
         order.setStatus(OrderStatus.CONFIRMED);
+        order.setRestaurant(restaurant);
 
         when(orderService.getOrderById(orderId))
                 .thenReturn(order);
+        when(securityUtils.getCurrentUser())
+                .thenReturn(dodo);
 
         assertThrows(IllegalStateException.class,
                 () -> restaurantService.markAsReady(orderId));

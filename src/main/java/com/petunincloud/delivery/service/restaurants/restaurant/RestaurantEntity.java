@@ -30,11 +30,18 @@ public class RestaurantEntity {
     public RestaurantEntity() {
     }
 
-    public RestaurantEntity(Long id, String name, String address, List<DishEntity> menu) {
+    public RestaurantEntity(
+            Long id,
+            String name,
+            String address,
+            List<DishEntity> menu,
+            UserEntity user
+    ) {
         this.id = id;
         this.name = name;
         this.address = address;
         this.menu = menu;
+        this.user = user;
     }
 
     public Long getId() {

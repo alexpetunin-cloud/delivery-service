@@ -1,7 +1,6 @@
 package com.petunincloud.delivery.service.deliveries.courier;
 
 import com.petunincloud.delivery.service.common.BaseService;
-import com.petunincloud.delivery.service.deliveries.courier.dto.CourierRequest;
 import com.petunincloud.delivery.service.deliveries.courier.dto.CourierResponse;
 import com.petunincloud.delivery.service.deliveries.courier.dto.CreateCourierRequest;
 import com.petunincloud.delivery.service.security.SecurityUtils;
@@ -25,7 +24,6 @@ public class CourierService extends BaseService<CourierEntity, CourierResponse, 
     private static final Logger log = LoggerFactory.getLogger(CourierService.class);
     private final CourierMapper courierMapper;
     private final CourierRepository courierRepository;
-    private final SecurityUtils securityUtils;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
@@ -33,14 +31,12 @@ public class CourierService extends BaseService<CourierEntity, CourierResponse, 
     public CourierService(
             CourierMapper courierMapper,
             CourierRepository courierRepository,
-            SecurityUtils securityUtils,
             UserRepository userRepository,
             RoleRepository roleRepository,
             PasswordEncoder passwordEncoder
     ) {
         this.courierMapper = courierMapper;
         this.courierRepository = courierRepository;
-        this.securityUtils = securityUtils;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
@@ -87,36 +83,6 @@ public class CourierService extends BaseService<CourierEntity, CourierResponse, 
     }
 
     @Transactional
-    public CourierResponse createCourier(CourierRequest request) {
-        log.info("Create new courier with request={}", request);
-        long startTime = System.currentTimeMillis();
-
-        try {
-            if (courierRepository.findByPhone(request.phone()).isPresent()) {
-                log.warn("Courier with this phone: {} already exists", request.phone());
-                throw new IllegalArgumentException("Courier with this phone already exists");
-            }
-
-            UserEntity currentUser = securityUtils.getCurrentUser();
-            CourierEntity courier = courierMapper.toEntity(request);
-
-            courier.setUser(currentUser);
-            courier.setStatus(CourierStatus.AVAILABLE);
-
-            CourierEntity saved = courierRepository.save(courier);
-
-            long duration = System.currentTimeMillis() - startTime;
-            log.info("Success create courier with request: {}, duration={}ms", request, duration);
-
-            return courierMapper.toResponse(saved);
-
-        } catch (Exception e) {
-            log.error("Failed to create courier with request {}. Error: {}", request, e.getMessage());
-            throw e;
-        }
-    }
-
-    @Transactional
     public CourierResponse createCourier(CreateCourierRequest request) {
 
         if (userRepository.findByEmail(request.email()).isPresent()) {
@@ -132,7 +98,6 @@ public class CourierService extends BaseService<CourierEntity, CourierResponse, 
                         new IllegalStateException("ROLE_COURIER not found"));
 
         UserEntity user = new UserEntity();
-        CourierEntity courier = new CourierEntity();
 
         user.setEmail(request.email());
         user.setPassword(passwordEncoder.encode(request.password()));
@@ -143,10 +108,7 @@ public class CourierService extends BaseService<CourierEntity, CourierResponse, 
 
         UserEntity savedUser = userRepository.save(user);
 
-        courier.setUser(savedUser);
-        courier.setName(request.name());
-        courier.setPhone(request.phone());
-        courier.setStatus(CourierStatus.AVAILABLE);
+        CourierEntity courier = courierMapper.toEntity(request, user);
 
         CourierEntity savedCourier = courierRepository.save(courier);
 
